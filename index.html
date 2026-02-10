@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>행사어때 | 전문 렌탈 서비스</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="다양한 행사와 비즈니스를 위한 프리미엄 렌탈 서비스. 최고의 파트너 행사어때입니다." />
+  <meta name="keywords" content="렌탈, 장비렌탈, 행사장비, 비즈니스렌탈, 프리미엄렌탈, 행사어때" />
+  <meta name="author" content="행사어때" />
+
+  <!-- Open Graph / Facebook / KakaoTalk -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://human-partner.web.app/" />
+  <meta property="og:title" content="행사어때 | 전문 렌탈 서비스" />
+  <meta property="og:description" content="다양한 행사와 비즈니스를 위한 프리미엄 렌탈 서비스. 최고의 파트너입니다." />
+  <meta property="og:image" content="https://human-partner.web.app/company.png" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:site_name" content="행사어때" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="행사어때 | 전문 렌탈 서비스" />
+  <meta name="twitter:description" content="다양한 행사와 비즈니스를 위한 프리미엄 렌탈 서비스" />
+  <meta name="twitter:image" content="https://human-partner.web.app/company.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f172a;
+      --accent: #0d9488;
+      --background: #ffffff;
+      --surface: #f8fafc;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    /* Premium Scrollbar */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Glassmorphism Classes */
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Micro-animations */
+    .hover-lift {
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .hover-lift:hover {
+      transform: translateY(-4px);
+    }
+  </style>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="bg-white text-slate-800 antialiased">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
