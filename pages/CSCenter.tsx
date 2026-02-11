@@ -58,7 +58,7 @@ export const CSCenter: React.FC = () => {
                         <div>
                             <div className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-1">1800-1985</div>
                             <div className="text-xs md:text-sm text-slate-500 font-medium space-y-0.5">
-                                <p>고객행복센터(전화): 오전 9시 ~ 오후 6시 운영</p>
+                                <p>고객행복센터(전화): <br className="md:hidden" />오전 9시 ~ 오후 6시 운영</p>
                                 <p>채팅 상담 문의: 24시간 운영</p>
                             </div>
                         </div>
@@ -109,13 +109,13 @@ export const CSCenter: React.FC = () => {
                                 <div key={item.id} className="border-b border-slate-100">
                                     <button
                                         onClick={() => toggleAccordion(item.id!)}
-                                        className="w-full py-5 flex items-start gap-3 text-left hover:bg-slate-50/50 transition-colors px-2"
+                                        className="w-full py-5 flex items-center gap-3 text-left hover:bg-slate-50/50 transition-colors px-2"
                                     >
-                                        <span className="text-[#FF5B60] font-bold text-lg mt-0.5">Q</span>
+                                        <span className="text-[#FF5B60] font-bold text-lg">Q</span>
                                         <span className="flex-1 font-bold text-slate-800 text-[15px] md:text-base leading-snug">
                                             {item.question}
                                         </span>
-                                        <span className={`text-slate-300 transition-transform mt-1 ${expandedId === item.id ? 'rotate-180' : ''}`}>
+                                        <span className={`text-slate-300 transition-transform ${expandedId === item.id ? 'rotate-180' : ''}`}>
                                             <ChevronDown size={20} />
                                         </span>
                                     </button>

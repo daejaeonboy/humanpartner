@@ -154,13 +154,14 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                         </div>
                                         <div className="flex gap-3">
                                             <Link to="/mypage" onClick={onClose} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm hover:bg-slate-200 transition-colors text-center">마이페이지</Link>
-                                            <button
-                                                onClick={() => { logout(); onClose(); }}
-                                                className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors"
-                                            >
-                                                로그아웃
-                                            </button>
+                                            <Link to="/cs" onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors text-center">고객센터</Link>
                                         </div>
+                                        <button
+                                            onClick={() => { logout(); onClose(); }}
+                                            className="mt-4 text-xs text-slate-400 underline hover:text-slate-600 transition-colors"
+                                        >
+                                            로그아웃
+                                        </button>
                                     </>
                                 ) : (
                                     <>

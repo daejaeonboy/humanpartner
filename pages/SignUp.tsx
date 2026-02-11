@@ -386,13 +386,14 @@ export const SignUp: React.FC = () => {
                 business_license_url: memberType === 'business' ? (formData.businessLicenseUrl || undefined) : undefined,
                 member_type: memberType,
                 manager_name: memberType === 'public' ? formData.managerName : undefined,
+                is_approved: false,
                 agreed_terms: agreements.terms,
                 agreed_privacy: agreements.privacy,
                 agreed_marketing: agreements.marketing
             });
 
-            alert('회원가입이 완료되었습니다.');
-            navigate('/');
+            alert('가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.');
+            navigate('/login');
         } catch (error: any) {
             console.error('Sign up failed', error);
             const message = getAuthErrorMessage(error.code);

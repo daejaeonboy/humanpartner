@@ -18,15 +18,19 @@ import {
   MessageCircle,
   X,
   Download,
+  Check,
   RotateCcw,
+  CheckCircle,
+  ListPlus,
+  PlusCircle,
+
+  ChevronDown
 } from "lucide-react";
-import {
-  getProductById,
-  getProductsByType,
-  Product,
-} from "../src/api/productApi";
+import { getProductById, getProductsByType, Product } from "../src/api/productApi";
+import { getActiveSections, Section } from "../src/api/sectionApi";
 import { createBooking, checkAvailability } from "../src/api/bookingApi";
 import { getAllNavMenuItems, NavMenuItem } from "../src/api/cmsApi";
+import { createNotification } from "../src/api/notificationApi";
 import { useAuth } from "../src/context/AuthContext";
 import { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale/ko";
@@ -37,6 +41,264 @@ registerLocale("ko", ko);
 
 import "../src/styles/calendar.css";
 import { Helmet } from "react-helmet-async";
+
+// Helper to get image for basic components
+const getComponentComponentImage = (name: string) => {
+  if (name.includes("노트북")) return "/comp-notebook.png"; // User needs to upload this
+  if (name.includes("테이블")) return "/comp-table.png";
+  if (name.includes("의자")) return "/comp-chair.png";
+  if (name.includes("복합기") || name.includes("프린터")) return "/comp-printer.png";
+  if (name.includes("냉장고")) return "/comp-fridge.png";
+  if (name.includes("커피")) return "/comp-coffee.png";
+  return null;
+};
+
+// Sub-component for individual option items to handle local state and focus
+const OptionItem = ({
+  item,
+  initialQty,
+  imageUrl,
+  onUpdate,
+}: {
+  item: Product;
+  initialQty: number;
+  imageUrl?: string;
+  onUpdate: (qty: number) => void;
+}) => {
+  const [localQty, setLocalQty] = useState(initialQty);
+
+  // Sync local state if external state changes (e.g. when selectedAdditional/Places/Foods changes)
+  useEffect(() => {
+    setLocalQty(initialQty);
+  }, [initialQty]);
+
+  const handleCreate = () => {
+     // If user hasn't set a quantity (0), and clicks Add, default to 1.
+     // If user has set a quantity (>0), use that.
+     const qtyToAdd = localQty > 0 ? localQty : 1;
+     onUpdate(qtyToAdd);
+     // Update local state to reflect what we just added
+     setLocalQty(qtyToAdd);
+  };
+
+  const handleUpdate = () => {
+      onUpdate(localQty);
+  };
+
+  const isInCart = initialQty > 0;
+  const isChanged = localQty !== initialQty;
+
+  return (
+    <div className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors">
+      {/* Image */}
+      <div className="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-100">
+        {imageUrl ? (
+          <img src={imageUrl} alt={item.name} className="w-full h-full object-cover" />
+        ) : (
+          <Package size={20} className="text-gray-300" />
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <h5 className="font-bold text-gray-900 text-[15px] truncate">{item.name}</h5>
+        <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
+          {item.description || item.model_name || "상세 설명 없음"}
+        </p>
+        <p className="text-sm font-bold text-[#FF5B60] mt-1">
+          {item.price ? `${item.price.toLocaleString()}원` : "가격문의"}
+        </p>
+      </div>
+
+      {/* Controls */}
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-3 bg-white border border-gray-200 rounded-lg p-0.5 md:p-1 shadow-sm h-8 md:h-9">
+          <button
+            className="w-6 md:w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
+            onClick={() => setLocalQty((prev) => Math.max(0, prev - 1))}
+          >
+            <Minus size={14} />
+          </button>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={localQty}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (/^\d*$/.test(val)) {
+                setLocalQty(val === "" ? 0 : parseInt(val));
+              }
+            }}
+            className="w-8 md:w-10 text-center font-bold text-gray-900 text-sm border-none focus:outline-none focus:ring-0 p-0"
+          />
+          <button
+            className="w-6 md:w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
+            onClick={() => setLocalQty((prev) => prev + 1)}
+          >
+            <Plus size={14} />
+          </button>
+        </div>
+
+        {/* Action Button */}
+        {isInCart ? (
+            <button
+                onClick={handleUpdate}
+                disabled={!isChanged}
+                className={`px-4 h-9 rounded-lg text-sm font-bold transition-all
+                    ${isChanged
+                        ? "bg-[#FF5B60] text-white shadow-md hover:bg-[#E04F54]" // Changed? Red/Active
+                        : "bg-gray-900 text-white shadow-sm" // Saved/Same? Dark/Active
+                    }`}
+            >
+                {isChanged ? "수정" : <Check size={18} />}
+            </button>
+        ) : (
+            <button
+                onClick={handleCreate}
+                className="px-4 h-9 rounded-lg text-sm font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200"
+            >
+                담기
+            </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const getParentMenus = (menuItems: NavMenuItem[]): NavMenuItem[] => {
+  return menuItems
+    .filter((m) => !m.category)
+    .sort((a, b) => a.display_order - b.display_order);
+};
+
+const getChildMenus = (parentName: string, menuItems: NavMenuItem[]): NavMenuItem[] => {
+  return menuItems
+    .filter((m) => m.category === parentName)
+    .sort((a, b) => a.display_order - b.display_order);
+};
+
+const getCategoriesInProducts = (items: Product[]): Set<string> => {
+  const categories = new Set<string>();
+  items.forEach((p) => {
+    if (p.category) categories.add(p.category);
+  });
+  return categories;
+};
+
+const getParentMenusWithProducts = (items: Product[], menuItems: NavMenuItem[]): NavMenuItem[] => {
+  const productCategories = getCategoriesInProducts(items);
+  const parentMenus = getParentMenus(menuItems);
+  return parentMenus.filter((parent) => {
+    const children = getChildMenus(parent.name, menuItems);
+    return children.some((child) => productCategories.has(child.name));
+  });
+};
+
+const getChildMenusWithProducts = (
+  parentName: string,
+  items: Product[],
+  menuItems: NavMenuItem[]
+): NavMenuItem[] => {
+  const productCategories = getCategoriesInProducts(items);
+  const childMenus = getChildMenus(parentName, menuItems);
+  return childMenus.filter((child) => productCategories.has(child.name));
+};
+
+const OptionListTypeA = ({
+   items,
+   selectedQty,
+   setQty,
+   componentProducts,
+   menuItems
+}: {
+   items: Product[];
+   selectedQty: { [key: string]: number };
+   setQty: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
+   componentProducts: Product[];
+   menuItems: NavMenuItem[];
+}) => {
+   // 1. Get Categories (Parent Menus)
+   // Use useMemo here to prevent recalculation
+   const parentMenus = React.useMemo(() => getParentMenusWithProducts(items, menuItems), [items, menuItems]);
+   const [localActiveCategory, setLocalActiveCategory] = useState<string>('');
+
+   // Update local state if parentMenus changes
+   useEffect(() => {
+      if(parentMenus.length > 0) {
+         setLocalActiveCategory(prev => {
+            // IF previous category is still valid, keep it. Else set to first.
+            if(prev && parentMenus.find(p => p.name === prev)) return prev;
+            return parentMenus[0].name;
+         });
+      }
+   }, [parentMenus]);
+
+   if (parentMenus.length === 0) {
+      return (
+         <div className="py-12 text-center text-gray-400">
+            <p>해당 카테고리에 등록된 상품이 없습니다.</p>
+         </div>
+      );
+   }
+
+   // Calculating display items based on active category
+   const activeParentMenu = parentMenus.find(p => p.name === localActiveCategory);
+   let displayItems: Product[] = [];
+   
+   if (activeParentMenu) {
+      const childMenus = getChildMenusWithProducts(activeParentMenu.name, items, menuItems);
+      const directItems = items.filter(p => p.category === activeParentMenu.name);
+      const childItems = childMenus.flatMap(child => items.filter(p => p.category === child.name));
+      displayItems = [...directItems, ...childItems];
+   }
+
+   return (
+      <div>
+         {/* Horizontal Scrollable Chips */}
+         <div className="flex overflow-x-auto pb-4 gap-2 px-6 pt-6 border-b border-gray-50 no-scrollbar">
+            {parentMenus.map((menu) => (
+               <button
+                  key={menu.name}
+                  onClick={() => setLocalActiveCategory(menu.name)}
+                  className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border
+                     ${localActiveCategory === menu.name 
+                        ? "bg-gray-900 text-white border-gray-900" 
+                        : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
+               >
+                  {menu.name}
+               </button>
+            ))}
+         </div>
+
+         {/* List Content */}
+         <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2">
+            {displayItems.length > 0 ? (
+               <div className="divide-y divide-gray-50">
+                  {displayItems.map((item) => {
+                     const qty = selectedQty[item.id!] || 0;
+                     // Use existing image logic
+                     const imageUrl = item.image_url || getComponentComponentImage(item.name) || componentProducts.find(p=>p.name===item.name)?.image_url;
+
+                     return (
+                        <OptionItem
+                           key={item.id}
+                           item={item}
+                           initialQty={qty}
+                           imageUrl={imageUrl}
+                           onUpdate={(newQty) => setQty(prev => ({ ...prev, [item.id!]: newQty }))}
+                        />
+                     );
+                  })}
+               </div>
+            ) : (
+               <div className="py-12 text-center text-gray-400">
+                  <p>해당 카테고리에 등록된 상품이 없습니다.</p>
+               </div>
+            )}
+         </div>
+      </div>
+   );
+};
 
 export const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,6 +317,8 @@ export const ProductDetailPage: React.FC = () => {
   );
   const [activeTab, setActiveTab] = useState("detail");
   const [expectedPeople, setExpectedPeople] = useState<number | string>(1);
+  
+
 
   // Option Tab State (for the new tab UI)
   const [activeOptionTab, setActiveOptionTab] = useState<
@@ -76,6 +340,22 @@ export const ProductDetailPage: React.FC = () => {
   const [globalPlaces, setGlobalPlaces] = useState<Product[]>([]);
   const [globalFoods, setGlobalFoods] = useState<Product[]>([]);
 
+  // Component Products Lookup (for images)
+  const [componentProducts, setComponentProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    // Fetch products that might be used as components (essential/additional) to get their images
+    const fetchComponentProducts = async () => {
+      try {
+        const products = await getProductsByType('essential');
+        setComponentProducts(products);
+      } catch (err) {
+        console.error("Failed to fetch component products", err);
+      }
+    };
+    fetchComponentProducts();
+  }, []);
+
   // Menu Items for hierarchical selection
   const [menuItems, setMenuItems] = useState<NavMenuItem[]>([]);
 
@@ -95,258 +375,11 @@ export const ProductDetailPage: React.FC = () => {
     [sectionKey: string]: string[];
   }>({});
 
-  // 아코디언 확장 상태 (Key: "sectionKey-parentName" or "sectionKey-parentName-childName")
-  const [expandedAccordion, setExpandedAccordion] = useState<{
-    [key: string]: boolean;
-  }>({});
 
-  const getParentMenus = (): NavMenuItem[] => {
-    return menuItems
-      .filter((m) => !m.category)
-      .sort((a, b) => a.display_order - b.display_order);
-  };
 
-  const getChildMenus = (parentName: string): NavMenuItem[] => {
-    return menuItems
-      .filter((m) => m.category === parentName)
-      .sort((a, b) => a.display_order - b.display_order);
-  };
 
-  const getCategoriesInProducts = (items: Product[]): Set<string> => {
-    const categories = new Set<string>();
-    items.forEach((p) => {
-      if (p.category) categories.add(p.category);
-    });
-    return categories;
-  };
 
-  const getParentMenusWithProducts = (items: Product[]): NavMenuItem[] => {
-    const productCategories = getCategoriesInProducts(items);
-    const parentMenus = getParentMenus();
-    return parentMenus.filter((parent) => {
-      const children = getChildMenus(parent.name);
-      return children.some((child) => productCategories.has(child.name));
-    });
-  };
 
-  const getChildMenusWithProducts = (
-    parentName: string,
-    items: Product[],
-  ): NavMenuItem[] => {
-    const productCategories = getCategoriesInProducts(items);
-    const childMenus = getChildMenus(parentName);
-    return childMenus.filter((child) => productCategories.has(child.name));
-  };
-
-  // Enhanced Option Item Component with Thumbnail (Responsive)
-  const renderEnhancedProductItem = (
-    item: Product,
-    selectedQty: { [key: string]: number },
-    setQty: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>,
-  ) => {
-    const qty = selectedQty[item.id!] || 0;
-    const subtotal = qty * (item.price || 0);
-
-    return (
-      <div
-        key={item.id}
-        className={`p-3 lg:p-4 rounded-xl border-2 transition-all cursor-pointer group
-                    ${
-                      qty > 0
-                        ? "bg-blue-50 border-blue-300 shadow-md"
-                        : "bg-white border-gray-200 hover:border-blue-300 hover:shadow-md"
-                    }`}
-      >
-        {/* Main Content: Responsive Layout */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4">
-          {/* Top Row (Mobile) / Left Section (PC): Thumbnail + Name/Price */}
-          <div className="flex items-center gap-3 mb-3 lg:mb-0 lg:flex-1">
-            {/* Thumbnail */}
-            <div className="w-12 h-12 lg:w-14 lg:h-14 flex-shrink-0 rounded-lg bg-gray-100 overflow-hidden border border-gray-200">
-              {item.image_url ? (
-                <img
-                  src={item.image_url}
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <Package size={20} />
-                </div>
-              )}
-            </div>
-
-            {/* Name & Unit Price */}
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-900 text-sm lg:text-base leading-tight group-hover:text-blue-700">
-                {item.name}
-              </p>
-              <p className="text-sm text-blue-600 font-medium">
-                +{item.price?.toLocaleString()}원
-              </p>
-            </div>
-          </div>
-
-          {/* Bottom Row (Mobile) / Right Section (PC): Quantity + Subtotal */}
-          <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 lg:pt-0 lg:border-t-0 lg:gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 lg:hidden">수량:</span>
-              <input
-                type="number"
-                min="0"
-                value={qty || ""}
-                placeholder="0"
-                onChange={(e) => {
-                  e.stopPropagation();
-                  const value = parseInt(e.target.value) || 0;
-                  if (value <= 0) {
-                    const newQty = { ...selectedQty };
-                    delete newQty[item.id!];
-                    setQty(newQty);
-                  } else {
-                    setQty({ ...selectedQty, [item.id!]: value });
-                  }
-                }}
-                onClick={(e) => e.stopPropagation()}
-                className="w-16 h-9 lg:w-20 lg:h-10 text-center border-2 border-gray-300 rounded-lg font-bold text-base lg:text-lg focus:border-blue-500 focus:outline-none"
-              />
-            </div>
-            <p
-              className={`font-bold text-sm lg:text-base lg:w-28 lg:text-right ${qty > 0 ? "text-[#FF5B60]" : "text-gray-400"}`}
-            >
-              {subtotal > 0 ? `${subtotal.toLocaleString()}원` : "-"}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-    // Accordion Options Renderer (New)
-    const renderAccordionOptions = (
-        sectionKey: string,
-        items: Product[],
-        selectedQty: { [key: string]: number },
-        setQty: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>
-    ) => {
-        const parentMenus = getParentMenusWithProducts(items);
-
-        const toggleAccordion = (key: string) => {
-            setExpandedAccordion(prev => ({ ...prev, [key]: !prev[key] }));
-        };
-
-        const getSelectedCountForParent = (parentName: string): number => {
-            const childMenus = getChildMenusWithProducts(parentName, items);
-            let count = 0;
-            childMenus.forEach(child => {
-                const products = items.filter(p => p.category === child.name);
-                products.forEach(p => {
-                    if (selectedQty[p.id!] && selectedQty[p.id!] > 0) count += selectedQty[p.id!];
-                });
-            });
-            return count;
-        };
-
-        const getSelectedCountForChild = (childName: string): number => {
-            const products = items.filter(p => p.category === childName);
-            let count = 0;
-            products.forEach(p => {
-                if (selectedQty[p.id!] && selectedQty[p.id!] > 0) count += selectedQty[p.id!];
-            });
-            return count;
-        };
-
-        if (parentMenus.length === 0) {
-            return <div className="text-center py-8 text-gray-400">등록된 카테고리가 없습니다.</div>;
-        }
-
-        return (
-            <div className="space-y-3">
-                {parentMenus.map(parent => {
-                    const parentKey = `${sectionKey}-${parent.name}`;
-                    const isParentExpanded = expandedAccordion[parentKey] ?? false;
-                    const childMenus = getChildMenusWithProducts(parent.name, items);
-                    const parentSelectedCount = getSelectedCountForParent(parent.name);
-
-                    return (
-                        <div key={parent.id} className="border border-gray-200 rounded-xl overflow-hidden">
-                            {/* Parent Category Header */}
-                            <button
-                                onClick={() => toggleAccordion(parentKey)}
-                                className={`w-full flex items-center justify-between p-4 text-left transition-all
-                                    ${isParentExpanded ? 'bg-blue-50 border-b border-blue-200' : 'bg-white hover:bg-gray-50'}
-                                    ${parentSelectedCount > 0 ? 'ring-2 ring-blue-400' : ''}`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <span className="font-bold text-gray-800">{parent.name}</span>
-                                    {parentSelectedCount > 0 && (
-                                        <span className="bg-[#FF5B60] text-white text-xs px-2 py-0.5 rounded-full font-bold">
-                                            {parentSelectedCount}개 선택
-                                        </span>
-                                    )}
-                                </div>
-                                <ChevronRight
-                                    size={20}
-                                    className={`text-gray-400 transition-transform duration-200 ${isParentExpanded ? 'rotate-90' : ''}`}
-                                />
-                            </button>
-
-                            {/* Parent Expanded Content: Child Categories */}
-                            {isParentExpanded && (
-                                <div className="bg-gray-50 p-3 space-y-2">
-                                    {childMenus.length > 0 ? childMenus.map(child => {
-                                        const childKey = `${sectionKey}-${parent.name}-${child.name}`;
-                                        const isChildExpanded = expandedAccordion[childKey] ?? false;
-                                        const filteredProducts = items.filter(p => p.category === child.name);
-                                        const childSelectedCount = getSelectedCountForChild(child.name);
-
-                                        return (
-                                            <div key={child.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                                                {/* Child Category Header */}
-                                                <button
-                                                    onClick={() => toggleAccordion(childKey)}
-                                                    className={`w-full flex items-center justify-between p-3 text-left transition-all
-                                                        ${isChildExpanded ? 'bg-green-50 border-b border-green-200' : 'hover:bg-gray-50'}
-                                                        ${childSelectedCount > 0 ? 'ring-1 ring-green-400' : ''}`}
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-medium text-gray-700">{child.name}</span>
-                                                        <span className="text-xs text-gray-400">({filteredProducts.length}개)</span>
-                                                        {childSelectedCount > 0 && (
-                                                            <span className="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
-                                                                {childSelectedCount}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <ChevronRight
-                                                        size={16}
-                                                        className={`text-gray-400 transition-transform duration-200 ${isChildExpanded ? 'rotate-90' : ''}`}
-                                                    />
-                                                </button>
-
-                                                {/* Child Expanded Content: Products */}
-                                                {isChildExpanded && (
-                                                    <div className="p-3 space-y-2 bg-white">
-                                                        {filteredProducts.length > 0 ? (
-                                                            filteredProducts.map(item => renderEnhancedProductItem(item, selectedQty, setQty))
-                                                        ) : (
-                                                            <div className="text-center py-4 text-gray-400 text-sm">등록된 상품이 없습니다.</div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    }) : (
-                                        <div className="text-center py-4 text-gray-400 text-sm">등록된 중분류가 없습니다.</div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    };
   const onChange = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates;
     setStartDate(start);
@@ -515,6 +548,16 @@ export const ProductDetailPage: React.FC = () => {
         selected_options: selectedOptions,
         basic_components: basicComponents,
       });
+
+      // Send Notification
+      await createNotification(
+        user.uid,
+        "예약 신청 완료",
+        `${product.name} 예약 신청이 접수되었습니다. 관리자 승인 후 확정됩니다.`,
+        "info",
+        "/mypage" // Link to mypage
+      );
+
       alert("예약이 완료되었습니다! 마이페이지에서 확인하세요.");
       navigate("/mypage");
     } catch (error) {
@@ -574,29 +617,28 @@ export const ProductDetailPage: React.FC = () => {
     product.food_components &&
     product.food_components.length > 0 &&
     globalFoods.length > 0;
-  const hasAnyOptions =
-    hasAdditionalOptions || hasPlaceOptions || hasFoodOptions;
+  const hasAnyOptions = true;
 
   const optionTabs = [
     {
       id: "additional" as const,
       label: "추가 구성",
       icon: Package,
-      show: hasAdditionalOptions,
+      show: true, // Always show
       count: Object.values(selectedAdditional).reduce((a, b) => a + b, 0),
     },
     {
       id: "place" as const,
       label: "장소 상품",
       icon: MapPin,
-      show: hasPlaceOptions,
+      show: true, // Always show
       count: Object.values(selectedPlaces).reduce((a, b) => a + b, 0),
     },
     {
       id: "food" as const,
       label: "음식 상품",
       icon: UtensilsCrossed,
-      show: hasFoodOptions,
+      show: true, // Always show
       count: Object.values(selectedFoods).reduce((a, b) => a + b, 0),
     },
   ].filter((tab) => tab.show);
@@ -685,25 +727,7 @@ export const ProductDetailPage: React.FC = () => {
                   </li>
                 </ol>
 
-                {/* Category Tags */}
-                <div className="flex items-center gap-2 mt-3 flex-wrap">
-                  {parentCategoryName && (
-                    <a
-                      href={`/products?category=${encodeURIComponent(parentCategoryName)}`}
-                      className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium hover:bg-gray-200 transition-colors"
-                    >
-                      #{parentCategoryName}
-                    </a>
-                  )}
-                  {product.category && (
-                    <a
-                      href={`/products?category=${encodeURIComponent(product.category)}`}
-                      className="px-3 py-1 bg-[#FF5B60]/10 text-[#FF5B60] rounded-full text-xs font-medium hover:bg-[#FF5B60]/20 transition-colors"
-                    >
-                      #{product.category}
-                    </a>
-                  )}
-                </div>
+
               </nav>
             );
           })()}
@@ -776,41 +800,66 @@ export const ProductDetailPage: React.FC = () => {
                     selectsRange
                     inline
                     minDate={new Date()}
-                    monthsShown={2}
+                    monthsShown={1}
                     dateFormat="yyyy.MM.dd"
                     locale="ko"
                   />
                 </div>
-                <div className="flex justify-between items-center py-4 border-t border-gray-100">
-                  <span className="font-medium text-gray-700">
+                <div className="flex justify-between items-start py-4 border-t border-gray-100">
+                  <span className="font-medium text-gray-700 py-1">
                     총 대여 기간
                   </span>
-                  <div className="text-right">
-                    <span className="font-bold text-[#FF5B60] text-base">
+                  <div className="text-right flex flex-col items-end">
+                    <span className="font-bold text-[#FF5B60] text-base leading-tight">
                       {startDate ? startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '-'}
-                      {' ~ '}
+                      <br className="sm:hidden" />
+                      <span className="hidden sm:inline"> ~ </span>
+                      <span className="sm:hidden"> ~ </span>
                       {endDate ? endDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '-'}
                     </span>
-                    <span className="text-gray-500 text-sm ml-2">({days}일)</span>
+                    <span className="text-gray-500 text-sm mt-1">({days}일)</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center py-4 border-t border-gray-100">
                   <span className="font-medium text-gray-700">예상 인원</span>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={expectedPeople}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === "" || /^\d+$/.test(val)) {
-                          setExpectedPeople(val === "" ? "" : parseInt(val));
-                        }
-                      }}
-                      className="w-20 text-right font-bold text-[#FF5B60] text-lg border-b-2 border-gray-300 focus:outline-none focus:border-[#FF5B60] px-2 py-1 bg-transparent"
-                      placeholder="0"
-                    />
-                    <span className="font-medium text-gray-700">명</span>
+                  <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => {
+                            const current = typeof expectedPeople === 'string' ? parseInt(expectedPeople) || 0 : expectedPeople;
+                            if (current > 1) setExpectedPeople(current - 1);
+                        }}
+                        className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+                    >
+                        <Minus size={16} />
+                    </button>
+                    <div className="flex items-center gap-1">
+                        <input
+                        type="text"
+                        inputMode="numeric"
+                        value={expectedPeople}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "" || /^\d+$/.test(val)) {
+                            setExpectedPeople(val === "" ? "" : parseInt(val));
+                            }
+                        }}
+                        onBlur={() => {
+                            if (expectedPeople === "" || expectedPeople === 0) setExpectedPeople(1);
+                        }}
+                        className="w-12 text-center font-bold text-gray-900 text-lg border-b border-transparent focus:border-[#FF5B60] focus:outline-none bg-transparent p-0"
+                        placeholder="0"
+                        />
+                        <span className="font-medium text-gray-700">명</span>
+                    </div>
+                    <button
+                        onClick={() => {
+                            const current = typeof expectedPeople === 'string' ? parseInt(expectedPeople) || 0 : expectedPeople;
+                            setExpectedPeople(current + 1);
+                        }}
+                        className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+                    >
+                        <Plus size={16} />
+                    </button>
                   </div>
                 </div>
                 {availabilityError && (
@@ -821,16 +870,18 @@ export const ProductDetailPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Basic Configuration (Blue Background) - Collapsible */}
+              {/* Basic Configuration (Restored Box/Frame Style) */}
               {product.basic_components &&
                 product.basic_components.length > 0 && (
-                  <div className="bg-blue-50 rounded-2xl border-2 border-blue-200 overflow-hidden">
+                  <div className="bg-white rounded-2xl p-5 mb-6 border border-gray-200 shadow-sm">
                     <button
-                      onClick={() => setBasicComponentsExpanded(!basicComponentsExpanded)}
-                      className="w-full flex items-center justify-between p-6 text-left"
+                      onClick={() =>
+                        setBasicComponentsExpanded(!basicComponentsExpanded)
+                      }
+                      className="w-full flex items-center justify-between pb-2 text-left"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs font-bold">
+                        <span className="bg-slate-800 text-white px-2 py-0.5 rounded text-xs font-bold">
                           기본
                         </span>
                         <h3 className="font-bold text-gray-900 text-lg">
@@ -842,103 +893,118 @@ export const ProductDetailPage: React.FC = () => {
                       </div>
                       <ChevronRight
                         size={20}
-                        className={`text-gray-400 transition-transform duration-200 ${basicComponentsExpanded ? 'rotate-90' : ''}`}
+                        className={`text-gray-400 transition-transform duration-200 ${basicComponentsExpanded ? "rotate-90" : ""}`}
                       />
                     </button>
                     {basicComponentsExpanded && (
-                      <div className="px-6 pb-6 space-y-3">
-                        {product.basic_components.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-4 p-3 bg-white rounded-lg border border-blue-200"
-                          >
-                            <div className="w-[50px] h-[50px] flex-shrink-0 rounded-lg bg-blue-100 flex items-center justify-center">
-                              <Package size={20} className="text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-800">
-                                {item.name}
-                              </p>
-                              {item.model_name && (
-                                <p className="text-xs text-gray-400">
-                                  {item.model_name}
+                      <div className="space-y-0 mt-2">
+                        {product.basic_components.map((item, idx) => {
+                          const matchedProduct = componentProducts.find(
+                            (p) => p.name === item.name,
+                          );
+                          const imageUrl =
+                            item.image_url ||
+                            matchedProduct?.image_url ||
+                            getComponentComponentImage(item.name);
+
+                          return (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-4 py-4 border-b border-dashed border-gray-200 last:border-0"
+                            >
+                              <div className="w-16 h-16 flex-shrink-0 rounded-lg bg-white flex items-center justify-center border border-gray-100 shadow-sm overflow-hidden relative">
+                                {imageUrl ? (
+                                  <img
+                                    src={imageUrl}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                      e.currentTarget.parentElement?.classList.add(
+                                        "fallback-icon",
+                                      );
+                                    }}
+                                  />
+                                ) : (
+                                  <Package
+                                    size={24}
+                                    className="text-slate-400"
+                                  />
+                                )}
+                                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 -z-10">
+                                  <Package
+                                    size={24}
+                                    className="text-slate-400"
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-900 text-[15px]">
+                                  {item.name}
                                 </p>
-                              )}
+                                {(item.model_name ||
+                                  matchedProduct?.product_code) && (
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    {item.model_name ||
+                                      matchedProduct?.product_code ||
+                                      "P0000"}
+                                  </p>
+                                )}
+                              </div>
+                              <span className="font-bold text-slate-700 bg-white border border-gray-100 px-3 py-1 rounded text-sm shadow-sm">
+                                {item.quantity}개
+                              </span>
                             </div>
-                            <span className="font-bold text-blue-600">
-                              {item.quantity}개
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
                 )}
 
-              {/* Option Tabs Section */}
+              {/* Option Selection Area (Type A: Chip & List) */}
               {hasAnyOptions && (
-                <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                  {/* Tab Navigation */}
-                  <div className="flex border-b border-gray-200">
-                    {optionTabs.map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => {
-                          setActiveOptionTab(tab.id);
-                          setCategoryPath((prev) => ({
-                            ...prev,
-                            [tab.id]: [],
-                          }));
-                        }}
-                        className={`flex-1 flex items-center justify-center gap-2 py-4 font-semibold text-sm transition-colors relative
-                                                    ${activeOptionTab === tab.id ? "text-[#FF5B60] bg-gray-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"}`}
-                      >
-                        <tab.icon size={18} />
-                        {tab.label}
-                        {tab.count > 0 && (
-                          <span className="bg-[#FF5B60] text-white text-xs px-1.5 py-0.5 rounded-full">
-                            {tab.count}
-                          </span>
-                        )}
-                        {activeOptionTab === tab.id && (
-                          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#FF5B60]" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
+                  <div className="mb-10">
+                     {/* Tab Buttons (Underline Style for Type A) */}
+                     <div className="flex border-b border-gray-200 mb-6">
+                        {optionTabs.map((tab) => (
+                           <button
+                              key={tab.id}
+                              onClick={() => {
+                                 setActiveOptionTab(tab.id);
+                                 setCategoryPath((prev) => ({ ...prev, [tab.id]: [] }));
+                              }}
+                              className={`flex-1 py-3 font-bold text-sm transition-all relative
+                                 ${activeOptionTab === tab.id 
+                                    ? "text-gray-900" 
+                                    : "text-gray-400 hover:text-gray-600"}`}
+                           >
+                              <div className="flex items-center justify-center gap-2">
+                                 <tab.icon size={18} />
+                                 {tab.label}
+                                 {tab.count > 0 && <span className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded-full">{tab.count}</span>}
+                              </div>
+                              {activeOptionTab === tab.id && (
+                                 <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-900" />
+                              )}
+                           </button>
+                        ))}
+                     </div>
 
-                  {/* Tab Content */}
-                  <div className="p-6">
-                    {activeOptionTab === "additional" &&
-                      hasAdditionalOptions &&
-                      renderAccordionOptions(
-                        "additional",
-                        globalAdditional,
-                        selectedAdditional,
-                        setSelectedAdditional,
-                      )}
-                    {activeOptionTab === "place" &&
-                      hasPlaceOptions &&
-                      renderAccordionOptions(
-                        "place",
-                        globalPlaces,
-                        selectedPlaces,
-                        setSelectedPlaces,
-                      )}
-                    {activeOptionTab === "food" &&
-                      hasFoodOptions &&
-                      renderAccordionOptions(
-                        "food",
-                        globalFoods,
-                        selectedFoods,
-                        setSelectedFoods,
-                      )}
+                     {/* Chip Filter & List Content */}
+                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                        {activeOptionTab === "additional" &&
+                           <OptionListTypeA items={globalAdditional} selectedQty={selectedAdditional} setQty={setSelectedAdditional} componentProducts={componentProducts} menuItems={menuItems} />}
+                        {activeOptionTab === "place" &&
+                           <OptionListTypeA items={globalPlaces} selectedQty={selectedPlaces} setQty={setSelectedPlaces} componentProducts={componentProducts} menuItems={menuItems} />}
+                        {activeOptionTab === "food" &&
+                           <OptionListTypeA items={globalFoods} selectedQty={selectedFoods} setQty={setSelectedFoods} componentProducts={componentProducts} menuItems={menuItems} />}
+                     </div>
                   </div>
-                </div>
               )}
 
-              {/* Tabbed Product Details */}
-              <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              {/* Tabbed Product Details (Restored Box Style) */}
+              <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-10 border border-gray-100">
                 <div className="flex border-b border-gray-200">
                   {[
                     { id: "detail", label: "상세정보" },
@@ -1081,14 +1147,14 @@ export const ProductDetailPage: React.FC = () => {
                   </p>
 
                   {/* Payment Notice */}
-                  <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
+                  <div className="mt-4 p-3 bg-white rounded-xl border border-gray-200">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">💳</span>
-                      <p className="text-sm font-bold text-amber-800">
+                      <p className="text-sm font-bold text-gray-800">
                         법인카드 결제 및 세금계산서 발행 가능
                       </p>
                     </div>
-                    <p className="text-xs text-amber-600 mt-1 ml-7">
+                    <p className="text-xs text-gray-500 mt-1 ml-7">
                       기업 행정 처리를 위한 모든 서류를 지원합니다.
                     </p>
                   </div>
@@ -1109,37 +1175,40 @@ export const ProductDetailPage: React.FC = () => {
                     <p className="text-xs font-semibold text-gray-500 mb-3">
                       인증 기업
                     </p>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-blue-100">
+                    <div className="space-y-4">
+                      {/* Certified Company 1 */}
+                      <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-gray-100 border border-gray-100">
                           <img
-                            src="/badge-disabled.png"
+                            src="/cert-disabled.jpg"
                             alt="장애인등록기업"
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                         <div>
-                          <p className="font-bold text-blue-800 text-sm">
+                          <p className="font-bold text-gray-900 text-sm">
                             장애인등록기업
                           </p>
-                          <p className="text-xs text-blue-600">
+                          <p className="text-xs text-gray-500">
                             공공기관 우선구매 대상
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-teal-50 to-emerald-50 rounded-xl border border-teal-200">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-teal-100">
+
+                      {/* Certified Company 2 */}
+                      <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-gray-100 border border-gray-100">
                           <img
-                            src="/badge-mice.png"
+                            src="/cert-mice.jpg"
                             alt="대전 MICE 전문기업"
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                         <div>
-                          <p className="font-bold text-teal-800 text-sm">
+                          <p className="font-bold text-gray-900 text-sm">
                             대전 MICE 전문기업
                           </p>
-                          <p className="text-xs text-teal-600">
+                          <p className="text-xs text-gray-500">
                             지역 행사 전문성 보유
                           </p>
                         </div>
@@ -1155,7 +1224,7 @@ export const ProductDetailPage: React.FC = () => {
 
       {/* Mobile Floating Bar - Expandable Version (Solution 2) */}
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50 lg:hidden transition-all duration-300 ${mobileBarExpanded ? "max-h-[80vh]" : "max-h-[80px]"}`}
+        className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50 lg:hidden transition-all duration-300 ${mobileBarExpanded ? "max-h-[80vh]" : "max-h-[140px]"}`}
       >
         {/* Expand Toggle Button */}
         <button
@@ -1224,13 +1293,17 @@ export const ProductDetailPage: React.FC = () => {
             )}
 
             {/* Payment Notice */}
-            <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
+            {/* Payment Notice */}
+            <div className="mt-4 p-3 bg-white rounded-xl border border-gray-200">
               <div className="flex items-center gap-2">
                 <span className="text-lg">💳</span>
-                <p className="text-sm font-bold text-amber-800">
+                <p className="text-sm font-bold text-gray-800">
                   법인카드 결제 및 세금계산서 발행 가능
                 </p>
               </div>
+              <p className="text-xs text-gray-500 mt-1 ml-7">
+                기업 행정 처리를 위한 모든 서류를 지원합니다.
+              </p>
             </div>
 
             {/* Quote Button */}

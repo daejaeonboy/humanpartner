@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Check, X, Loader2, Clock, CheckCircle, XCircle, Trash2, Phone, Building2 } from 'lucide-react';
+import { Check, X, Loader2, Clock, Calendar, CheckCircle, XCircle, Trash2, Phone, Building2 } from 'lucide-react';
 import { getBookings, updateBookingStatus, deleteBooking, Booking } from '../../src/api/bookingApi';
+import { createNotification } from '../../src/api/notificationApi';
 
 export const BookingList = () => {
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -33,6 +34,21 @@ export const BookingList = () => {
         try {
             await updateBookingStatus(id, status);
             setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
+
+            // Send Notification
+            const targetBooking = bookings.find(b => b.id === id);
+            if (targetBooking?.user_id) {
+                 await createNotification(
+                    targetBooking.user_id,
+                    status === 'confirmed' ? '예약 확정' : '예약 취소',
+                    status === 'confirmed' 
+                        ? `${targetBooking.products?.name || '상품'} 예약이 확정되었습니다. 이용해주셔서 감사합니다.` 
+                        : `${targetBooking.products?.name || '상품'} 예약이 취소되었습니다.`,
+                    status === 'confirmed' ? 'success' : 'error',
+                    '/mypage'
+                );
+            }
+
             alert(`예약이 ${statusLabel}되었습니다.`);
         } catch (error) {
             console.error('Failed to update status:', error);
@@ -60,14 +76,26 @@ export const BookingList = () => {
 
     const getStatusBadge = (status: Booking['status']) => {
         const config = {
-            pending: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: Clock, label: '대기중' },
-            confirmed: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle, label: '확정' },
-            cancelled: { bg: 'bg-red-100', text: 'text-red-700', icon: XCircle, label: '취소' },
+            pending: { 
+                className: 'bg-orange-100 border border-orange-300 text-orange-800', 
+                icon: Calendar, 
+                label: '예약 대기 중' 
+            },
+            confirmed: { 
+                className: 'bg-blue-100 border border-blue-300 text-blue-800', 
+                icon: CheckCircle, 
+                label: '예약 확정' 
+            },
+            cancelled: { 
+                className: 'bg-gray-100 border border-gray-300 text-gray-700', 
+                icon: XCircle, 
+                label: '예약 취소' 
+            },
         };
-        const { bg, text, icon: Icon, label } = config[status];
+        const { className, icon: Icon, label } = config[status];
         return (
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${bg} ${text}`}>
-                <Icon size={14} />
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold shadow-sm ${className}`}>
+                <Icon size={14} strokeWidth={2.5} />
                 {label}
             </span>
         );

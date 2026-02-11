@@ -39,16 +39,16 @@ export function Footer() {
 
                     {/* COMPANY INFO */}
                     <div className="flex-1 md:pl-10">
-                        <div className="flex gap-4 mb-4 text-xs font-medium text-gray-500">
-                            <Link to="/" className="hover:text-black">홈</Link>
-                            <span className="w-px h-3 bg-gray-300"></span>
-                            <Link to="/cs" className="hover:text-black font-bold text-[#FF5B60]">고객센터</Link>
-                            <span className="w-px h-3 bg-gray-300"></span>
-                            <Link to="/company" className="cursor-pointer hover:text-black">회사소개</Link>
-                            <span className="w-px h-3 bg-gray-300"></span>
-                            <Link to="/terms" className="cursor-pointer hover:text-black">이용약관</Link>
-                            <span className="w-px h-3 bg-gray-300"></span>
-                            <Link to="/privacy" className="cursor-pointer hover:text-black font-bold text-gray-700">개인정보처리방침</Link>
+                        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4 text-xs font-medium text-gray-500">
+                            <Link to="/" className="hover:text-black whitespace-nowrap">홈</Link>
+                            <span className="w-px h-3 bg-gray-300 self-center"></span>
+                            <Link to="/cs" className="hover:text-black font-bold text-[#FF5B60] whitespace-nowrap">고객센터</Link>
+                            <span className="w-px h-3 bg-gray-300 self-center"></span>
+                            <Link to="/company" className="cursor-pointer hover:text-black whitespace-nowrap">회사소개</Link>
+                            <span className="w-px h-3 bg-gray-300 self-center"></span>
+                            <Link to="/terms" className="cursor-pointer hover:text-black whitespace-nowrap">이용약관</Link>
+                            <span className="w-px h-3 bg-gray-300 self-center"></span>
+                            <Link to="/privacy" className="cursor-pointer hover:text-black font-bold text-gray-700 whitespace-nowrap">개인정보처리방침</Link>
                         </div>
 
                         <div className="text-xs leading-5 text-gray-500">

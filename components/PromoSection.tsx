@@ -48,6 +48,23 @@ export const PromoSection: React.FC = () => {
     loadBanners();
   }, [activeTabId]);
 
+  // Scroll Buttons logic
+  const sliderRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollPrev = () => {
+    if (sliderRef.current) {
+      const scrollAmount = sliderRef.current.clientWidth / 2; // Scroll by one item (approx)
+      sliderRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const scrollNext = () => {
+    if (sliderRef.current) {
+      const scrollAmount = sliderRef.current.clientWidth / 2;
+      sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="pb-16 bg-white flex items-center justify-center py-12">
@@ -69,7 +86,7 @@ export const PromoSection: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTabId(tab.id || null)}
-              className={`flex-1 py-4 text-center text-sm font-medium transition-colors relative
+              className={`flex-1 py-4 text-center text-base font-medium transition-colors relative
                 ${activeTabId === tab.id
                   ? 'bg-[#FF5B60] text-white'
                   : 'text-gray-600 hover:text-[#FF5B60] hover:bg-gray-200'
@@ -80,7 +97,7 @@ export const PromoSection: React.FC = () => {
           ))}
         </div>
 
-        {/* Banners Grid */}
+        {/* Banners Slider */}
         {loadingBanners ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="animate-spin text-[#FF5B60]" size={32} />
@@ -92,63 +109,79 @@ export const PromoSection: React.FC = () => {
             <span className="text-sm">Admin → CMS 관리에서 배너를 추가하고 탭을 연결해주세요.</span>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {banners.map((item) => {
-              const linkTo = item.target_product_code ? `/p/${item.target_product_code}` : item.link || '/';
-              const isExternal = linkTo.startsWith('http');
+          <div className="relative group/slider">
+            {/* Left Button */}
+            <button
+              onClick={scrollPrev}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-all opacity-0 group-hover/slider:opacity-100"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft size={24} />
+            </button>
 
-              const BannerContent = (
-                <>
-                  {/* Background */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${item.image_url})` }}
-                  >
-                    <div className="absolute inset-0 bg-black/40"></div>
-                  </div>
+            {/* Right Button */}
+            <button
+              onClick={scrollNext}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-all opacity-0 group-hover/slider:opacity-100"
+              aria-label="Next slide"
+            >
+              <ChevronRight size={24} />
+            </button>
 
-                  {/* Navigation Arrows (Mock functionality) */}
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center hover:bg-white text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronLeft size={18} />
-                  </div>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center hover:bg-white text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronRight size={18} />
-                  </div>
+            <div
+              ref={sliderRef}
+              className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {banners.map((item) => {
+                const linkTo = item.target_product_code ? `/p/${item.target_product_code}` : item.link || '/';
+                const isExternal = linkTo.startsWith('http');
 
-                  {/* Text Content */}
-                  <div className="absolute inset-0 p-8 flex flex-col justify-center text-white">
-                    <h3 className="text-2xl font-light whitespace-pre-line mb-2 text-white">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm opacity-90 mb-6 text-white/90">{item.subtitle}</p>
-
-                    <div className="self-start px-6 py-2 bg-white text-gray-900 text-xs font-bold hover:bg-gray-100 transition-colors rounded-lg">
-                      {item.button_text || '바로가기'}
+                const BannerContent = (
+                  <>
+                    {/* Background */}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                      style={{ backgroundImage: `url(${item.image_url})` }}
+                    >
+                      <div className="absolute inset-0 bg-black/40"></div>
                     </div>
-                  </div>
-                </>
-              );
 
-              return isExternal ? (
-                <a
-                  key={item.id}
-                  href={linkTo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="relative h-64 md:h-80 group overflow-hidden block rounded-2xl cursor-pointer"
-                >
-                  {BannerContent}
-                </a>
-              ) : (
-                <Link
-                  key={item.id}
-                  to={linkTo}
-                  className="relative h-64 md:h-80 group overflow-hidden block rounded-2xl cursor-pointer"
-                >
-                  {BannerContent}
-                </Link>
-              );
-            })}
+                    {/* Text Content */}
+                    <div className="absolute inset-0 p-8 flex flex-col justify-center text-white">
+                      <h3 className="text-2xl font-light whitespace-pre-line mb-2 text-white">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm opacity-90 mb-6 text-white/90">{item.subtitle}</p>
+
+                      <div className="self-start px-6 py-2 bg-white text-gray-900 text-xs font-bold hover:bg-gray-100 transition-colors rounded-lg">
+                        {item.button_text || '바로가기'}
+                      </div>
+                    </div>
+                  </>
+                );
+
+                return isExternal ? (
+                  <a
+                    key={item.id}
+                    href={linkTo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative h-64 md:h-80 group overflow-hidden block rounded-2xl cursor-pointer min-w-[85%] md:min-w-[calc(50%-8px)] snap-center flex-shrink-0"
+                  >
+                    {BannerContent}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.id}
+                    to={linkTo}
+                    className="relative h-64 md:h-80 group overflow-hidden block rounded-2xl cursor-pointer min-w-[85%] md:min-w-[calc(50%-8px)] snap-center flex-shrink-0"
+                  >
+                    {BannerContent}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         )}
       </Container>

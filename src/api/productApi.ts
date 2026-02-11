@@ -14,8 +14,9 @@ export interface Product {
     review_count?: number;
     created_at?: string;
     product_code?: string; // New: User-friendly product code (e.g. P1001)
+    model_name?: string; // New: Model name for options
     product_type?: 'basic' | 'essential' | 'additional' | 'place' | 'food'; // New: basic(package), essential(basic component), additional, place, food
-    basic_components?: { name: string; model_name?: string; quantity: number; _category?: string }[];
+    basic_components?: { name: string; model_name?: string; quantity: number; _category?: string; image_url?: string }[];
     additional_components?: { name: string; model_name?: string; price: number; _category?: string }[];
     place_components?: { name: string; model_name?: string; price: number; _category?: string }[];
     food_components?: { name: string; model_name?: string; price: number; _category?: string }[];

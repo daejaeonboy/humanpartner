@@ -4,7 +4,7 @@ import { Container } from './ui/Container';
 import { getQuickMenuItems, QuickMenuItem } from '../src/api/cmsApi';
 import {
   Hotel, Zap, Ticket, Gift, Globe, ShoppingBag, Utensils, Car,
-  LayoutGrid, Key, Monitor, Laptop, Printer, Phone, Camera, Plus, Loader2
+  LayoutGrid, Key, Monitor, Laptop, Printer, Phone, Camera, Plus, Loader2, ChevronsLeft, ChevronsRight, MoveHorizontal
 } from 'lucide-react';
 
 // Dynamic icon mapping based on icon name stored in DB
@@ -41,6 +41,19 @@ export const QuickMenu: React.FC = () => {
   const [items, setItems] = useState<QuickMenuItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [showScrollHint, setShowScrollHint] = useState(true);
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+        if (scrollRef.current.scrollLeft > 20) {
+            setShowScrollHint(false);
+        } else {
+            setShowScrollHint(true);
+        }
+    }
+  };
+
   useEffect(() => {
     const loadItems = async () => {
       try {
@@ -70,8 +83,13 @@ export const QuickMenu: React.FC = () => {
   return (
     <div className="py-8 md:py-16 bg-white overflow-hidden">
       <Container>
-        {/* Grid for mobile (2 rows), Flex for desktop (1 row) */}
-        <div className="grid grid-cols-5 md:flex md:flex-row md:flex-nowrap md:justify-between items-start gap-x-2 gap-y-6 md:gap-4 overflow-x-auto no-scrollbar md:overflow-visible">
+        <div className="relative">
+            {/* Horizontal Scroll for mobile, Flex for desktop */}
+            <div 
+               ref={scrollRef}
+               onScroll={handleScroll}
+               className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth gap-3 px-4 -mx-4 md:mx-0 md:px-0 md:gap-4 md:justify-between items-start pb-4 md:pb-0"
+            >
           {items.map((item, index) => {
             // 카테고리가 있으면 해당 카테고리 필터링 링크 생성, 없으면 기존 링크 사용
             // title 파라미터도 함께 추가하여 페이지 제목 설정
@@ -89,7 +107,7 @@ export const QuickMenu: React.FC = () => {
               <Link
                 key={item.id}
                 to={linkUrl}
-                className="group flex flex-col items-center gap-2 flex-shrink-0 md:flex-1 min-w-0"
+                className="group flex flex-col items-center gap-2 flex-shrink-0 w-16 md:w-auto md:flex-1 min-w-0 snap-center"
               >
                 <div className="w-12 h-12 md:h-16 lg:w-20 lg:h-20 rounded-2xl bg-slate-50 flex items-center justify-center bg-opacity-10 group-hover:bg-opacity-25 transition-all duration-300 group-hover:-translate-y-1">
                   <div className="scale-90 md:scale-110 lg:scale-125">
@@ -106,6 +124,16 @@ export const QuickMenu: React.FC = () => {
               </Link>
             )
           })}
+            </div>
+
+            {/* Scroll Hint - Combined: Animated Sides + Static Center */}
+            <div 
+               className={`md:hidden flex justify-center items-center gap-8 py-2 transition-opacity duration-500 ${showScrollHint ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden py-0'}`}
+            >
+               <ChevronsLeft className="animate-move-left text-[#FF5B60]" size={24} />
+               <MoveHorizontal className="text-slate-900 animate-swipe-hint" size={24} strokeWidth={1.5} />
+               <ChevronsRight className="animate-move-right text-[#FF5B60]" size={24} />
+            </div>
         </div>
       </Container>
     </div>

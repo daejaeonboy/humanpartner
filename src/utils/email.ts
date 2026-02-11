@@ -19,7 +19,7 @@ export const sendVerificationEmail = async (toName: string, toEmail: string, cod
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
             <div style="text-align: center; margin-bottom: 20px;">
                 <h1 style="color: #FF5B60; margin: 0;">마이스파트너</h1>
-                <p style="color: #666; font-size: 14px;">MICE 장비 렌탈의 모든 것</p>
+                <p style="color: #666; font-size: 14px;">장소, 장비 </p>
             </div>
             
             <div style="background-color: #f9f9f9; padding: 30px; border-radius: 8px; text-align: center;">
