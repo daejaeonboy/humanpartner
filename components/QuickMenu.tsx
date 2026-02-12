@@ -41,18 +41,7 @@ export const QuickMenu: React.FC = () => {
   const [items, setItems] = useState<QuickMenuItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-  const [showScrollHint, setShowScrollHint] = useState(true);
 
-  const handleScroll = () => {
-    if (scrollRef.current) {
-        if (scrollRef.current.scrollLeft > 20) {
-            setShowScrollHint(false);
-        } else {
-            setShowScrollHint(true);
-        }
-    }
-  };
 
   useEffect(() => {
     const loadItems = async () => {
@@ -84,11 +73,9 @@ export const QuickMenu: React.FC = () => {
     <div className="py-8 md:py-16 bg-white overflow-hidden">
       <Container>
         <div className="relative">
-            {/* Horizontal Scroll for mobile, Flex for desktop */}
+            {/* 2-row Grid for mobile, Flex for desktop */}
             <div 
-               ref={scrollRef}
-               onScroll={handleScroll}
-               className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth gap-3 px-4 -mx-4 md:mx-0 md:px-0 md:gap-4 md:justify-between items-start pb-4 md:pb-0"
+               className="grid grid-cols-5 gap-y-6 md:flex md:justify-between items-start pb-4 md:pb-0"
             >
           {items.map((item, index) => {
             // 카테고리가 있으면 해당 카테고리 필터링 링크 생성, 없으면 기존 링크 사용
@@ -107,7 +94,7 @@ export const QuickMenu: React.FC = () => {
               <Link
                 key={item.id}
                 to={linkUrl}
-                className="group flex flex-col items-center gap-2 flex-shrink-0 w-16 md:w-auto md:flex-1 min-w-0 snap-center"
+                className="group flex flex-col items-center gap-2 flex-shrink-0 w-full md:w-auto md:flex-1 min-w-0"
               >
                 <div className="w-12 h-12 md:h-16 lg:w-20 lg:h-20 rounded-2xl bg-slate-50 flex items-center justify-center bg-opacity-10 group-hover:bg-opacity-25 transition-all duration-300 group-hover:-translate-y-1">
                   <div className="scale-90 md:scale-110 lg:scale-125">
@@ -118,21 +105,12 @@ export const QuickMenu: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <span className="text-[11px] md:text-xs lg:text-sm text-slate-600 font-bold tracking-tight opacity-90 truncate w-full text-center px-1">
+                <span className="text-[11px] md:text-xs lg:text-sm text-slate-600 font-medium tracking-tight opacity-90 truncate w-full text-center px-1">
                   {item.name}
                 </span>
               </Link>
             )
           })}
-            </div>
-
-            {/* Scroll Hint - Combined: Animated Sides + Static Center */}
-            <div 
-               className={`md:hidden flex justify-center items-center gap-8 py-2 transition-opacity duration-500 ${showScrollHint ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden py-0'}`}
-            >
-               <ChevronsLeft className="animate-move-left text-[#FF5B60]" size={24} />
-               <MoveHorizontal className="text-slate-900 animate-swipe-hint" size={24} strokeWidth={1.5} />
-               <ChevronsRight className="animate-move-right text-[#FF5B60]" size={24} />
             </div>
         </div>
       </Container>

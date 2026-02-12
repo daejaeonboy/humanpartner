@@ -128,7 +128,7 @@ export const MainPage: React.FC = () => {
                                 title={section.name}
                                 categories={getSectionCategories(section, products)}
                                 products={formattedProducts}
-                                layoutMode={section.layout_mode}
+                                layoutMode="grid-2"
                             />
                         );
                     })}
@@ -139,6 +139,7 @@ export const MainPage: React.FC = () => {
                     title="전체 상품"
                     categories={getCategories(allProducts)}
                     products={formatProducts(allProducts)}
+                    layoutMode="grid-2"
                 />
             ) : (
                 <div className="text-center py-20 text-slate-400">

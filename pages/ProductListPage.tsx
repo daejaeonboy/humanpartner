@@ -171,7 +171,7 @@ export const ProductListPage: React.FC = () => {
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {filteredProducts.map((product) => (
                             <Link to={`/products/${product.id}`} key={product.id} className="group cursor-pointer">
-                                <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 mb-4 rounded-lg">
+                                <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 mb-4 rounded-lg">
                                     <img
                                         src={product.image_url || 'https://picsum.photos/seed/product/400/500'}
                                         alt={product.name}

@@ -89,9 +89,9 @@ const OptionItem = ({
   const isChanged = localQty !== initialQty;
 
   return (
-    <div className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors">
+    <div className="flex items-center gap-3 sm:gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors border-b border-gray-50 last:border-0 relative">
       {/* Image */}
-      <div className="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-100">
+      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-100">
         {imageUrl ? (
           <img src={imageUrl} alt={item.name} className="w-full h-full object-cover" />
         ) : (
@@ -100,22 +100,24 @@ const OptionItem = ({
       </div>
 
       {/* Info */}
-      <div className="flex-1 min-w-0">
-        <h5 className="font-bold text-gray-900 text-[15px] truncate">{item.name}</h5>
-        <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
+      <div className="flex-1 min-w-0 pr-24 sm:pr-0">
+        <h5 className="font-bold text-gray-900 text-sm sm:text-[15px] leading-snug line-clamp-1">
+          {item.name}
+        </h5>
+        <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">
           {item.description || item.model_name || "상세 설명 없음"}
         </p>
-        <p className="text-sm font-bold text-[#FF5B60] mt-1">
+        <p className="text-sm font-bold text-[#FF5B60] mt-0.5">
           {item.price ? `${item.price.toLocaleString()}원` : "가격문의"}
         </p>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1 md:gap-3 bg-white border border-gray-200 rounded-lg p-0.5 md:p-1 shadow-sm h-8 md:h-9">
+      {/* Desktop (PC) UI: Original Framed Style */}
+      <div className="hidden sm:flex items-center gap-2">
+        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-1 shadow-sm h-9">
           <button
-            className="w-6 md:w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
-            onClick={() => setLocalQty((prev) => Math.max(0, prev - 1))}
+            className="w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
+            onClick={() => onUpdate(Math.max(0, initialQty - 1))}
           >
             <Minus size={14} />
           </button>
@@ -129,37 +131,65 @@ const OptionItem = ({
                 setLocalQty(val === "" ? 0 : parseInt(val));
               }
             }}
-            className="w-8 md:w-10 text-center font-bold text-gray-900 text-sm border-none focus:outline-none focus:ring-0 p-0"
+            onBlur={handleUpdate}
+            className="w-10 text-center font-bold text-gray-900 text-sm border-none focus:outline-none focus:ring-0 p-0"
           />
           <button
-            className="w-6 md:w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
-            onClick={() => setLocalQty((prev) => prev + 1)}
+            className="w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
+            onClick={() => onUpdate(initialQty + 1)}
           >
             <Plus size={14} />
           </button>
         </div>
 
-        {/* Action Button */}
         {isInCart ? (
-            <button
-                onClick={handleUpdate}
-                disabled={!isChanged}
-                className={`px-4 h-9 rounded-lg text-sm font-bold transition-all
-                    ${isChanged
-                        ? "bg-[#FF5B60] text-white shadow-md hover:bg-[#E04F54]" // Changed? Red/Active
-                        : "bg-gray-900 text-white shadow-sm" // Saved/Same? Dark/Active
-                    }`}
-            >
-                {isChanged ? "수정" : <Check size={18} />}
-            </button>
+          <button
+            onClick={handleUpdate}
+            disabled={!isChanged}
+            className={`px-4 h-9 rounded-lg text-sm font-bold transition-all
+              ${isChanged ? "bg-[#FF5B60] text-white shadow-md" : "bg-gray-900 text-white"}`}
+          >
+            {isChanged ? "수정" : <Check size={18} />}
+          </button>
         ) : (
-            <button
-                onClick={handleCreate}
-                className="px-4 h-9 rounded-lg text-sm font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200"
-            >
-                담기
-            </button>
+          <button
+            onClick={handleCreate}
+            className="px-4 h-9 rounded-lg text-sm font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all"
+          >
+            담기
+          </button>
         )}
+      </div>
+
+      {/* Mobile UI: Minimal Frameless Style */}
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:hidden">
+        <button
+          onClick={() => onUpdate(Math.max(0, initialQty - 1))}
+          className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors
+            ${initialQty > 0 ? "text-gray-900 bg-gray-50" : "text-gray-300 pointer-events-none"}`}
+        >
+          <Minus size={14} />
+        </button>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={localQty}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (/^\d*$/.test(val)) {
+              setLocalQty(val === "" ? 0 : parseInt(val));
+            }
+          }}
+          onBlur={handleUpdate}
+          className={`w-8 text-center font-bold text-sm border-none focus:outline-none focus:ring-0 p-0 bg-transparent
+            ${initialQty > 0 ? "text-gray-900" : "text-gray-400"}`}
+        />
+        <button
+          onClick={() => onUpdate(initialQty + 1)}
+          className="w-7 h-7 flex items-center justify-center text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <Plus size={14} />
+        </button>
       </div>
     </div>
   );
@@ -625,21 +655,21 @@ export const ProductDetailPage: React.FC = () => {
       label: "추가 구성",
       icon: Package,
       show: true, // Always show
-      count: Object.values(selectedAdditional).reduce((a, b) => a + b, 0),
+      count: Object.values(selectedAdditional).filter(qty => qty > 0).length,
     },
     {
       id: "place" as const,
       label: "장소 상품",
       icon: MapPin,
       show: true, // Always show
-      count: Object.values(selectedPlaces).reduce((a, b) => a + b, 0),
+      count: Object.values(selectedPlaces).filter(qty => qty > 0).length,
     },
     {
       id: "food" as const,
       label: "음식 상품",
       icon: UtensilsCrossed,
       show: true, // Always show
-      count: Object.values(selectedFoods).reduce((a, b) => a + b, 0),
+      count: Object.values(selectedFoods).filter(qty => qty > 0).length,
     },
   ].filter((tab) => tab.show);
 
@@ -719,12 +749,6 @@ export const ProductDetailPage: React.FC = () => {
                       </li>
                     </>
                   )}
-                  <li>
-                    <ChevronRight size={14} className="text-gray-300" />
-                  </li>
-                  <li className="text-gray-800 font-medium truncate max-w-[200px]">
-                    {product.name}
-                  </li>
                 </ol>
 
 
@@ -753,7 +777,7 @@ export const ProductDetailPage: React.FC = () => {
                 <span className="text-[#FF5B60] font-bold text-sm mb-2 block">
                   {product.category}
                 </span>
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-2xl lg:text-3xl font-semibold text-gray-900 mb-2">
                   {product.name}
                 </h1>
                 {product.short_description && (
@@ -767,7 +791,7 @@ export const ProductDetailPage: React.FC = () => {
                       {product.discount_rate}% OFF
                     </span>
                   )}
-                  <span className="text-2xl font-bold text-gray-900">
+                  <span className="text-2xl font-semibold text-gray-900">
                     {product.price?.toLocaleString()}원
                   </span>
                   <span className="text-sm text-gray-400">/ 1일</span>
@@ -810,7 +834,7 @@ export const ProductDetailPage: React.FC = () => {
                     총 대여 기간
                   </span>
                   <div className="text-right flex flex-col items-end">
-                    <span className="font-bold text-[#FF5B60] text-base leading-tight">
+                    <span className="font-medium text-gray-900 text-base leading-tight">
                       {startDate ? startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '-'}
                       <br className="sm:hidden" />
                       <span className="hidden sm:inline"> ~ </span>
@@ -1233,7 +1257,7 @@ export const ProductDetailPage: React.FC = () => {
         >
           <ChevronRight
             size={20}
-            className={`text-gray-400 transition-transform duration-300 ${mobileBarExpanded ? "rotate-[-90deg]" : "rotate-90"}`}
+            className={`text-gray-400 transition-transform duration-300 ${mobileBarExpanded ? "rotate-90" : "rotate-[-90deg]"}`}
           />
           <span className="text-xs text-gray-500 ml-1">
             {mobileBarExpanded ? "접기" : "상세보기"}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Container } from '../ui/Container';
@@ -39,10 +39,10 @@ const NotificationDropdown = ({
    return (
       <div className="relative">
          <button 
-            className={`p-1.5 md:p-2 text-slate-600 transition-colors rounded-full hover:bg-slate-100 ${isOpen ? 'text-[#FF5B60] bg-red-50' : ''}`}
+            className={`w-8 h-8 md:w-11 md:h-11 flex items-center justify-center text-slate-600 transition-colors rounded-xl md:rounded-full hover:bg-slate-100 ${isOpen ? 'text-[#FF5B60] bg-red-50' : ''}`}
             onClick={() => setIsOpen(!isOpen)}
          >
-            <BellIcon className="w-5 h-5 md:w-6 md:h-6" />
+            <BellIcon className="w-6 h-6" />
             {/* Badge - Only show if unreadCount > 0 */}
             {unreadCount > 0 && (
                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#FF5B60] rounded-full ring-1 ring-white"></span>
@@ -105,6 +105,38 @@ export const Header: React.FC = () => {
   // Removed showNotifications state as it is now inside NotificationDropdown
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  // Smart Sticky Header Logic
+  // Smart Sticky Header Logic
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+      const diff = currentScrollY - lastScrollYRef.current;
+
+      // 1. Top Zone Logic - Always show
+      if (currentScrollY < 120) {
+        setIsVisible(true);
+        lastScrollYRef.current = currentScrollY;
+        return;
+      }
+
+      // 2. Scroll Direction Logic
+      if (diff < -2) {
+        // Scrolling UP - Instant Reveal
+        setIsVisible(true);
+        lastScrollYRef.current = currentScrollY;
+      } else if (diff > 40) {
+        // Scrolling DOWN - Hide after threshold
+        setIsVisible(false);
+        lastScrollYRef.current = currentScrollY;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch notifications
   useEffect(() => {
@@ -172,155 +204,159 @@ export const Header: React.FC = () => {
               // Logged In View
               <>
                 <span className="font-bold text-gray-700">{user.displayName || user.email}님 안녕하세요</span>
-                <Link to="/mypage" className="hover:text-blue-600 transition-colors">마이페이지</Link>
-                <button onClick={logout} className="hover:text-red-600 transition-colors">로그아웃</button>
-                <Link to="/cs" className="hover:text-blue-600 transition-colors font-medium">고객센터</Link>
+                <Link to="/mypage" className="hover:text-[#FF5B60] transition-colors">마이페이지</Link>
+                <button onClick={logout} className="hover:text-[#FF5B60] transition-colors">로그아웃</button>
+                <Link to="/cs" className="hover:text-[#FF5B60] transition-colors font-medium">고객센터</Link>
               </>
             ) : (
               // Logged Out View
               <>
-                <Link to="/login" className="hover:text-blue-600 transition-colors">로그인</Link>
-                <Link to="/signup" className="hover:text-blue-600 transition-colors">회원가입</Link>
-                <Link to="/cs" className="hover:text-blue-600 transition-colors font-medium">고객센터</Link>
+                <Link to="/login" className="hover:text-[#FF5B60] transition-colors">로그인</Link>
+                <Link to="/signup" className="hover:text-[#FF5B60] transition-colors">회원가입</Link>
+                <Link to="/cs" className="hover:text-[#FF5B60] transition-colors font-medium">고객센터</Link>
               </>
             )}
           </div>
         </Container>
       </div>
 
-      {/* Main Header Area */}
-      <div className="py-3 md:py-4 sticky top-0 bg-white/80 backdrop-blur-md z-40">
-        <Container>
-          <div className="flex items-center justify-between gap-2 md:gap-8">
-            {/* Logo */}
-            <a href="/" className="flex-shrink-0">
-              <img src="/logo.png" alt="행사어때" className="h-[18px] md:h-6 object-contain" />
-              {/* Mobile logo slightly bigger than h-4 for better visibility if needed, or stick to h-4 (16px) */}
-            </a>
+      {/* Spacer for Fixed Header (Prevents content jump) */}
+      <div className="h-[105px] md:h-28 hidden md:block"></div>
+      <div className="h-[95px] md:hidden"></div>
 
-            {/* Search Bar - Mobile optimized */}
-            <div className="flex-1 min-w-0 max-w-sm md:max-w-md">
-              <div className="relative group">
-                <input
-                  type="text"
-                  placeholder="무엇을 도와드릴까요?"
-                  className="w-full pl-3 pr-8 py-2 md:py-2.5 rounded-full bg-slate-100 border-none focus:ring-2 focus:ring-[#FF5B60]/20 focus:bg-white transition-all text-xs md:text-sm text-gray-700 placeholder-gray-400 font-medium"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      const target = e.target as HTMLInputElement;
-                      if (target.value.trim()) {
-                        window.location.href = `/search?q=${encodeURIComponent(target.value)}`;
+      {/* Smart Reveal Header Container - SWITCHED TO FIXED */}
+      <div className={`
+        fixed top-0 left-0 w-full z-40 transition-all duration-300 ease-in-out bg-white
+        ${isVisible ? 'translate-y-0 shadow-md' : '-translate-y-full shadow-none'}
+      `}>
+        {/* Main Header Area */}
+        <div className="py-3 md:py-4 bg-white/80 backdrop-blur-md border-b border-gray-100">
+          <Container>
+            <div className="flex items-center justify-between gap-1 md:gap-8">
+              {/* Logo */}
+              <a href="/" className="flex-shrink-0">
+                <img src="/logo.png" alt="행사어때" className="h-[17px] md:h-6 object-contain" />
+              </a>
+
+              {/* Desktop Spacer */}
+              <div className="hidden md:block flex-1" />
+
+              {/* Search Bar */}
+              <div className="flex-1 md:flex-none min-w-0 max-w-sm md:w-[380px] ml-1 md:ml-0">
+                <div className="relative group">
+                  <input
+                    type="text"
+                    placeholder="무엇을 도와드릴까요?"
+                    className="w-full pl-3.5 pr-8.5 py-1.5 md:py-3 rounded-full bg-slate-100 border-none focus:ring-2 focus:ring-[#FF5B60]/20 focus:bg-white transition-all text-[12px] md:text-sm text-gray-700 placeholder-gray-400 font-normal"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const target = e.target as HTMLInputElement;
+                        if (target.value.trim()) {
+                          window.location.href = `/search?q=${encodeURIComponent(target.value)}`;
+                        }
                       }
-                    }
-                  }}
+                    }}
+                  />
+                  <button
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#FF5B60] transition-colors"
+                    onClick={(e) => {
+                      const input = e.currentTarget.parentElement?.querySelector('input');
+                      if (input && input.value.trim()) {
+                        window.location.href = `/search?q=${encodeURIComponent(input.value)}`;
+                      }
+                    }}
+                  >
+                    <Search size={18} className="md:w-5 md:h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Desktop Actions */}
+              <div className="hidden md:flex items-center gap-4">
+                <NotificationDropdown 
+                  notifications={notifications}
+                  unreadCount={unreadCount}
+                  onMarkAllRead={handleMarkAllRead}
+                  onNotificationClick={handleNotificationClick}
                 />
-                <button
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#FF5B60] transition-colors"
-                  onClick={(e) => {
-                    const input = e.currentTarget.parentElement?.querySelector('input');
-                    if (input && input.value.trim()) {
-                      window.location.href = `/search?q=${encodeURIComponent(input.value)}`;
-                    }
-                  }}
+              </div>
+
+              {/* Mobile Actions */}
+              <div className="flex items-center md:hidden">
+                <NotificationDropdown 
+                  notifications={notifications}
+                  unreadCount={unreadCount}
+                  onMarkAllRead={handleMarkAllRead}
+                  onNotificationClick={handleNotificationClick}
+                />
+                <button 
+                  className="w-8 h-8 flex items-center justify-center text-slate-600 rounded-xl hover:bg-slate-100 transition-colors" 
+                  onClick={() => setShowMobileMenu(true)}
                 >
-                  <Search size={16} className="md:w-[18px] md:h-[18px]" />
+                  <MenuIcon className="w-6 h-6" />
                 </button>
               </div>
             </div>
+          </Container>
+        </div>
 
-            {/* Desktop Actions */}
-            <div className="hidden md:flex items-center gap-4">
-               {/* Desktop Notification */}
-               <NotificationDropdown 
-                  notifications={notifications}
-                  unreadCount={unreadCount}
-                  onMarkAllRead={handleMarkAllRead}
-                  onNotificationClick={handleNotificationClick}
-               />
+        {/* Global Navigation - Also sticky and reveals with header */}
+        <div className="border-t border-gray-100 relative bg-white">
+          <Container>
+            <div className="relative">
+              <nav className="flex items-center gap-6 md:gap-8 overflow-x-auto no-scrollbar scroll-smooth snap-x">
+                <div
+                  className="hidden md:block"
+                  onMouseEnter={() => setShowDesktopMenu(true)}
+                  onMouseLeave={() => setShowDesktopMenu(false)}
+                >
+                  <button
+                    className={`flex items-center gap-2 whitespace-nowrap text-sm font-medium px-1 py-3 border-b-2 transition-all ${showDesktopMenu ? 'text-[#FF5B60] border-[#FF5B60]' : 'text-[#FF5B60] border-transparent hover:border-[#FF5B60]'}`}
+                  >
+                    <MenuIcon className="w-[18px] h-[18px]" /> 전체메뉴
+                  </button>
+                </div>
+
+                {navItems.map((item) => {
+                  const linkUrl = `/products?sectionId=${item.id}&title=${encodeURIComponent(item.name)}`;
+                  const isCurrent = location.search.includes(`sectionId=${item.id}`);
+
+                  return (
+                    <Link
+                      key={item.id}
+                      to={linkUrl}
+                      className={`whitespace-nowrap text-[13px] md:text-sm font-medium transition-all px-1 py-3 border-b-2 ${isCurrent
+                        ? 'text-[#FF5B60] border-[#FF5B60]'
+                        : 'text-slate-500 border-transparent hover:text-[#FF5B60] hover:border-gray-200'
+                        }`}
+                    >
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </nav>
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
             </div>
+          </Container>
 
-            {/* Mobile Actions */}
-            <div className="flex items-center gap-1 md:hidden">
-              {/* Notification Icon */}
-              <NotificationDropdown 
-                  notifications={notifications}
-                  unreadCount={unreadCount}
-                  onMarkAllRead={handleMarkAllRead}
-                  onNotificationClick={handleNotificationClick}
-              />
-
-              {/* Menu Icon */}
-              <button className="p-1 text-slate-600" onClick={() => setShowMobileMenu(true)}>
-                <MenuIcon className="w-6 h-6" />
-              </button>
-            </div>
+          {/* Desktop Mega Menu Dropdown */}
+          <div
+            className={`
+              absolute top-full left-0 w-full z-50 transition-all duration-300 ease-in-out origin-top block
+              ${showDesktopMenu ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}
+            `}
+            onMouseEnter={() => setShowDesktopMenu(true)}
+            onMouseLeave={() => setShowDesktopMenu(false)}
+          >
+            <FullMenu variant="desktop" items={allMenuItems} onClose={() => setShowDesktopMenu(false)} />
           </div>
-        </Container>
+        </div>
       </div>
 
       {/* Mobile Full Menu Overlay */}
       {showMobileMenu && (
         <FullMenu variant="mobile" onClose={() => setShowMobileMenu(false)} />
       )}
-
-      {/* Navigation - Secondary on mobile/scrollable */}
-      <div className="border-t border-gray-100 shadow-sm md:shadow-none relative">
-        <Container>
-          <div className="relative">
-            {/* Horizontal Scroll Area */}
-            <nav className="flex items-center gap-6 md:gap-8 overflow-x-auto no-scrollbar scroll-smooth snap-x">
-              {/* All Menu Button (Desktop) */}
-              {/* All Menu Button (Desktop) - Hover Trigger */}
-              <div
-                className="hidden md:block"
-                onMouseEnter={() => setShowDesktopMenu(true)}
-                onMouseLeave={() => setShowDesktopMenu(false)}
-              >
-                <button
-                  className={`flex items-center gap-2 whitespace-nowrap text-sm font-semibold px-1 py-3 border-b-2 transition-all ${showDesktopMenu ? 'text-[#FF5B60] border-[#FF5B60]' : 'text-[#FF5B60] border-transparent hover:border-[#FF5B60]'}`}
-                >
-                  <MenuIcon className="w-[18px] h-[18px]" /> 전체메뉴
-                </button>
-              </div>
-
-
-
-              {navItems.map((item) => {
-                const linkUrl = `/products?sectionId=${item.id}&title=${encodeURIComponent(item.name)}`;
-                const isCurrent = location.search.includes(`sectionId=${item.id}`);
-
-                return (
-                  <Link
-                    key={item.id}
-                    to={linkUrl}
-                    className={`whitespace-nowrap text-[13px] md:text-sm font-semibold transition-all px-1 py-3 border-b-2 ${isCurrent
-                      ? 'text-[#FF5B60] border-[#FF5B60]'
-                      : 'text-slate-500 border-transparent hover:text-[#FF5B60] hover:border-gray-200'
-                      }`}
-                  >
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* Gradient Mask to indicate more content - Visible on mobile only */}
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
-          </div>
-        </Container>
-
-        {/* Desktop Mega Menu Dropdown - Persisted in DOM for smooth transition */}
-        <div
-          className={`
-                absolute top-full left-0 w-full z-50 transition-all duration-300 ease-in-out origin-top block
-                ${showDesktopMenu ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}
-            `}
-          onMouseEnter={() => setShowDesktopMenu(true)}
-          onMouseLeave={() => setShowDesktopMenu(false)}
-        >
-          <FullMenu variant="desktop" items={allMenuItems} onClose={() => setShowDesktopMenu(false)} />
-        </div>
-      </div>
     </header>
   );
 };

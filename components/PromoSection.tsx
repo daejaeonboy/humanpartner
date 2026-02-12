@@ -86,7 +86,7 @@ export const PromoSection: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTabId(tab.id || null)}
-              className={`flex-1 py-4 text-center text-base font-medium transition-colors relative
+              className={`flex-1 py-2.5 md:py-4 text-center text-[13px] md:text-base font-medium transition-colors relative
                 ${activeTabId === tab.id
                   ? 'bg-[#FF5B60] text-white'
                   : 'text-gray-600 hover:text-[#FF5B60] hover:bg-gray-200'
@@ -113,7 +113,7 @@ export const PromoSection: React.FC = () => {
             {/* Left Button */}
             <button
               onClick={scrollPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-all opacity-0 group-hover/slider:opacity-100"
+              className="absolute left-0 top-[calc(50%-8px)] -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
               aria-label="Previous slide"
             >
               <ChevronLeft size={24} />
@@ -122,7 +122,7 @@ export const PromoSection: React.FC = () => {
             {/* Right Button */}
             <button
               onClick={scrollNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-all opacity-0 group-hover/slider:opacity-100"
+              className="absolute right-0 top-[calc(50%-8px)] -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
               aria-label="Next slide"
             >
               <ChevronRight size={24} />
@@ -149,10 +149,10 @@ export const PromoSection: React.FC = () => {
 
                     {/* Text Content */}
                     <div className="absolute inset-0 p-8 flex flex-col justify-center text-white">
-                      <h3 className="text-2xl font-light whitespace-pre-line mb-2 text-white">
+                      <h3 className="text-xl md:text-2xl font-semibold whitespace-pre-line mb-1 text-white tracking-tight">
                         {item.title}
                       </h3>
-                      <p className="text-sm opacity-90 mb-6 text-white/90">{item.subtitle}</p>
+                      <p className="text-[13px] md:text-sm opacity-80 mb-6 text-white/90">{item.subtitle}</p>
 
                       <div className="self-start px-6 py-2 bg-white text-gray-900 text-xs font-bold hover:bg-gray-100 transition-colors rounded-lg">
                         {item.button_text || '바로가기'}

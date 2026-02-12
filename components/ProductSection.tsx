@@ -72,7 +72,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         {/* Header */}
         <div className="flex justify-between items-end mb-3 md:mb-4">
           <div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">{title}</h2>
+            <h2 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight">{title}</h2>
           </div>
           <button className="text-sm font-semibold text-slate-400 hover:text-[#FF5B60] transition-colors hidden md:block">전체보기</button>
         </div>
@@ -83,7 +83,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             <button
               key={`${cat}-${idx}`}
               onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2 rounded-full text-[13px] md:text-sm font-semibold transition-all border min-w-[80px] flex-shrink-0 text-center
+              className={`px-4 py-1.5 rounded-full text-[12px] md:text-sm font-medium transition-all border min-w-[70px] flex-shrink-0 text-center
                 ${activeCategory === cat
                   ? 'bg-[#FF5B60] text-white border-[#FF5B60]'
                   : 'bg-white text-slate-500 border-slate-200 hover:border-[#FF5B60] hover:text-[#FF5B60]'
@@ -99,7 +99,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           {/* Left Arrow */}
           <button
             onClick={() => scroll('left')}
-            className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-14 h-14 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-slate-900 hover:border-slate-900 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0"
+            className="absolute -left-4 md:-left-6 top-[calc(50%-48px)] -translate-y-1/2 z-10 w-14 h-14 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0"
           >
             <ChevronLeft size={28} />
           </button>
@@ -107,7 +107,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           {/* Right Arrow */}
           <button
             onClick={() => scroll('right')}
-            className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-14 h-14 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-slate-900 hover:border-slate-900 transition-all opacity-0 group-hover:opacity-100"
+            className="absolute -right-4 md:-right-6 top-[calc(50%-48px)] -translate-y-1/2 z-10 w-14 h-14 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover:opacity-100"
           >
             <ChevronRight size={28} />
           </button>
@@ -140,13 +140,13 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="font-bold text-sm md:text-base text-slate-800 truncate group-hover/card:text-[#FF5B60] transition-colors">{product.title}</h3>
+                  <h3 className="font-medium text-sm md:text-base text-slate-800 truncate group-hover/card:text-[#FF5B60] transition-colors">{product.title}</h3>
 
                   <div className="flex items-center gap-2">
                     {product.discountRate && (
-                      <span className="text-rose-500 font-extrabold text-base md:text-lg">{product.discountRate}%</span>
+                      <span className="text-rose-500 font-semibold text-base md:text-lg">{product.discountRate}%</span>
                     )}
-                    <span className="font-extrabold text-base md:text-lg text-slate-900">
+                    <span className="font-semibold text-base md:text-lg text-slate-900">
                       {product.price?.toLocaleString()}<span className="text-xs font-medium ml-0.5">원</span>
                     </span>
                   </div>

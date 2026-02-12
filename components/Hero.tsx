@@ -45,6 +45,33 @@ export const Hero: React.FC = () => {
     setCurrentSlide(index);
   };
 
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
   if (loading) {
     return (
       <section className="relative w-full h-[500px] md:h-[800px] bg-slate-900 flex items-center justify-center">
@@ -62,7 +89,12 @@ export const Hero: React.FC = () => {
   }
 
   return (
-    <section className="relative w-full h-[500px] md:h-[800px] bg-slate-900 overflow-hidden group">
+    <section
+      className="relative w-full h-[500px] md:h-[800px] bg-slate-900 overflow-hidden group"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Slides */}
       {slides.map((slide, index) => {
         const linkHref = slide.target_product_code ? `/p/${slide.target_product_code}` : slide.link || '/';
@@ -147,14 +179,14 @@ export const Hero: React.FC = () => {
         <ChevronRight size={28} />
       </button>
 
-      {/* Dots Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+      {/* Dots Indicators - Responsive Layout */}
+      <div className="absolute top-6 left-6 md:top-auto md:bottom-8 md:left-1/2 md:-translate-x-1/2 z-30 flex gap-2">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
             className={`w-2 h-2 rounded-full transition-all duration-300 
-              ${index === currentSlide ? 'w-8 bg-white' : 'bg-white/50 hover:bg-white/80'}
+              ${index === currentSlide ? 'bg-[#FF5B60]' : 'bg-white/40 hover:bg-white/60'}
             `}
             aria-label={`Go to slide ${index + 1}`}
           />

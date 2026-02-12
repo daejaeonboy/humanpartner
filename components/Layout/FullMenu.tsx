@@ -150,18 +150,12 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                             <h3 className="font-bold text-lg text-slate-800 mb-1">
                                                 {userProfile?.name || '사용자'}님, 안녕하세요!
                                             </h3>
-                                            <p className="text-sm text-slate-500">행사어때와 함께 멋진 행사를 기획해보세요.</p>
+                                            <p className="text-xs text-slate-500">행사어때와 함께<br />멋진 행사를 기획해보세요.</p>
                                         </div>
                                         <div className="flex gap-3">
-                                            <Link to="/mypage" onClick={onClose} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm hover:bg-slate-200 transition-colors text-center">마이페이지</Link>
-                                            <Link to="/cs" onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors text-center">고객센터</Link>
+                                            <Link to="/mypage" onClick={onClose} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm hover:bg-[#FF5B60]/10 hover:text-[#FF5B60] transition-all text-center">마이페이지</Link>
+                                            <Link to="/cs" onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-[#FF5B60]/5 hover:border-[#FF5B60]/30 hover:text-[#FF5B60] transition-all text-center">고객센터</Link>
                                         </div>
-                                        <button
-                                            onClick={() => { logout(); onClose(); }}
-                                            className="mt-4 text-xs text-slate-400 underline hover:text-slate-600 transition-colors"
-                                        >
-                                            로그아웃
-                                        </button>
                                     </>
                                 ) : (
                                     <>
@@ -248,6 +242,16 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                     </div>
                                 </div>
                             ))}
+                            {user && variant === 'mobile' && (
+                                <div className="mt-10 pt-4 border-t border-gray-100 flex justify-center">
+                                    <button
+                                        onClick={() => { logout(); onClose(); }}
+                                        className="py-3 px-8 rounded-xl bg-slate-50 text-slate-400 font-medium text-sm hover:bg-red-50 hover:text-red-400 transition-colors"
+                                    >
+                                        로그아웃
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </Container>
                 </div>

@@ -82,7 +82,7 @@ export const ProductSearchResult: React.FC = () => {
                                 to={`/products/${product.id}`}
                                 className="group block bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
                             >
-                                <div className="aspect-[4/5] relative overflow-hidden bg-slate-100">
+                                <div className="aspect-[16/10] relative overflow-hidden bg-slate-100">
                                     {product.image_url ? (
                                         <img
                                             src={product.image_url}
