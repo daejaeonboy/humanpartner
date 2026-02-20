@@ -133,9 +133,9 @@ export const ProductListPage: React.FC = () => {
     });
 
     return (
-        <div className="py-12 bg-white">
+        <div className="pt-8 pb-12 bg-white">
             <Container>
-                <div className="mb-8">
+                <div className="mb-6">
                     {/* Title Logic: Use Current Group Name if available, otherwise URL Title or Active Category */}
                     <h1 className="text-3xl font-bold text-gray-900">
                         {currentGroup || urlTitle || (activeCategory !== '전체' ? activeCategory : "모든 상품")}

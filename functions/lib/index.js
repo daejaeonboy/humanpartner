@@ -47,7 +47,7 @@ exports.sendEmailVerification = functions.https.onRequest((req, res) => {
             transporterConfig = {
                 host: smtpHost,
                 port: smtpPort,
-                secure: smtpSecure,
+                secure: smtpSecure, // true for 465, false for other ports
                 auth: {
                     user: emailUser,
                     pass: emailPass,

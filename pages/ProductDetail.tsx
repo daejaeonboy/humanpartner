@@ -73,16 +73,16 @@ const OptionItem = ({
   }, [initialQty]);
 
   const handleCreate = () => {
-     // If user hasn't set a quantity (0), and clicks Add, default to 1.
-     // If user has set a quantity (>0), use that.
-     const qtyToAdd = localQty > 0 ? localQty : 1;
-     onUpdate(qtyToAdd);
-     // Update local state to reflect what we just added
-     setLocalQty(qtyToAdd);
+    // If user hasn't set a quantity (0), and clicks Add, default to 1.
+    // If user has set a quantity (>0), use that.
+    const qtyToAdd = localQty > 0 ? localQty : 1;
+    onUpdate(qtyToAdd);
+    // Update local state to reflect what we just added
+    setLocalQty(qtyToAdd);
   };
 
   const handleUpdate = () => {
-      onUpdate(localQty);
+    onUpdate(localQty);
   };
 
   const isInCart = initialQty > 0;
@@ -235,99 +235,99 @@ const getChildMenusWithProducts = (
 };
 
 const OptionListTypeA = ({
-   items,
-   selectedQty,
-   setQty,
-   componentProducts,
-   menuItems
+  items,
+  selectedQty,
+  setQty,
+  componentProducts,
+  menuItems
 }: {
-   items: Product[];
-   selectedQty: { [key: string]: number };
-   setQty: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
-   componentProducts: Product[];
-   menuItems: NavMenuItem[];
+  items: Product[];
+  selectedQty: { [key: string]: number };
+  setQty: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
+  componentProducts: Product[];
+  menuItems: NavMenuItem[];
 }) => {
-   // 1. Get Categories (Parent Menus)
-   // Use useMemo here to prevent recalculation
-   const parentMenus = React.useMemo(() => getParentMenusWithProducts(items, menuItems), [items, menuItems]);
-   const [localActiveCategory, setLocalActiveCategory] = useState<string>('');
+  // 1. Get Categories (Parent Menus)
+  // Use useMemo here to prevent recalculation
+  const parentMenus = React.useMemo(() => getParentMenusWithProducts(items, menuItems), [items, menuItems]);
+  const [localActiveCategory, setLocalActiveCategory] = useState<string>('');
 
-   // Update local state if parentMenus changes
-   useEffect(() => {
-      if(parentMenus.length > 0) {
-         setLocalActiveCategory(prev => {
-            // IF previous category is still valid, keep it. Else set to first.
-            if(prev && parentMenus.find(p => p.name === prev)) return prev;
-            return parentMenus[0].name;
-         });
-      }
-   }, [parentMenus]);
+  // Update local state if parentMenus changes
+  useEffect(() => {
+    if (parentMenus.length > 0) {
+      setLocalActiveCategory(prev => {
+        // IF previous category is still valid, keep it. Else set to first.
+        if (prev && parentMenus.find(p => p.name === prev)) return prev;
+        return parentMenus[0].name;
+      });
+    }
+  }, [parentMenus]);
 
-   if (parentMenus.length === 0) {
-      return (
-         <div className="py-12 text-center text-gray-400">
-            <p>해당 카테고리에 등록된 상품이 없습니다.</p>
-         </div>
-      );
-   }
-
-   // Calculating display items based on active category
-   const activeParentMenu = parentMenus.find(p => p.name === localActiveCategory);
-   let displayItems: Product[] = [];
-   
-   if (activeParentMenu) {
-      const childMenus = getChildMenusWithProducts(activeParentMenu.name, items, menuItems);
-      const directItems = items.filter(p => p.category === activeParentMenu.name);
-      const childItems = childMenus.flatMap(child => items.filter(p => p.category === child.name));
-      displayItems = [...directItems, ...childItems];
-   }
-
-   return (
-      <div>
-         {/* Horizontal Scrollable Chips */}
-         <div className="flex overflow-x-auto pb-4 gap-2 px-6 pt-6 border-b border-gray-50 no-scrollbar">
-            {parentMenus.map((menu) => (
-               <button
-                  key={menu.name}
-                  onClick={() => setLocalActiveCategory(menu.name)}
-                  className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border
-                     ${localActiveCategory === menu.name 
-                        ? "bg-gray-900 text-white border-gray-900" 
-                        : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
-               >
-                  {menu.name}
-               </button>
-            ))}
-         </div>
-
-         {/* List Content */}
-         <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2">
-            {displayItems.length > 0 ? (
-               <div className="divide-y divide-gray-50">
-                  {displayItems.map((item) => {
-                     const qty = selectedQty[item.id!] || 0;
-                     // Use existing image logic
-                     const imageUrl = item.image_url || getComponentComponentImage(item.name) || componentProducts.find(p=>p.name===item.name)?.image_url;
-
-                     return (
-                        <OptionItem
-                           key={item.id}
-                           item={item}
-                           initialQty={qty}
-                           imageUrl={imageUrl}
-                           onUpdate={(newQty) => setQty(prev => ({ ...prev, [item.id!]: newQty }))}
-                        />
-                     );
-                  })}
-               </div>
-            ) : (
-               <div className="py-12 text-center text-gray-400">
-                  <p>해당 카테고리에 등록된 상품이 없습니다.</p>
-               </div>
-            )}
-         </div>
+  if (parentMenus.length === 0) {
+    return (
+      <div className="py-12 text-center text-gray-400">
+        <p>해당 카테고리에 등록된 상품이 없습니다.</p>
       </div>
-   );
+    );
+  }
+
+  // Calculating display items based on active category
+  const activeParentMenu = parentMenus.find(p => p.name === localActiveCategory);
+  let displayItems: Product[] = [];
+
+  if (activeParentMenu) {
+    const childMenus = getChildMenusWithProducts(activeParentMenu.name, items, menuItems);
+    const directItems = items.filter(p => p.category === activeParentMenu.name);
+    const childItems = childMenus.flatMap(child => items.filter(p => p.category === child.name));
+    displayItems = [...directItems, ...childItems];
+  }
+
+  return (
+    <div>
+      {/* Horizontal Scrollable Chips */}
+      <div className="flex overflow-x-auto pb-4 gap-2 px-6 pt-6 border-b border-gray-50 no-scrollbar">
+        {parentMenus.map((menu) => (
+          <button
+            key={menu.name}
+            onClick={() => setLocalActiveCategory(menu.name)}
+            className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border
+                     ${localActiveCategory === menu.name
+                ? "bg-[#FF5B60] text-white border-[#FF5B60]"
+                : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
+          >
+            {menu.name}
+          </button>
+        ))}
+      </div>
+
+      {/* List Content */}
+      <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2">
+        {displayItems.length > 0 ? (
+          <div className="divide-y divide-gray-50">
+            {displayItems.map((item) => {
+              const qty = selectedQty[item.id!] || 0;
+              // Use existing image logic
+              const imageUrl = item.image_url || getComponentComponentImage(item.name) || componentProducts.find(p => p.name === item.name)?.image_url;
+
+              return (
+                <OptionItem
+                  key={item.id}
+                  item={item}
+                  initialQty={qty}
+                  imageUrl={imageUrl}
+                  onUpdate={(newQty) => setQty(prev => ({ ...prev, [item.id!]: newQty }))}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="py-12 text-center text-gray-400">
+            <p>해당 카테고리에 등록된 상품이 없습니다.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export const ProductDetailPage: React.FC = () => {
@@ -338,7 +338,11 @@ export const ProductDetailPage: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState<Date | null>(new Date());
-  const [endDate, setEndDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d;
+  });
   const [totalPrice, setTotalPrice] = useState(0);
   const [days, setDays] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
@@ -347,7 +351,7 @@ export const ProductDetailPage: React.FC = () => {
   );
   const [activeTab, setActiveTab] = useState("detail");
   const [expectedPeople, setExpectedPeople] = useState<number | string>(1);
-  
+
 
 
   // Option Tab State (for the new tab UI)
@@ -411,7 +415,15 @@ export const ProductDetailPage: React.FC = () => {
 
 
   const onChange = (dates: [Date | null, Date | null]) => {
-    const [start, end] = dates;
+    let [start, end] = dates;
+
+    // 최소 2일 대여 강제 (시작일과 종료일이 같을 경우 종료일을 다음날로 설정)
+    if (start && end && start.getTime() === end.getTime()) {
+      const nextDay = new Date(start);
+      nextDay.setDate(nextDay.getDate() + 1);
+      end = nextDay;
+    }
+
     setStartDate(start);
     setEndDate(end);
   };
@@ -456,7 +468,7 @@ export const ProductDetailPage: React.FC = () => {
     if (startDate && endDate && product) {
       const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      const validDays = diffDays > 0 ? diffDays : 1;
+      const validDays = Math.max(2, diffDays); // 최소 2일 보장
       setDays(validDays);
 
       let total = product.price || 0;
@@ -698,7 +710,7 @@ export const ProductDetailPage: React.FC = () => {
           }
         />
       </Helmet>
-      <div className="py-8 bg-gray-50 min-h-screen pb-24 lg:pb-8">
+      <div className="pt-8 pb-8 bg-gray-50 min-h-screen lg:pb-8">
         <Container>
           {/* Breadcrumbs */}
           {(() => {
@@ -806,8 +818,11 @@ export const ProductDetailPage: React.FC = () => {
                   </h3>
                   <button
                     onClick={() => {
-                      setStartDate(new Date());
-                      setEndDate(new Date());
+                      const sd = new Date();
+                      const ed = new Date();
+                      ed.setDate(ed.getDate() + 1);
+                      setStartDate(sd);
+                      setEndDate(ed);
                     }}
                     className="text-sm text-gray-400 hover:text-[#FF5B60] transition-colors flex items-center gap-1"
                   >
@@ -829,7 +844,7 @@ export const ProductDetailPage: React.FC = () => {
                     locale="ko"
                   />
                 </div>
-                <div className="flex justify-between items-start py-4 border-t border-gray-100">
+                <div className="flex justify-between items-start pt-8 pb-4 border-t border-gray-100">
                   <span className="font-medium text-gray-700 py-1">
                     총 대여 기간
                   </span>
@@ -844,45 +859,45 @@ export const ProductDetailPage: React.FC = () => {
                     <span className="text-gray-500 text-sm mt-1">({days}일)</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center py-4 border-t border-gray-100">
+                <div className="flex justify-between items-center pt-8 pb-4 border-t border-gray-100">
                   <span className="font-medium text-gray-700">예상 인원</span>
                   <div className="flex items-center gap-3">
                     <button
-                        onClick={() => {
-                            const current = typeof expectedPeople === 'string' ? parseInt(expectedPeople) || 0 : expectedPeople;
-                            if (current > 1) setExpectedPeople(current - 1);
-                        }}
-                        className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+                      onClick={() => {
+                        const current = typeof expectedPeople === 'string' ? parseInt(expectedPeople) || 0 : expectedPeople;
+                        if (current > 1) setExpectedPeople(current - 1);
+                      }}
+                      className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
                     >
-                        <Minus size={16} />
+                      <Minus size={16} />
                     </button>
                     <div className="flex items-center gap-1">
-                        <input
+                      <input
                         type="text"
                         inputMode="numeric"
                         value={expectedPeople}
                         onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === "" || /^\d+$/.test(val)) {
+                          const val = e.target.value;
+                          if (val === "" || /^\d+$/.test(val)) {
                             setExpectedPeople(val === "" ? "" : parseInt(val));
-                            }
+                          }
                         }}
                         onBlur={() => {
-                            if (expectedPeople === "" || expectedPeople === 0) setExpectedPeople(1);
+                          if (expectedPeople === "" || expectedPeople === 0) setExpectedPeople(1);
                         }}
                         className="w-12 text-center font-bold text-gray-900 text-lg border-b border-transparent focus:border-[#FF5B60] focus:outline-none bg-transparent p-0"
                         placeholder="0"
-                        />
-                        <span className="font-medium text-gray-700">명</span>
+                      />
+                      <span className="font-medium text-gray-700">명</span>
                     </div>
                     <button
-                        onClick={() => {
-                            const current = typeof expectedPeople === 'string' ? parseInt(expectedPeople) || 0 : expectedPeople;
-                            setExpectedPeople(current + 1);
-                        }}
-                        className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+                      onClick={() => {
+                        const current = typeof expectedPeople === 'string' ? parseInt(expectedPeople) || 0 : expectedPeople;
+                        setExpectedPeople(current + 1);
+                      }}
+                      className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
                     >
-                        <Plus size={16} />
+                      <Plus size={16} />
                     </button>
                   </div>
                 </div>
@@ -897,7 +912,7 @@ export const ProductDetailPage: React.FC = () => {
               {/* Basic Configuration (Restored Box/Frame Style) */}
               {product.basic_components &&
                 product.basic_components.length > 0 && (
-                  <div className="bg-white rounded-2xl p-5 mb-6 border border-gray-200 shadow-sm">
+                  <div className="bg-white rounded-2xl p-5 mb-6 shadow-sm">
                     <button
                       onClick={() =>
                         setBasicComponentsExpanded(!basicComponentsExpanded)
@@ -905,7 +920,7 @@ export const ProductDetailPage: React.FC = () => {
                       className="w-full flex items-center justify-between pb-2 text-left"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="bg-slate-800 text-white px-2 py-0.5 rounded text-xs font-bold">
+                        <span className="bg-[#FF5B60] text-white px-2 py-0.5 rounded text-xs font-bold">
                           기본
                         </span>
                         <h3 className="font-bold text-gray-900 text-lg">
@@ -968,12 +983,12 @@ export const ProductDetailPage: React.FC = () => {
                                 </p>
                                 {(item.model_name ||
                                   matchedProduct?.product_code) && (
-                                  <p className="text-xs text-gray-400 mt-0.5">
-                                    {item.model_name ||
-                                      matchedProduct?.product_code ||
-                                      "P0000"}
-                                  </p>
-                                )}
+                                    <p className="text-xs text-gray-400 mt-0.5">
+                                      {item.model_name ||
+                                        matchedProduct?.product_code ||
+                                        "P0000"}
+                                    </p>
+                                  )}
                               </div>
                               <span className="font-bold text-slate-700 bg-white border border-gray-100 px-3 py-1 rounded text-sm shadow-sm">
                                 {item.quantity}개
@@ -988,43 +1003,43 @@ export const ProductDetailPage: React.FC = () => {
 
               {/* Option Selection Area (Type A: Chip & List) */}
               {hasAnyOptions && (
-                  <div className="mb-10">
-                     {/* Tab Buttons (Underline Style for Type A) */}
-                     <div className="flex border-b border-gray-200 mb-6">
-                        {optionTabs.map((tab) => (
-                           <button
-                              key={tab.id}
-                              onClick={() => {
-                                 setActiveOptionTab(tab.id);
-                                 setCategoryPath((prev) => ({ ...prev, [tab.id]: [] }));
-                              }}
-                              className={`flex-1 py-3 font-bold text-sm transition-all relative
-                                 ${activeOptionTab === tab.id 
-                                    ? "text-gray-900" 
-                                    : "text-gray-400 hover:text-gray-600"}`}
-                           >
-                              <div className="flex items-center justify-center gap-2">
-                                 <tab.icon size={18} />
-                                 {tab.label}
-                                 {tab.count > 0 && <span className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded-full">{tab.count}</span>}
-                              </div>
-                              {activeOptionTab === tab.id && (
-                                 <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-900" />
-                              )}
-                           </button>
-                        ))}
-                     </div>
-
-                     {/* Chip Filter & List Content */}
-                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                        {activeOptionTab === "additional" &&
-                           <OptionListTypeA items={globalAdditional} selectedQty={selectedAdditional} setQty={setSelectedAdditional} componentProducts={componentProducts} menuItems={menuItems} />}
-                        {activeOptionTab === "place" &&
-                           <OptionListTypeA items={globalPlaces} selectedQty={selectedPlaces} setQty={setSelectedPlaces} componentProducts={componentProducts} menuItems={menuItems} />}
-                        {activeOptionTab === "food" &&
-                           <OptionListTypeA items={globalFoods} selectedQty={selectedFoods} setQty={setSelectedFoods} componentProducts={componentProducts} menuItems={menuItems} />}
-                     </div>
+                <div className="mb-10">
+                  {/* Tab Buttons (Underline Style for Type A) */}
+                  <div className="flex bg-white rounded-t-xl border-b border-gray-200">
+                    {optionTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          setActiveOptionTab(tab.id);
+                          setCategoryPath((prev) => ({ ...prev, [tab.id]: [] }));
+                        }}
+                        className={`flex-1 py-4 font-bold text-sm transition-all relative
+                                 ${activeOptionTab === tab.id
+                            ? "text-[#FF5B60]"
+                            : "text-gray-400 hover:text-[#FF5B60]"}`}
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          <tab.icon size={18} />
+                          {tab.label}
+                          {tab.count > 0 && <span className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded-full">{tab.count}</span>}
+                        </div>
+                        {activeOptionTab === tab.id && (
+                          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FF5B60]" />
+                        )}
+                      </button>
+                    ))}
                   </div>
+
+                  {/* Chip Filter & List Content */}
+                  <div className="bg-white rounded-b-xl border border-gray-100 shadow-sm overflow-hidden">
+                    {activeOptionTab === "additional" &&
+                      <OptionListTypeA items={globalAdditional} selectedQty={selectedAdditional} setQty={setSelectedAdditional} componentProducts={componentProducts} menuItems={menuItems} />}
+                    {activeOptionTab === "place" &&
+                      <OptionListTypeA items={globalPlaces} selectedQty={selectedPlaces} setQty={setSelectedPlaces} componentProducts={componentProducts} menuItems={menuItems} />}
+                    {activeOptionTab === "food" &&
+                      <OptionListTypeA items={globalFoods} selectedQty={selectedFoods} setQty={setSelectedFoods} componentProducts={componentProducts} menuItems={menuItems} />}
+                  </div>
+                </div>
               )}
 
               {/* Tabbed Product Details (Restored Box Style) */}
@@ -1142,7 +1157,7 @@ export const ProductDetailPage: React.FC = () => {
                   <div className="mt-6 pt-4 border-t-2 border-gray-900">
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-gray-900">
-                        총 결제 금액
+                        예상 견적 비용
                       </span>
                       <span className="text-2xl font-bold text-[#FF5B60]">
                         {totalPrice.toLocaleString()}원
@@ -1154,7 +1169,7 @@ export const ProductDetailPage: React.FC = () => {
                   <button
                     onClick={handleBooking}
                     disabled={isBooking || product.stock === 0}
-                    className="w-full mt-6 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 disabled:bg-gray-400 shadow-lg"
+                    className="w-full mt-6 bg-[#FF5B60] text-white py-4 rounded-xl font-bold hover:bg-[#FF5B60]/90 transition-all flex items-center justify-center gap-2 disabled:bg-gray-400 shadow-lg"
                   >
                     {isBooking ? (
                       <>
@@ -1163,7 +1178,7 @@ export const ProductDetailPage: React.FC = () => {
                     ) : product.stock === 0 ? (
                       "품절"
                     ) : (
-                      "예약하기"
+                      "견적 받기"
                     )}
                   </button>
                   <p className="text-xs text-gray-400 text-center mt-3">
@@ -1187,7 +1202,7 @@ export const ProductDetailPage: React.FC = () => {
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <button
                       onClick={() => setShowQuoteModal(true)}
-                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-blue-500 text-blue-600 font-semibold hover:bg-blue-50 transition-all"
+                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-[#FF5B60] text-[#FF5B60] font-semibold hover:bg-red-50 transition-all"
                     >
                       <FileText size={18} />
                       견적서 다운로드 (PDF)
@@ -1345,7 +1360,7 @@ export const ProductDetailPage: React.FC = () => {
         <div className="p-4 border-t border-gray-100 bg-white">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs text-gray-500">총 결제 금액</p>
+              <p className="text-xs text-gray-500">예상 견적 비용</p>
               <p className="text-xl font-bold text-[#FF5B60]">
                 {totalPrice.toLocaleString()}원
               </p>
@@ -1362,7 +1377,7 @@ export const ProductDetailPage: React.FC = () => {
                 ? "처리중..."
                 : product.stock === 0
                   ? "품절"
-                  : "예약하기"}
+                  : "견적 받기"}
             </button>
           </div>
         </div>

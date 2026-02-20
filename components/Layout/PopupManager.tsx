@@ -81,9 +81,13 @@ export const PopupManager: React.FC = () => {
                 >
                     {/* Image / Content */}
                     <div className="relative flex-1 bg-slate-50 min-h-[200px] flex items-center justify-center">
-                        {/* Link wrapper if link exists */}
-                        {popup.link ? (
-                            <Link to={popup.link} className='w-full h-full block'>
+                        {/* Link wrapper if link or target_product_code exists */}
+                        {(popup.target_product_code || popup.link) ? (
+                            <Link
+                                to={popup.target_product_code ? `/p/${popup.target_product_code}` : popup.link}
+                                className='w-full h-full block'
+                                onClick={() => closePopup(popup.id!)}
+                            >
                                 <img
                                     src={popup.image_url || 'https://via.placeholder.com/400x400?text=Popup'}
                                     alt={popup.title}

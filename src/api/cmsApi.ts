@@ -289,6 +289,7 @@ export interface Popup {
     display_order: number;
     is_active: boolean;
     created_at?: string;
+    target_product_code?: string;
 }
 
 export const getPopups = async (): Promise<Popup[]> => {
