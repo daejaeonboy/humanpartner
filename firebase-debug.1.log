@@ -1,0 +1,72 @@
+[debug] [2026-02-20T04:10:58.350Z] ----------------------------------------------------------------------
+[debug] [2026-02-20T04:10:58.352Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\USER\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --debug
+[debug] [2026-02-20T04:10:58.353Z] CLI Version:   15.4.0
+[debug] [2026-02-20T04:10:58.353Z] Platform:      win32
+[debug] [2026-02-20T04:10:58.353Z] Node Version:  v24.13.0
+[debug] [2026-02-20T04:10:58.353Z] Time:          Fri Feb 20 2026 13:10:58 GMT+0900 (대한민국 표준시)
+[debug] [2026-02-20T04:10:58.353Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-20T04:10:59.405Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-20T04:10:59.405Z] > authorizing via signed-in user (cryingonion77@gmail.com)
+[debug] [2026-02-20T04:10:59.405Z] [iam] checking project human-partner for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-02-20T04:10:59.406Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:10:59.406Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:10:59.407Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions [none]
+[debug] [2026-02-20T04:10:59.407Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions x-goog-quota-user=projects/human-partner
+[debug] [2026-02-20T04:10:59.407Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-20T04:10:59.633Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions 200
+[debug] [2026-02-20T04:10:59.633Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-20T04:10:59.633Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:10:59.634Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:10:59.634Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/human-partner/serviceAccounts/human-partner@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-02-20T04:10:59.634Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/human-partner/serviceAccounts/human-partner@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-02-20T04:11:00.660Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/human-partner/serviceAccounts/human-partner@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2026-02-20T04:11:00.660Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/human-partner/serviceAccounts/human-partner@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-02-20T04:11:00.660Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:11:00.661Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:11:00.661Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/human-partner [none]
+[debug] [2026-02-20T04:11:01.052Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/human-partner 200
+[debug] [2026-02-20T04:11:01.052Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/human-partner {"projectId":"human-partner","projectNumber":"36770228350","displayName":"Human partner","name":"projects/human-partner","resources":{"hostingSite":"human-partner"},"state":"ACTIVE","etag":"1_1643f5a0-9e4e-4597-a1cb-17befdfcf695"}
+[info] 
+[info] === Deploying to 'human-partner'...
+[info] 
+[info] i  deploying functions, hosting 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[error] 
+[error] Error: functions predeploy error: Command terminated with non-zero exit code 2
+[debug] [2026-02-20T04:15:56.050Z] ----------------------------------------------------------------------
+[debug] [2026-02-20T04:15:56.052Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\USER\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --debug
+[debug] [2026-02-20T04:15:56.053Z] CLI Version:   15.4.0
+[debug] [2026-02-20T04:15:56.053Z] Platform:      win32
+[debug] [2026-02-20T04:15:56.053Z] Node Version:  v24.13.0
+[debug] [2026-02-20T04:15:56.053Z] Time:          Fri Feb 20 2026 13:15:56 GMT+0900 (대한민국 표준시)
+[debug] [2026-02-20T04:15:56.053Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-20T04:15:57.099Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-20T04:15:57.099Z] > authorizing via signed-in user (cryingonion77@gmail.com)
+[debug] [2026-02-20T04:15:57.099Z] [iam] checking project human-partner for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-02-20T04:15:57.100Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:15:57.100Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:15:57.101Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions [none]
+[debug] [2026-02-20T04:15:57.101Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions x-goog-quota-user=projects/human-partner
+[debug] [2026-02-20T04:15:57.101Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-20T04:15:57.326Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions 200
+[debug] [2026-02-20T04:15:57.326Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/human-partner:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-20T04:15:57.326Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:15:57.327Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:15:57.327Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/human-partner/serviceAccounts/human-partner@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-02-20T04:15:57.327Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/human-partner/serviceAccounts/human-partner@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-02-20T04:15:58.363Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/human-partner/serviceAccounts/human-partner@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2026-02-20T04:15:58.364Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/human-partner/serviceAccounts/human-partner@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-02-20T04:15:58.365Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:15:58.365Z] Checked if tokens are valid: true, expires at: 1771564234517
+[debug] [2026-02-20T04:15:58.365Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/human-partner [none]
+[debug] [2026-02-20T04:15:58.785Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/human-partner 200
+[debug] [2026-02-20T04:15:58.785Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/human-partner {"projectId":"human-partner","projectNumber":"36770228350","displayName":"Human partner","name":"projects/human-partner","resources":{"hostingSite":"human-partner"},"state":"ACTIVE","etag":"1_1643f5a0-9e4e-4597-a1cb-17befdfcf695"}
+[info] 
+[info] === Deploying to 'human-partner'...
+[info] 
+[info] i  deploying functions, hosting 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[error] 
+[error] Error: functions predeploy error: Command terminated with non-zero exit code 2
