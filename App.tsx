@@ -14,6 +14,9 @@ import { ProductSearchResult } from './pages/ProductSearchResult';
 import { CompanyIntro } from './pages/CompanyIntro';
 import { TermsOfService } from './pages/TermsOfService';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { AlliancePage } from './pages/AlliancePage';
+import { EventPage } from './pages/EventPage';
+import { BlankPage } from './pages/BlankPage';
 import { AuthProvider } from './src/context/AuthContext';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { ProductManager } from './pages/admin/ProductManager';
@@ -66,6 +69,9 @@ function App() {
                   <Route path="/p/:code" element={<RedirectToProduct />} />
                   <Route path="/search" element={<ProductSearchResult />} />
                   <Route path="/company" element={<CompanyIntro />} />
+                  <Route path="/alliance" element={<AlliancePage />} />
+                  <Route path="/event" element={<EventPage />} />
+                  <Route path="/blank" element={<BlankPage />} />
                   <Route path="/terms" element={<TermsOfService />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />
                 </Routes>

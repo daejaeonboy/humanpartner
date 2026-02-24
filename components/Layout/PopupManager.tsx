@@ -83,17 +83,33 @@ export const PopupManager: React.FC = () => {
                     <div className="relative flex-1 bg-slate-50 min-h-[200px] flex items-center justify-center">
                         {/* Link wrapper if link or target_product_code exists */}
                         {(popup.target_product_code || popup.link) ? (
-                            <Link
-                                to={popup.target_product_code ? `/p/${popup.target_product_code}` : popup.link}
-                                className='w-full h-full block'
-                                onClick={() => closePopup(popup.id!)}
-                            >
-                                <img
-                                    src={popup.image_url || 'https://via.placeholder.com/400x400?text=Popup'}
-                                    alt={popup.title}
-                                    className="w-full h-auto object-contain"
-                                />
-                            </Link>
+                            popup.link && popup.link.startsWith('http') ? (
+                                <a
+                                    href={popup.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full h-full block"
+                                    onClick={() => closePopup(popup.id!)}
+                                >
+                                    <img
+                                        src={popup.image_url || 'https://via.placeholder.com/400x400?text=Popup'}
+                                        alt={popup.title}
+                                        className="w-full h-auto object-contain"
+                                    />
+                                </a>
+                            ) : (
+                                <Link
+                                    to={popup.target_product_code ? `/p/${popup.target_product_code}` : (popup.link || '/')}
+                                    className='w-full h-full block'
+                                    onClick={() => closePopup(popup.id!)}
+                                >
+                                    <img
+                                        src={popup.image_url || 'https://via.placeholder.com/400x400?text=Popup'}
+                                        alt={popup.title}
+                                        className="w-full h-auto object-contain"
+                                    />
+                                </Link>
+                            )
                         ) : (
                             <img
                                 src={popup.image_url || 'https://via.placeholder.com/400x400?text=Popup'}

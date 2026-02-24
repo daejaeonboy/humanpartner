@@ -528,7 +528,7 @@ export const ProductDetailPage: React.FC = () => {
         const item = globalFoods.find((p) => p.id === key);
         if (item) total += (item.price || 0) * qty;
       });
-      setTotalPrice(total * validDays);
+      setTotalPrice(total); // Fixed price regardless of days
       setAvailabilityError(null);
     }
   }, [
@@ -1172,7 +1172,7 @@ export const ProductDetailPage: React.FC = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-500">{product.name}</span>
                       <span className="font-medium text-gray-900">
-                        {((product.price || 0) * days).toLocaleString()}원
+                        {(product.price || 0).toLocaleString()}원
                       </span>
                     </div>
                   </div>
@@ -1193,7 +1193,7 @@ export const ProductDetailPage: React.FC = () => {
                               {opt.name} x{opt.qty}
                             </span>
                             <span className="font-medium ml-2">
-                              {(opt.subtotal * days).toLocaleString()}원
+                              {(opt.subtotal).toLocaleString()}원
                             </span>
                           </div>
                         ))}
@@ -1354,7 +1354,7 @@ export const ProductDetailPage: React.FC = () => {
               <div className="flex justify-between">
                 <span className="text-gray-500">{product.name}</span>
                 <span className="font-medium text-gray-900">
-                  {((product.price || 0) * days).toLocaleString()}원
+                  {(product.price || 0).toLocaleString()}원
                 </span>
               </div>
             </div>
@@ -1375,7 +1375,7 @@ export const ProductDetailPage: React.FC = () => {
                         {opt.name} x{opt.qty}
                       </span>
                       <span className="font-medium ml-2">
-                        {(opt.subtotal * days).toLocaleString()}원
+                        {(opt.subtotal).toLocaleString()}원
                       </span>
                     </div>
                   ))}

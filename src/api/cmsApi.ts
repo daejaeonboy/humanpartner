@@ -347,3 +347,64 @@ export const deletePopup = async (id: string): Promise<void> => {
         .eq('id', id);
     if (error) throw error;
 };
+// ==================== Alliance Members ====================
+export interface AllianceMember {
+    id?: string;
+    name: string;
+    category1: string;
+    category2: string;
+    address: string;
+    phone: string;
+    logo_url: string;
+    display_order: number;
+    is_active: boolean;
+    created_at?: string;
+}
+
+export const getAllianceMembers = async (): Promise<AllianceMember[]> => {
+    const { data, error } = await supabase
+        .from('alliance_members')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+    if (error) throw error;
+    return data || [];
+};
+
+export const getAllAllianceMembers = async (): Promise<AllianceMember[]> => {
+    const { data, error } = await supabase
+        .from('alliance_members')
+        .select('*')
+        .order('display_order', { ascending: true });
+    if (error) throw error;
+    return data || [];
+};
+
+export const addAllianceMember = async (member: Omit<AllianceMember, 'id' | 'created_at'>): Promise<AllianceMember> => {
+    const { data, error } = await supabase
+        .from('alliance_members')
+        .insert([member])
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+};
+
+export const updateAllianceMember = async (id: string, updates: Partial<AllianceMember>): Promise<AllianceMember> => {
+    const { data, error } = await supabase
+        .from('alliance_members')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+};
+
+export const deleteAllianceMember = async (id: string): Promise<void> => {
+    const { error } = await supabase
+        .from('alliance_members')
+        .delete()
+        .eq('id', id);
+    if (error) throw error;
+};

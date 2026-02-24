@@ -8,6 +8,7 @@ export const Hero: React.FC = () => {
   const [slides, setSlides] = useState<Banner[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
   // Load banners from DB
   useEffect(() => {
@@ -26,12 +27,12 @@ export const Hero: React.FC = () => {
 
   // Auto-slide effect
   useEffect(() => {
-    if (slides.length === 0) return;
+    if (slides.length === 0 || isPaused) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, 5000); // Reversed from 8000ms back to 5000ms
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides.length, isPaused]);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -94,6 +95,8 @@ export const Hero: React.FC = () => {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       {/* Slides */}
       {slides.map((slide, index) => {

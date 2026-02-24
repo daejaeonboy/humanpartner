@@ -231,20 +231,20 @@ export const Header: React.FC = () => {
               {/* Logo and Subtitle */}
               <a href="/" className="flex-shrink-0 flex items-center gap-1.5 md:gap-2">
                 <img src="/logo.png" alt="행사어때" className="h-[17px] md:h-6 object-contain" />
-                <span className="text-[10px] md:text-xs text-gray-400 font-medium mt-0.5 whitespace-nowrap hidden sm:block tracking-[1px]">| 대전형 MICE 행사 통합운영 플랫폼</span>
+                <span className="text-[0.8rem] text-gray-400 font-medium mt-0.5 whitespace-nowrap hidden sm:block tracking-[1px]">| 대전형 MICE 행사 통합운영 플랫폼</span>
               </a>
 
               <div className="hidden md:block flex-1" />
 
               {/* Right Aligned Area: Search + Actions */}
-              <div className="flex items-center gap-4 md:gap-6 justify-end">
+              <div className="flex items-center gap-1 md:gap-6 justify-end">
                 
-                {/* Search Bar (from Option A style) */}
-                <div className="hidden md:flex relative group w-[220px]">
+                {/* Search Bar (Responsive for both Mobile and Desktop) */}
+                <div className="flex flex-1 md:flex-none relative group max-w-[140px] sm:max-w-[180px] md:max-w-none md:w-[220px]">
                   <input
                     type="text"
-                    placeholder="검색어 입력..."
-                    className="w-full pl-4 pr-10 py-2.5 rounded-lg bg-slate-50 border border-slate-200 focus:border-[#FF5B60] focus:ring-1 focus:ring-[#FF5B60] focus:bg-white transition-all text-sm text-slate-700 placeholder-slate-400"
+                    placeholder="무엇을 도와드릴까요?"
+                    className="w-full pl-3 md:pl-4 pr-8 md:pr-10 py-1.5 md:py-2.5 rounded-lg bg-[#F1F5F9] border border-slate-200 focus:border-[#FF5B60] focus:ring-1 focus:ring-[#FF5B60] focus:bg-white transition-all text-[11px] md:text-sm text-slate-700 placeholder-slate-400 text-ellipsis overflow-hidden whitespace-nowrap"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         const target = e.target as HTMLInputElement;
@@ -252,24 +252,31 @@ export const Header: React.FC = () => {
                       }
                     }}
                   />
-                  <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search className="absolute right-2.5 md:right-3 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5 md:w-4 md:h-4" />
                 </div>
 
-              {/* Desktop Actions (Icons Only) */}
-              <div className="hidden md:flex items-center gap-2">
-                <Link
-                  to={user ? "/mypage" : "/login"}
-                  className="w-12 h-12 flex items-center justify-center text-gray-800 transition-colors rounded-full hover:bg-gray-100"
-                >
-                  <ProfileIcon className="w-7 h-7" />
-                </Link>
-                <NotificationDropdown
-                  notifications={notifications}
-                  unreadCount={unreadCount}
-                  onMarkAllRead={handleMarkAllRead}
-                  onNotificationClick={handleNotificationClick}
-                />
-              </div>
+                {/* Actions (Both Mobile & Desktop) */}
+                <div className="flex items-center gap-0 md:gap-2">
+                  <Link
+                    to={user ? "/mypage" : "/login"}
+                    className="hidden md:flex w-10 h-10 md:w-12 md:h-12 items-center justify-center text-gray-800 transition-colors rounded-full hover:bg-gray-100"
+                  >
+                    <ProfileIcon className="w-6 h-6 md:w-7 md:h-7" />
+                  </Link>
+                  <NotificationDropdown
+                    notifications={notifications}
+                    unreadCount={unreadCount}
+                    onMarkAllRead={handleMarkAllRead}
+                    onNotificationClick={handleNotificationClick}
+                  />
+                  {/* Mobile Menu Toggle Button */}
+                  <button 
+                    className="md:hidden w-10 h-10 flex items-center justify-center text-gray-800 hover:bg-gray-100 rounded-full ml-1"
+                    onClick={() => setShowMobileMenu(true)}
+                  >
+                    <MenuIcon className="w-6 h-6" />
+                  </button>
+                </div>
 
               </div>
             </div>
@@ -279,37 +286,56 @@ export const Header: React.FC = () => {
         {/* Premium GNB - Centered and Generous Spacing */}
         <div className="border-t border-b border-gray-100 relative bg-white shadow-sm">
           <Container>
-            <div className="relative flex justify-center w-full">
-              <nav className="flex items-center justify-center gap-8 md:gap-14 overflow-x-auto no-scrollbar scroll-smooth snap-x">
+            <div className="relative flex justify-center md:justify-start w-full">
+              <nav className="flex items-center justify-center md:justify-start gap-4 sm:gap-6 md:gap-[1.8rem] w-full md:w-auto overflow-x-auto no-scrollbar scroll-smooth snap-x md:-ml-4">
                 <div
                   className="hidden md:block"
                   onMouseEnter={() => setShowDesktopMenu(true)}
                   onMouseLeave={() => setShowDesktopMenu(false)}
                 >
                   <button
-                    className={`flex items-center gap-2 whitespace-nowrap text-[15px] font-bold px-4 py-4 border-b-[3px] transition-all text-[#FF5B60] ${showDesktopMenu ? 'border-[#FF5B60]' : 'border-transparent hover:border-[#FF5B60]'}`}
+                    className={`flex items-center gap-2 whitespace-nowrap text-[15px] font-[550] px-4 py-4 border-b-[3px] transition-all text-[#FF5B60] ${showDesktopMenu ? 'border-[#FF5B60]' : 'border-transparent hover:border-[#FF5B60]'}`}
                   >
                     <MenuIcon className="w-[18px] h-[18px]" /> 전체 서비스
                   </button>
                 </div>
 
-                {navItems.map((item) => {
-                  const linkUrl = `/products?sectionId=${item.id}&title=${encodeURIComponent(item.name)}`;
-                  const isCurrent = location.search.includes(`sectionId=${item.id}`);
-
-                  return (
-                    <Link
-                      key={item.id}
-                      to={linkUrl}
-                      className={`whitespace-nowrap text-[15px] font-bold transition-all px-4 py-4 border-b-[3px] ${isCurrent
-                        ? 'text-[#FF5B60] border-[#FF5B60]'
-                        : 'text-gray-900 border-transparent hover:border-gray-900'
-                        }`}
-                    >
-                      {item.name}
-                    </Link>
-                  );
-                })}
+                <Link
+                  to="/company"
+                  className={`whitespace-nowrap text-[15px] font-[550] transition-all px-4 py-4 border-b-[3px] ${location.pathname === '/company'
+                    ? 'text-[#FF5B60] border-[#FF5B60]'
+                    : 'text-gray-900 border-transparent hover:border-gray-900'
+                    }`}
+                >
+                  회사소개
+                </Link>
+                <Link
+                  to="/alliance"
+                  className={`whitespace-nowrap text-[15px] font-[550] transition-all px-4 py-4 border-b-[3px] ${location.pathname === '/alliance'
+                    ? 'text-[#FF5B60] border-[#FF5B60]'
+                    : 'text-gray-900 border-transparent hover:border-gray-900'
+                    }`}
+                >
+                  MICE 회원사
+                </Link>
+                <Link
+                  to="/event"
+                  className={`whitespace-nowrap text-[15px] font-[550] transition-all px-4 py-4 border-b-[3px] ${location.pathname === '/event'
+                    ? 'text-[#FF5B60] border-[#FF5B60]'
+                    : 'text-gray-900 border-transparent hover:border-gray-900'
+                    }`}
+                >
+                  EVENT
+                </Link>
+                <Link
+                  to="/blank"
+                  className={`whitespace-nowrap text-[15px] font-[550] transition-all px-4 py-4 border-b-[3px] ${location.pathname === '/blank'
+                    ? 'text-[#FF5B60] border-[#FF5B60]'
+                    : 'text-gray-900 border-transparent hover:border-gray-900'
+                    }`}
+                >
+                  BLANK
+                </Link>
               </nav>
               <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
             </div>

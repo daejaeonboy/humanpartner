@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container } from '../components/ui/Container';
 import { Helmet } from 'react-helmet-async';
-import { BadgeCheck, Calendar, MapPin, Users } from 'lucide-react';
+import { LayoutTemplate, Network, Wrench, Calculator } from 'lucide-react';
 
 export const CompanyIntro: React.FC = () => {
     return (
@@ -25,8 +25,8 @@ export const CompanyIntro: React.FC = () => {
                         고객의 성공적인 행사를 위한<br />
                         <span className="text-[#FF5B60]">최고의 파트너</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
-                        micepartner는 단순한 렌탈 서비스를 넘어,<br className="md:hidden" /> 고객의 비즈니스 가치를 높이는 토탈 솔루션을 제공합니다.
+                    <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto break-keep leading-relaxed">
+                        휴먼파트너는 공공기관의 행사 운영을 위한 실무 경험을 바탕으로<br className="hidden md:block" /> '마이스파트너' 플랫폼을 통해 표준화된 행사 환경을 제공합니다.
                     </p>
                 </Container>
             </div>
@@ -36,38 +36,39 @@ export const CompanyIntro: React.FC = () => {
                 <Container>
                     <div className="flex flex-col md:flex-row gap-12 items-center">
                         <div className="flex-1">
-                            <h2 className="text-3xl font-bold text-slate-800 mb-6">
-                                ABOUT <span className="text-[#FF5B60]">US</span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-6 break-keep">
+                                ABOUT <span className="text-[#FF5B60]">MICEPARTNER</span>
                             </h2>
-                            <p className="text-lg text-gray-600 leading-relaxed mb-6">
-                                micepartner는 다년간의 행사 장비 렌탈 및 운영 노하우를 바탕으로 설립되었습니다.
-                                작은 행사부터 대규모 축제, 기업 세미나까지 행사 현장에 필요한 모든 것을 원스톱으로 제공합니다.
+                            <p className="text-base md:text-lg text-gray-600 leading-relaxed mb-6 break-keep">
+                                마이스파트너는 공공기관과 기업 행사의 실질적인 운영 경험을 바탕으로<br className="hidden md:block" /> 설계된 행사 통합 운영 플랫폼입니다.
                             </p>
-                            <p className="text-lg text-gray-600 leading-relaxed">
-                                우리는 단순한 물품 전달자가 아닙니다. 행사 현장의 분위기와 품격을 결정짓는 중요한 파트너로서,
-                                항상 청결하고 완벽한 상태의 장비를 약속드립니다.
+                            <p className="text-base md:text-lg text-gray-600 leading-relaxed mb-6 break-keep">
+                                휴먼파트너의 10년 이상 축적된 현장 노하우를 기반으로,<br className="hidden md:block" /> 행사 준비 과정에서 발생하는 비효율과 협업의 어려움을<br className="hidden md:block" /> 패키지화·표준화하여 제공합니다.
+                            </p>
+                            <p className="text-base md:text-lg text-gray-600 leading-relaxed break-keep">
+                                작은 회의부터 대규모 전시·시험·공공행사까지,<br className="hidden md:block" /> 단순 장비 공급이 아닌 운영 기준과 책임을 함께 제공하는 파트너입니다.
                             </p>
                         </div>
                         <div className="flex-1 grid grid-cols-2 gap-4">
-                            <div className="bg-slate-50 p-6 rounded-2xl text-center hover:shadow-lg transition-all border border-slate-100">
-                                <BadgeCheck className="w-10 h-10 text-[#FF5B60] mx-auto mb-3" />
-                                <h3 className="font-bold text-slate-800 mb-1">최상의 품질</h3>
-                                <p className="text-sm text-gray-500">철저한 장비 관리</p>
+                            <div className="bg-slate-50 p-6 rounded-2xl text-center hover:shadow-lg transition-all border border-slate-100 flex flex-col items-center justify-center">
+                                <LayoutTemplate className="w-10 h-10 text-[#FF5B60] mb-3" />
+                                <h3 className="font-bold text-slate-800 mb-1">행사 운영 표준화</h3>
+                                <p className="text-sm text-gray-500 break-keep">행사 유형별 패키지 기반 구성 제공</p>
                             </div>
-                            <div className="bg-slate-50 p-6 rounded-2xl text-center hover:shadow-lg transition-all border border-slate-100">
-                                <Users className="w-10 h-10 text-[#FF5B60] mx-auto mb-3" />
-                                <h3 className="font-bold text-slate-800 mb-1">전문가 지원</h3>
-                                <p className="text-sm text-gray-500">현장 설치/운영</p>
+                            <div className="bg-slate-50 p-6 rounded-2xl text-center hover:shadow-lg transition-all border border-slate-100 flex flex-col items-center justify-center">
+                                <Network className="w-10 h-10 text-[#FF5B60] mb-3" />
+                                <h3 className="font-bold text-slate-800 mb-1">협업 구조 관리</h3>
+                                <p className="text-sm text-gray-500 break-keep">회원사·협력사 역할 분담 및 이력 기록</p>
                             </div>
-                            <div className="bg-slate-50 p-6 rounded-2xl text-center hover:shadow-lg transition-all border border-slate-100">
-                                <Calendar className="w-10 h-10 text-[#FF5B60] mx-auto mb-3" />
-                                <h3 className="font-bold text-slate-800 mb-1">신속한 대응</h3>
-                                <p className="text-sm text-gray-500">정확한 납기 준수</p>
+                            <div className="bg-slate-50 p-6 rounded-2xl text-center hover:shadow-lg transition-all border border-slate-100 flex flex-col items-center justify-center">
+                                <Wrench className="w-10 h-10 text-[#FF5B60] mb-3" />
+                                <h3 className="font-bold text-slate-800 mb-1">실질 운영 지원</h3>
+                                <p className="text-sm text-gray-500 break-keep">현장 설치·운영·기술 책임 체계</p>
                             </div>
-                            <div className="bg-slate-50 p-6 rounded-2xl text-center hover:shadow-lg transition-all border border-slate-100">
-                                <MapPin className="w-10 h-10 text-[#FF5B60] mx-auto mb-3" />
-                                <h3 className="font-bold text-slate-800 mb-1">전국 서비스</h3>
-                                <p className="text-sm text-gray-500">어디든 찾아가는 서비스</p>
+                            <div className="bg-slate-50 p-6 rounded-2xl text-center hover:shadow-lg transition-all border border-slate-100 flex flex-col items-center justify-center">
+                                <Calculator className="w-10 h-10 text-[#FF5B60] mb-3" />
+                                <h3 className="font-bold text-slate-800 mb-1">예산 예측 가능</h3>
+                                <p className="text-sm text-gray-500 break-keep">기본 시작가 공개로 합리적 예산 계획</p>
                             </div>
                         </div>
                     </div>
