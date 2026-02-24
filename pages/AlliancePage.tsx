@@ -32,7 +32,7 @@ export const AlliancePage: React.FC = () => {
   }, []);
 
   // Filter Logic (Simple Name Search)
-  const filteredMembers = members.filter(member => 
+  const filteredMembers = members.filter(member =>
     member.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -59,36 +59,36 @@ export const AlliancePage: React.FC = () => {
         <title>대전·충청 MICE 얼라이언스 - 회원사 소개</title>
         <meta name="description" content="대전·충청 MICE 얼라이언스(DCMA) 회원사 소개 및 안내입니다." />
       </Helmet>
-      
+
       <div className="bg-white min-h-screen pb-20">
-        
+
 
 
         <Container>
           {/* Main Title Area */}
-          <div className="py-16 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{activeTab}</h2>
-            <p className="text-gray-500 whitespace-pre-line text-[15px] leading-relaxed">
+          <div className="py-10 md:py-16 text-left">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">{activeTab}</h2>
+            <p className="text-gray-500 whitespace-pre-line text-[14px] md:text-[15px] leading-relaxed break-keep">
               대전·충청 MICE 얼라이언스(Daejeon Chungcheong MICE Alliance, DCMA)는 대전과 충청지역 MICE 산업 협력 네트워크 구축과{'\n'}
               MICE 산업 경쟁력 강화를 위해 2010년 지자체 최초로 출범한 민·관 협력체입니다.
             </p>
           </div>
 
           {/* Search Box Background Frame */}
-          <div className="bg-[#f7f8f9] py-8 px-6 flex justify-center items-center mb-10 rounded-sm">
-            <div className="flex w-full max-w-2xl bg-white border border-gray-200 shadow-sm pointer-events-none">
+          <div className="bg-[#f7f8f9] py-6 md:py-8 px-4 md:px-6 flex justify-start items-center mb-10 rounded-sm">
+            <div className="flex w-full max-w-2xl bg-white border border-gray-200 shadow-sm">
               {/* Category Dropdown (Dummy for UI accuracy) */}
-              <div className="w-[120px] md:w-[150px] border-r border-gray-200 px-4 py-3 text-sm text-gray-600 flex justify-between items-center bg-white cursor-pointer pointer-events-auto">
+              <div className="w-[80px] md:w-[150px] border-r border-gray-200 px-3 md:px-4 py-3 text-sm text-gray-600 flex justify-between items-center bg-white cursor-pointer shrink-0">
                 전체
                 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1L5 5L9 1" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M1 1L5 5L9 1" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               {/* Input */}
-              <input 
-                type="text" 
-                placeholder="얼라이언스명을 입력해주세요." 
-                className="flex-1 px-4 py-3 text-sm outline-none bg-transparent pointer-events-auto"
+              <input
+                type="text"
+                placeholder="얼라이언스명을 입력해주세요."
+                className="flex-1 min-w-0 px-3 md:px-4 py-3 text-sm outline-none bg-transparent"
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -96,7 +96,7 @@ export const AlliancePage: React.FC = () => {
                 }}
               />
               {/* Search Button */}
-              <button className="bg-[#222] text-white px-8 py-3 text-sm font-medium hover:bg-black transition-colors pointer-events-auto">
+              <button className="bg-[#222] text-white px-5 md:px-8 py-3 text-sm font-medium hover:bg-black transition-colors shrink-0">
                 검색
               </button>
             </div>
@@ -126,16 +126,16 @@ export const AlliancePage: React.FC = () => {
                       <img src={member.logo_url} alt={member.name} className="max-w-full max-h-full object-contain mix-blend-multiply" />
                     )}
                   </div>
-                  
+
                   {/* Right: Info Area */}
                   <div className="flex-1 p-6 flex flex-col justify-center">
                     {/* Tags */}
                     <div className="flex gap-2 mb-3">
                       <span className={`text-[13px] font-bold px-3 py-1 rounded border
-                        ${member.category1 === 'MICE 시설분과' ? 'text-[#e69b00] bg-[#fff9ea] border-[#ffe099]' : 
+                        ${member.category1 === 'MICE 시설분과' ? 'text-[#e69b00] bg-[#fff9ea] border-[#ffe099]' :
                           member.category1 === 'MICE 기획 · 운영분과' || member.category1 === 'MICE 기획분과' ? 'text-[#3b5bdb] bg-[#edf2ff] border-[#bac8ff]' :
-                          member.category1 === 'MICE 지원분과' ? 'text-[#0ca678] bg-[#e6fcf5] border-[#63e6be]' :
-                          'text-gray-600 bg-gray-100 border-gray-300'}`}
+                            member.category1 === 'MICE 지원분과' ? 'text-[#0ca678] bg-[#e6fcf5] border-[#63e6be]' :
+                              'text-gray-600 bg-gray-100 border-gray-300'}`}
                       >
                         {member.category1 === 'MICE 기획분과' ? 'MICE 기획 · 운영분과' : member.category1}
                       </span>
@@ -172,14 +172,14 @@ export const AlliancePage: React.FC = () => {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-1.5 font-sans">
-              <button 
+              <button
                 onClick={() => handlePageChange(1)}
                 disabled={currentPage === 1}
                 className="w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-400 bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
                 <ChevronsLeft size={14} />
               </button>
-              <button 
+              <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
                 className="w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-400 bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
@@ -193,8 +193,8 @@ export const AlliancePage: React.FC = () => {
                 let pageNum = i + 1;
                 // Shift pages if we are deep in pagination (basic)
                 if (totalPages > 10 && currentPage > 5) {
-                   pageNum = currentPage - 5 + i;
-                   if (pageNum > totalPages) return null;
+                  pageNum = currentPage - 5 + i;
+                  if (pageNum > totalPages) return null;
                 }
 
                 if (pageNum > totalPages) return null;
@@ -204,8 +204,8 @@ export const AlliancePage: React.FC = () => {
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
                     className={`w-8 h-8 flex items-center justify-center border text-[13px] transition-colors
-                      ${currentPage === pageNum 
-                        ? "border-[#222] bg-[#222] text-white font-bold" 
+                      ${currentPage === pageNum
+                        ? "border-[#222] bg-[#222] text-white font-bold"
                         : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"}`}
                   >
                     {pageNum}
@@ -213,14 +213,14 @@ export const AlliancePage: React.FC = () => {
                 );
               })}
 
-              <button 
+              <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 className="w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-400 bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
                 <ChevronRight size={14} />
               </button>
-              <button 
+              <button
                 onClick={() => handlePageChange(totalPages)}
                 disabled={currentPage === totalPages}
                 className="w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-400 bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"

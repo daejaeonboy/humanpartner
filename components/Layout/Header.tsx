@@ -238,7 +238,7 @@ export const Header: React.FC = () => {
 
               {/* Right Aligned Area: Search + Actions */}
               <div className="flex items-center gap-1 md:gap-6 justify-end">
-                
+
                 {/* Search Bar (Responsive for both Mobile and Desktop) */}
                 <div className="flex flex-1 md:flex-none relative group max-w-[140px] sm:max-w-[180px] md:max-w-none md:w-[220px]">
                   <input
@@ -270,7 +270,7 @@ export const Header: React.FC = () => {
                     onNotificationClick={handleNotificationClick}
                   />
                   {/* Mobile Menu Toggle Button */}
-                  <button 
+                  <button
                     className="md:hidden w-10 h-10 flex items-center justify-center text-gray-800 hover:bg-gray-100 rounded-full ml-1"
                     onClick={() => setShowMobileMenu(true)}
                   >
@@ -286,8 +286,8 @@ export const Header: React.FC = () => {
         {/* Premium GNB - Centered and Generous Spacing */}
         <div className="border-t border-b border-gray-100 relative bg-white shadow-sm">
           <Container>
-            <div className="relative flex justify-center md:justify-start w-full">
-              <nav className="flex items-center justify-center md:justify-start gap-4 sm:gap-6 md:gap-[1.8rem] w-full md:w-auto overflow-x-auto no-scrollbar scroll-smooth snap-x md:-ml-4">
+            <div className="relative flex justify-start w-full">
+              <nav className="flex items-center justify-start gap-4 sm:gap-6 md:gap-[1.8rem] w-full md:w-auto overflow-x-auto no-scrollbar scroll-smooth snap-x md:-ml-4 px-4 md:px-0">
                 <div
                   className="hidden md:block"
                   onMouseEnter={() => setShowDesktopMenu(true)}
