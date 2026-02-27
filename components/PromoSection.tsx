@@ -165,14 +165,14 @@ export const PromoSection: React.FC = () => {
 
                     {/* Text Content */}
                     <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white z-10 pointer-events-none">
-                      <h3 className="text-xl md:text-2xl font-bold whitespace-pre-line mb-3 text-white tracking-[-0.03em] leading-tight">
+                      <h3 className="text-xl md:text-2xl font-bold whitespace-pre-line mb-1.5 text-white tracking-[-0.03em] leading-tight">
                         {item.title}
                       </h3>
-                      <p className="text-[13px] md:text-sm opacity-90 mb-6 text-slate-100 font-medium">
+                      <p className="text-[13px] md:text-sm opacity-90 mb-4 text-slate-100 font-medium">
                         {item.subtitle}
                       </p>
 
-                      <div className="self-start flex items-center gap-2 px-6 py-2.5 bg-[#FF5B60] text-white text-[13px] font-black rounded-xl shadow-lg shadow-[#FF5B60]/20 hover:bg-[#e54a4f] transition-all transform group-hover:scale-105 active:scale-95 pointer-events-auto group/btn">
+                      <div className="self-start flex items-center gap-1.5 px-4 py-1.5 bg-[#FF5B60] text-white text-[12px] font-black rounded-lg shadow-lg shadow-[#FF5B60]/20 hover:bg-[#e54a4f] transition-all transform group-hover:scale-105 active:scale-95 pointer-events-auto group/btn">
                         {item.button_text || '바로가기'}
                         <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
                       </div>
