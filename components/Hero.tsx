@@ -126,14 +126,14 @@ export const Hero: React.FC = () => {
                 </div>
 
                 {/* Main Title */}
-                <h1 className={`text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tighter text-white mb-6 md:mb-8 transition-all duration-1000 delay-500 transform
+                <h1 className={`text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tighter text-white mb-6 md:mb-8 transition-all duration-1000 delay-500 transform drop-shadow-2xl
                   ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
                 `}>
                   {slide.title}
                 </h1>
 
                 {/* Subtitle */}
-                <p className={`text-sm md:text-base font-normal text-slate-100/80 leading-relaxed break-keep max-w-xl transition-all duration-1000 delay-700 transform
+                <p className={`text-sm md:text-base font-normal text-slate-100/80 leading-relaxed break-keep max-w-xl transition-all duration-1000 delay-700 transform drop-shadow-lg
                   ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
                 `}>
                   {slide.subtitle}
