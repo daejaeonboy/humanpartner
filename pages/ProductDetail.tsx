@@ -796,7 +796,7 @@ export const ProductDetailPage: React.FC = () => {
   const optionTabs = [
     {
       id: "cooperative" as const,
-      label: "협력 업체",
+      label: "부가 서비스",
       icon: Users,
       show:
         product?.cooperative_components &&
