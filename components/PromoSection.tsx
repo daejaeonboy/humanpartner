@@ -151,43 +151,30 @@ export const PromoSection: React.FC = () => {
                 const isExternal = linkTo.startsWith('http');
 
                 const BannerContent = (
-                  <div className="flex flex-col h-full bg-white">
-                    {/* Image Box */}
-                    <div className="relative aspect-[16/9] md:aspect-[16/10] overflow-hidden">
-                      <div
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
-                        style={{ backgroundImage: `url(${item.image_url})` }}
-                      >
-                        {/* Subtle Light Overlay for images */}
-                        <div className="absolute inset-0 bg-black/5"></div>
-                      </div>
-                      
+                  <>
+                    {/* Background */}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
+                      style={{ backgroundImage: `url(${item.image_url})` }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     </div>
 
-                    {/* Text Area - Separated from image for better clarity */}
-                    <div className="flex-1 p-5 md:p-6 flex flex-col justify-between border-t border-slate-50">
-                      <div>
-                        <h3 className="text-[17px] md:text-xl font-bold text-slate-900 mb-1.5 tracking-tight leading-snug line-clamp-1 group-hover:text-[#FF5B60] transition-colors">
-                          {item.title}
-                        </h3>
-                        <p className="text-[12px] md:text-sm text-slate-500 font-medium leading-relaxed line-clamp-2">
-                          {item.subtitle}
-                        </p>
-                      </div>
+                    {/* Text Content */}
+                    <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white z-10 pointer-events-none">
+                      <h3 className="text-xl md:text-2xl font-semibold whitespace-pre-line mb-1 text-white tracking-tight">
+                        {item.title}
+                      </h3>
+                      <p className="text-[13px] md:text-sm opacity-90 mb-4 text-slate-100">{item.subtitle}</p>
 
-                      <div className="mt-4 flex items-center justify-between">
-                        <div className="text-[11px] md:text-xs font-black text-[#FF5B60] uppercase tracking-tighter">
-                          VIEW PROJECT
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#FF5B60] group-hover:text-white transition-all shadow-sm">
-                          <ChevronRight size={16} />
-                        </div>
+                      <div className="self-start px-5 py-2 bg-white/95 backdrop-blur-sm text-gray-900 text-xs font-bold hover:bg-white transition-colors rounded-lg shadow-lg">
+                        {item.button_text || '바로가기'}
                       </div>
                     </div>
-                  </div>
+                  </>
                 );
 
-                const linkWrapperClass = "relative aspect-[16/10] w-[290px] md:w-[calc(50%-0.6rem)] group overflow-hidden block rounded-3xl cursor-pointer snap-start flex-shrink-0 bg-slate-200 shadow-xl shadow-slate-200/20 border border-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-[#FF5B60]/10";
+                const linkWrapperClass = "relative aspect-[16/10] w-[300px] md:w-[calc(50%-0.5rem)] group overflow-hidden block rounded-2xl cursor-pointer snap-start flex-shrink-0 bg-slate-100 shadow-sm border border-slate-100";
 
                 const BannerElement = isExternal ? (
                   <a
