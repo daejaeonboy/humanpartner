@@ -86,7 +86,7 @@ export const PromoSection: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTabId(tab.id || null)}
-              className={`flex-1 py-2.5 md:py-4 text-center text-[14px] md:text-base font-[650] transition-colors relative
+              className={`flex-1 py-4 md:py-4 text-center text-[14px] md:text-base font-[650] transition-colors relative
                 ${activeTabId === tab.id
                   ? 'bg-[#FF5B60] text-white'
                   : 'text-gray-600 hover:text-[#FF5B60] hover:bg-gray-200'
