@@ -88,7 +88,7 @@ export const PromoSection: React.FC = () => {
               onClick={() => setActiveTabId(tab.id || null)}
               className={`flex-1 py-3 md:py-4 text-center text-[13px] md:text-[15px] font-bold transition-all duration-300 rounded-xl
                 ${activeTabId === tab.id
-                  ? 'bg-white text-[#FF5B60] shadow-md border border-slate-100'
+                  ? 'bg-[#FF5B60] text-white shadow-lg shadow-[#FF5B60]/20'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
                 }`}
             >
