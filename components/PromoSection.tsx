@@ -81,15 +81,28 @@ export const PromoSection: React.FC = () => {
     <div className="pb-16 bg-white">
       <Container>
         {/* Tabs */}
-        <div className="flex w-full mb-8 bg-gray-100 rounded-xl overflow-hidden">
+        <div className="flex w-full mb-10 bg-gray-100/80 p-1.5 rounded-2xl overflow-hidden relative border border-gray-200">
+          {/* Sliding Indicator */}
+          {tabs.length > 0 && (
+            <div 
+              className="absolute top-1.5 bottom-1.5 left-0 transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) z-0"
+              style={{ 
+                width: `${100 / tabs.length}%`,
+                transform: `translateX(${tabs.findIndex(t => t.id === activeTabId) * 100}%)`,
+              }}
+            >
+              <div className="mx-1.5 h-full bg-[#FF5B60] rounded-xl shadow-lg shadow-[#FF5B60]/20" />
+            </div>
+          )}
+
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTabId(tab.id || null)}
-              className={`flex-1 py-4 md:py-4 text-center text-[14px] md:text-base font-[650] transition-colors relative
+              className={`flex-1 py-3 md:py-4 text-center text-[13px] md:text-[15px] font-bold transition-colors duration-300 relative z-10
                 ${activeTabId === tab.id
-                  ? 'bg-[#FF5B60] text-white'
-                  : 'text-gray-600 hover:text-[#FF5B60] hover:bg-gray-200'
+                  ? 'text-white'
+                  : 'text-slate-500 hover:text-slate-900'
                 }`}
             >
               {tab.name}
