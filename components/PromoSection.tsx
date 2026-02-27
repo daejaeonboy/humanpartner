@@ -81,15 +81,15 @@ export const PromoSection: React.FC = () => {
     <div className="pb-16 bg-white">
       <Container>
         {/* Tabs */}
-        <div className="flex w-full mb-8 bg-gray-100 rounded-xl overflow-hidden">
+        <div className="flex w-full mb-10 bg-slate-50 p-1.5 rounded-2xl overflow-hidden border border-slate-200/60 shadow-inner">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTabId(tab.id || null)}
-              className={`flex-1 py-2.5 md:py-4 text-center text-[14px] md:text-base font-[650] transition-colors relative
+              className={`flex-1 py-3 md:py-4 text-center text-[13px] md:text-[15px] font-bold transition-all duration-300 rounded-xl
                 ${activeTabId === tab.id
-                  ? 'bg-[#FF5B60] text-white'
-                  : 'text-gray-600 hover:text-[#FF5B60] hover:bg-gray-200'
+                  ? 'bg-white text-[#FF5B60] shadow-md border border-slate-100'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
                 }`}
             >
               {tab.name}
@@ -141,27 +141,38 @@ export const PromoSection: React.FC = () => {
                   <>
                     {/* Background */}
                     <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
                       style={{ backgroundImage: `url(${item.image_url})` }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                      {/* Premium Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
                     </div>
 
                     {/* Text Content */}
-                    <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white z-10 pointer-events-none">
-                      <h3 className="text-xl md:text-2xl font-semibold whitespace-pre-line mb-1 text-white tracking-tight">
+                    <div className="absolute inset-0 p-5 md:p-8 flex flex-col justify-end text-white z-10">
+                      {/* Premium Tag */}
+                      <div className="self-start mb-3 px-2 py-0.5 bg-[#FF5B60]/10 backdrop-blur-md border border-[#FF5B60]/30 rounded text-[9px] md:text-[10px] font-black text-[#FF5B60] uppercase tracking-widest transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                        Promotion
+                      </div>
+
+                      <h3 className="text-xl md:text-2xl font-bold whitespace-pre-line mb-1.5 text-white tracking-tight leading-[1.2] transform transition-transform duration-500 group-hover:-translate-y-1">
                         {item.title}
                       </h3>
-                      <p className="text-[13px] md:text-sm opacity-90 mb-4 text-slate-100">{item.subtitle}</p>
+                      <p className="text-[12px] md:text-sm font-medium text-slate-200/90 mb-5 max-w-[90%] transform transition-transform duration-500 delay-75 group-hover:-translate-y-1 opacity-90">
+                        {item.subtitle}
+                      </p>
 
-                      <div className="self-start px-5 py-2 bg-white/95 backdrop-blur-sm text-gray-900 text-xs font-bold hover:bg-white transition-colors rounded-lg shadow-lg">
-                        {item.button_text || '바로가기'}
+                      <div className="self-start flex items-center gap-2 pr-4 pl-5 py-2.5 bg-white text-gray-900 text-[11px] md:text-xs font-black rounded-xl shadow-xl hover:bg-slate-50 transition-all transform group-hover:scale-105 active:scale-95">
+                        {item.button_text || '자세히 보기'}
+                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
+                          <ChevronRight size={14} className="text-[#FF5B60]" />
+                        </div>
                       </div>
                     </div>
                   </>
                 );
 
-                const linkWrapperClass = "relative aspect-[16/10] w-[300px] md:w-[calc(50%-0.5rem)] group overflow-hidden block rounded-2xl cursor-pointer snap-start flex-shrink-0 bg-slate-100 shadow-sm border border-slate-100";
+                const linkWrapperClass = "relative aspect-[16/10] w-[290px] md:w-[calc(50%-0.6rem)] group overflow-hidden block rounded-3xl cursor-pointer snap-start flex-shrink-0 bg-slate-200 shadow-xl shadow-slate-200/20 border border-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-[#FF5B60]/10";
 
                 const BannerElement = isExternal ? (
                   <a
