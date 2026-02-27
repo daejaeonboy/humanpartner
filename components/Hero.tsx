@@ -139,14 +139,13 @@ export const Hero: React.FC = () => {
                   {slide.subtitle}
                 </p>
 
-                {/* Action Button */}
+                {/* Action - Minimal Hint (Option B) */}
                 <div className={`mt-10 md:mt-14 transition-all duration-1000 delay-1000 transform
                   ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
                 `}>
-                  <div className="inline-flex items-center gap-3 px-4 py-2 md:px-8 md:py-4 bg-[#FF5B60] text-white text-sm md:text-base font-black rounded-2xl hover:bg-[#e54a4f] hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-[#FF5B60]/30 group/btn">
-                    {slide.button_text || '자세히 보기'}
-                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover/btn:translate-x-1 transition-transform">
-                      <ArrowRight size={16} />
+                  <div className="flex flex-col gap-2">
+                    <div className="text-white/60 text-xs font-bold tracking-[0.2em] uppercase transition-all group-hover/slide:text-[#FF5B60] group-hover/slide:translate-x-2 flex items-center gap-2">
+                      Click to view project <ArrowRight size={14} />
                     </div>
                   </div>
                 </div>
