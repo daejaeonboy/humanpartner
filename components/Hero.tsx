@@ -144,8 +144,8 @@ export const Hero: React.FC = () => {
                   ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
                 `}>
                   <div className="flex flex-col gap-2">
-                    <div className="text-white/60 text-xs font-bold tracking-[0.2em] uppercase transition-all group-hover/slide:text-[#FF5B60] group-hover/slide:translate-x-2 flex items-center gap-2">
-                      Click to view project <ArrowRight size={14} />
+                    <div className="text-white/60 text-xs font-bold transition-all group-hover/slide:text-[#FF5B60] group-hover/slide:translate-x-2 flex items-center gap-2">
+                      자세히 보기 <ArrowRight size={14} />
                     </div>
                   </div>
                 </div>
