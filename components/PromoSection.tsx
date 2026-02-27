@@ -128,7 +128,7 @@ export const PromoSection: React.FC = () => {
             {/* Left Button */}
             <button
               onClick={scrollPrev}
-              className="absolute left-0 top-[calc(50%-8px)] -translate-y-1/2 -translate-x-3 md:-translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
+              className="hidden md:flex absolute left-0 top-[calc(50%-8px)] -translate-y-1/2 -translate-x-3 md:-translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
               aria-label="Previous slide"
             >
               <ChevronLeft size={24} />
@@ -137,7 +137,7 @@ export const PromoSection: React.FC = () => {
             {/* Right Button */}
             <button
               onClick={scrollNext}
-              className="absolute right-0 top-[calc(50%-8px)] -translate-y-1/2 translate-x-3 md:translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
+              className="hidden md:flex absolute right-0 top-[calc(50%-8px)] -translate-y-1/2 translate-x-3 md:translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
               aria-label="Next slide"
             >
               <ChevronRight size={24} />
@@ -145,7 +145,7 @@ export const PromoSection: React.FC = () => {
 
             <div
               ref={sliderRef}
-              className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide [&::-webkit-scrollbar]:hidden"
+              className="flex flex-col md:flex-row md:overflow-x-auto gap-4 pb-4 md:snap-x md:snap-mandatory scrollbar-hide [&::-webkit-scrollbar]:hidden"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {banners.map((item) => {
@@ -176,7 +176,7 @@ export const PromoSection: React.FC = () => {
                   </>
                 );
 
-                const linkWrapperClass = "relative aspect-[16/10] w-[300px] md:w-[calc(50%-0.5rem)] group overflow-hidden block rounded-2xl cursor-pointer snap-start flex-shrink-0 bg-slate-100 shadow-sm border border-slate-100";
+                const linkWrapperClass = "relative aspect-[16/10] w-full md:w-[calc(50%-0.5rem)] group overflow-hidden block rounded-2xl cursor-pointer md:snap-start flex-shrink-0 bg-slate-100 shadow-sm border border-slate-100";
 
                 const BannerElement = isExternal ? (
                   <a
