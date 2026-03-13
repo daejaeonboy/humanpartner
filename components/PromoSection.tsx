@@ -86,7 +86,7 @@ export const PromoSection: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTabId(tab.id || null)}
-              className={`flex-1 py-2.5 md:py-4 text-center text-[13px] md:text-base font-medium transition-colors relative
+              className={`flex-1 py-2.5 md:py-4 text-center text-[14px] md:text-base font-[650] transition-colors relative
                 ${activeTabId === tab.id
                   ? 'bg-[#FF5B60] text-white'
                   : 'text-gray-600 hover:text-[#FF5B60] hover:bg-gray-200'
@@ -113,7 +113,7 @@ export const PromoSection: React.FC = () => {
             {/* Left Button */}
             <button
               onClick={scrollPrev}
-              className="absolute left-0 top-[calc(50%-8px)] -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
+              className="absolute left-0 top-[calc(50%-8px)] -translate-y-1/2 -translate-x-3 md:-translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
               aria-label="Previous slide"
             >
               <ChevronLeft size={24} />
@@ -122,7 +122,7 @@ export const PromoSection: React.FC = () => {
             {/* Right Button */}
             <button
               onClick={scrollNext}
-              className="absolute right-0 top-[calc(50%-8px)] -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
+              className="absolute right-0 top-[calc(50%-8px)] -translate-y-1/2 translate-x-3 md:translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
               aria-label="Next slide"
             >
               <ChevronRight size={24} />
@@ -130,7 +130,7 @@ export const PromoSection: React.FC = () => {
 
             <div
               ref={sliderRef}
-              className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide"
+              className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide [&::-webkit-scrollbar]:hidden"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {banners.map((item) => {
@@ -144,30 +144,32 @@ export const PromoSection: React.FC = () => {
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                       style={{ backgroundImage: `url(${item.image_url})` }}
                     >
-                      <div className="absolute inset-0 bg-black/40"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     </div>
 
                     {/* Text Content */}
-                    <div className="absolute inset-0 p-8 flex flex-col justify-center text-white">
+                    <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white z-10 pointer-events-none">
                       <h3 className="text-xl md:text-2xl font-semibold whitespace-pre-line mb-1 text-white tracking-tight">
                         {item.title}
                       </h3>
-                      <p className="text-[13px] md:text-sm opacity-80 mb-6 text-white/90">{item.subtitle}</p>
+                      <p className="text-[13px] md:text-sm opacity-90 mb-4 text-slate-100">{item.subtitle}</p>
 
-                      <div className="self-start px-6 py-2 bg-white text-gray-900 text-xs font-bold hover:bg-gray-100 transition-colors rounded-lg">
+                      <div className="self-start px-5 py-2 bg-white/95 backdrop-blur-sm text-gray-900 text-xs font-bold hover:bg-white transition-colors rounded-lg shadow-lg">
                         {item.button_text || '바로가기'}
                       </div>
                     </div>
                   </>
                 );
 
-                return isExternal ? (
+                const linkWrapperClass = "relative aspect-[16/10] w-[300px] md:w-[calc(50%-0.5rem)] group overflow-hidden block rounded-2xl cursor-pointer snap-start flex-shrink-0 bg-slate-100 shadow-sm border border-slate-100";
+
+                const BannerElement = isExternal ? (
                   <a
                     key={item.id}
                     href={linkTo}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative h-64 md:h-80 group overflow-hidden block rounded-2xl cursor-pointer min-w-[85%] md:min-w-[calc(50%-8px)] snap-center flex-shrink-0"
+                    className={linkWrapperClass}
                   >
                     {BannerContent}
                   </a>
@@ -175,11 +177,13 @@ export const PromoSection: React.FC = () => {
                   <Link
                     key={item.id}
                     to={linkTo}
-                    className="relative h-64 md:h-80 group overflow-hidden block rounded-2xl cursor-pointer min-w-[85%] md:min-w-[calc(50%-8px)] snap-center flex-shrink-0"
+                    className={linkWrapperClass}
                   >
                     {BannerContent}
                   </Link>
                 );
+                
+                return BannerElement;
               })}
             </div>
           </div>

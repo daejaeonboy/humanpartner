@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ArrowLeft,
   Package,
+  Users,
   MapPin,
   UtensilsCrossed,
   ShoppingBag,
@@ -21,6 +22,7 @@ import {
   Check,
   RotateCcw,
   CheckCircle,
+  XCircle,
   ListPlus,
   PlusCircle,
 
@@ -59,11 +61,13 @@ const OptionItem = ({
   initialQty,
   imageUrl,
   onUpdate,
+  selectionMode = 'quantity',
 }: {
   item: Product;
   initialQty: number;
   imageUrl?: string;
   onUpdate: (qty: number) => void;
+  selectionMode?: 'quantity' | 'checkbox';
 }) => {
   const [localQty, setLocalQty] = useState(initialQty);
 
@@ -104,8 +108,8 @@ const OptionItem = ({
         <h5 className="font-bold text-gray-900 text-sm sm:text-[15px] leading-snug line-clamp-1">
           {item.name}
         </h5>
-        <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">
-          {item.description || item.model_name || "상세 설명 없음"}
+        <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 line-clamp-2 sm:line-clamp-1">
+          {item.short_description || item.description || item.model_name || "상세 설명 없음"}
         </p>
         <p className="text-sm font-bold text-[#FF5B60] mt-0.5">
           {item.price ? `${item.price.toLocaleString()}원` : "가격문의"}
@@ -114,82 +118,106 @@ const OptionItem = ({
 
       {/* Desktop (PC) UI: Original Framed Style */}
       <div className="hidden sm:flex items-center gap-2">
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-1 shadow-sm h-9">
+        {selectionMode === 'checkbox' ? (
           <button
-            className="w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
-            onClick={() => onUpdate(Math.max(0, initialQty - 1))}
+            onClick={() => onUpdate(isInCart ? 0 : 1)}
+            className={`flex items-center gap-2 px-4 h-9 rounded-lg text-sm font-bold transition-all border
+              ${isInCart ? "bg-[#FF5B60] text-white border-[#FF5B60] shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
           >
-            <Minus size={14} />
-          </button>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={localQty}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (/^\d*$/.test(val)) {
-                setLocalQty(val === "" ? 0 : parseInt(val));
-              }
-            }}
-            onBlur={handleUpdate}
-            className="w-10 text-center font-bold text-gray-900 text-sm border-none focus:outline-none focus:ring-0 p-0"
-          />
-          <button
-            className="w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
-            onClick={() => onUpdate(initialQty + 1)}
-          >
-            <Plus size={14} />
-          </button>
-        </div>
-
-        {isInCart ? (
-          <button
-            onClick={handleUpdate}
-            disabled={!isChanged}
-            className={`px-4 h-9 rounded-lg text-sm font-bold transition-all
-              ${isChanged ? "bg-[#FF5B60] text-white shadow-md" : "bg-gray-900 text-white"}`}
-          >
-            {isChanged ? "수정" : <Check size={18} />}
+            <Check size={16} /> {isInCart ? "추가완료" : "추가"}
           </button>
         ) : (
-          <button
-            onClick={handleCreate}
-            className="px-4 h-9 rounded-lg text-sm font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all"
-          >
-            담기
-          </button>
+          <>
+            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-1 shadow-sm h-9">
+              <button
+                className="w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
+                onClick={() => onUpdate(Math.max(0, initialQty - 1))}
+              >
+                <Minus size={14} />
+              </button>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={localQty}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (/^\d*$/.test(val)) {
+                    setLocalQty(val === "" ? 0 : parseInt(val));
+                  }
+                }}
+                onBlur={handleUpdate}
+                className="w-10 text-center font-bold text-gray-900 text-sm border-none focus:outline-none focus:ring-0 p-0"
+              />
+              <button
+                className="w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
+                onClick={() => onUpdate(initialQty + 1)}
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+
+            {isInCart ? (
+              <button
+                onClick={handleUpdate}
+                disabled={!isChanged}
+                className={`px-4 h-9 rounded-lg text-sm font-bold transition-all
+                  ${isChanged ? "bg-[#FF5B60] text-white shadow-md" : "bg-gray-900 text-white"}`}
+              >
+                {isChanged ? "수정" : <Check size={18} />}
+              </button>
+            ) : (
+              <button
+                onClick={handleCreate}
+                className="px-4 h-9 rounded-lg text-sm font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all"
+              >
+                담기
+              </button>
+            )}
+          </>
         )}
       </div>
 
       {/* Mobile UI: Minimal Frameless Style */}
       <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:hidden">
-        <button
-          onClick={() => onUpdate(Math.max(0, initialQty - 1))}
-          className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors
-            ${initialQty > 0 ? "text-gray-900 bg-gray-50" : "text-gray-300 pointer-events-none"}`}
-        >
-          <Minus size={14} />
-        </button>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={localQty}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (/^\d*$/.test(val)) {
-              setLocalQty(val === "" ? 0 : parseInt(val));
-            }
-          }}
-          onBlur={handleUpdate}
-          className={`w-8 text-center font-bold text-sm border-none focus:outline-none focus:ring-0 p-0 bg-transparent
-            ${initialQty > 0 ? "text-gray-900" : "text-gray-400"}`}
-        />
-        <button
-          onClick={() => onUpdate(initialQty + 1)}
-          className="w-7 h-7 flex items-center justify-center text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <Plus size={14} />
-        </button>
+        {selectionMode === 'checkbox' ? (
+          <button
+            onClick={() => onUpdate(isInCart ? 0 : 1)}
+            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all border
+              ${isInCart ? "bg-[#FF5B60] text-white border-[#FF5B60]" : "bg-gray-50 text-gray-400 border-gray-200"}`}
+          >
+            <Check size={16} />
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={() => onUpdate(Math.max(0, initialQty - 1))}
+              className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors
+                ${initialQty > 0 ? "text-gray-900 bg-gray-50" : "text-gray-300 pointer-events-none"}`}
+            >
+              <Minus size={14} />
+            </button>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={localQty}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^\d*$/.test(val)) {
+                  setLocalQty(val === "" ? 0 : parseInt(val));
+                }
+              }}
+              onBlur={handleUpdate}
+              className={`w-8 text-center font-bold text-sm border-none focus:outline-none focus:ring-0 p-0 bg-transparent
+                ${initialQty > 0 ? "text-gray-900" : "text-gray-400"}`}
+            />
+            <button
+              onClick={() => onUpdate(initialQty + 1)}
+              className="w-7 h-7 flex items-center justify-center text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <Plus size={14} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -252,7 +280,8 @@ const OptionListTypeA = ({
   setQty,
   componentProducts,
   menuItems,
-  tabType
+  tabType,
+  selectionMode = 'quantity',
 }: {
   items: Product[];
   selectedQty: { [key: string]: number };
@@ -260,6 +289,7 @@ const OptionListTypeA = ({
   componentProducts: Product[];
   menuItems: NavMenuItem[];
   tabType?: string;
+  selectionMode?: 'quantity' | 'checkbox';
 }) => {
   // Use useMemo here to prevent recalculation
   const optionGroups = React.useMemo(() => getCategorizedGroups(items, menuItems, tabType), [items, menuItems, tabType]);
@@ -357,6 +387,7 @@ const OptionListTypeA = ({
                   initialQty={qty}
                   imageUrl={imageUrl}
                   onUpdate={(newQty) => setQty(prev => ({ ...prev, [item.id!]: newQty }))}
+                  selectionMode={selectionMode}
                 />
               );
             })}
@@ -397,12 +428,22 @@ export const ProductDetailPage: React.FC = () => {
 
   // Option Tab State (for the new tab UI)
   const [activeOptionTab, setActiveOptionTab] = useState<
-    "additional" | "place" | "food"
-  >("additional");
+    "cooperative" | "additional" | "place" | "food"
+  >("cooperative");
+
+
 
   // Quote Modal State
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const quoteRef = useRef<HTMLDivElement>(null);
+
+  // Booking Result Modal State
+  const [bookingModal, setBookingModal] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error' | 'info';
+    onClose?: () => void;
+  }>({ show: false, message: '', type: 'info' });
 
   // Mobile Floating Bar Expand State (Solution 2)
   const [mobileBarExpanded, setMobileBarExpanded] = useState(false);
@@ -411,6 +452,7 @@ export const ProductDetailPage: React.FC = () => {
   const [basicComponentsExpanded, setBasicComponentsExpanded] = useState(true);
 
   // Global Options State
+  const [globalCooperative, setGlobalCooperative] = useState<Product[]>([]);
   const [globalAdditional, setGlobalAdditional] = useState<Product[]>([]);
   const [globalPlaces, setGlobalPlaces] = useState<Product[]>([]);
   const [globalFoods, setGlobalFoods] = useState<Product[]>([]);
@@ -435,6 +477,9 @@ export const ProductDetailPage: React.FC = () => {
   const [menuItems, setMenuItems] = useState<NavMenuItem[]>([]);
 
   // Selected Quantities (Key: Product ID)
+  const [selectedCooperative, setSelectedCooperative] = useState<{
+    [key: string]: number;
+  }>({});
   const [selectedAdditional, setSelectedAdditional] = useState<{
     [key: string]: number;
   }>({});
@@ -475,18 +520,21 @@ export const ProductDetailPage: React.FC = () => {
       try {
         const [
           productData,
+          cooperativeData,
           additionalData,
           placeData,
           foodData,
           menuItemsData,
         ] = await Promise.all([
           getProductById(id),
+          getProductsByType("cooperative"),
           getProductsByType("additional"),
           getProductsByType("place"),
           getProductsByType("food"),
           getAllNavMenuItems(),
         ]);
         setProduct(productData);
+        setGlobalCooperative(cooperativeData);
         setGlobalAdditional(additionalData);
         setGlobalPlaces(placeData);
         setGlobalFoods(foodData);
@@ -513,6 +561,11 @@ export const ProductDetailPage: React.FC = () => {
       setDays(validDays);
 
       let total = product.price || 0;
+      Object.keys(selectedCooperative).forEach((key) => {
+        const qty = selectedCooperative[key];
+        const item = globalCooperative.find((p) => p.id === key);
+        if (item) total += (item.price || 0) * qty;
+      });
       Object.keys(selectedAdditional).forEach((key) => {
         const qty = selectedAdditional[key];
         const item = globalAdditional.find((p) => p.id === key);
@@ -535,9 +588,11 @@ export const ProductDetailPage: React.FC = () => {
     startDate,
     endDate,
     product,
+    selectedCooperative,
     selectedAdditional,
     selectedPlaces,
     selectedFoods,
+    globalCooperative,
     globalAdditional,
     globalPlaces,
     globalFoods,
@@ -546,8 +601,12 @@ export const ProductDetailPage: React.FC = () => {
   const handleBooking = async () => {
     if (!product || !startDate || !endDate || !id) return;
     if (!user) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
+      setBookingModal({
+        show: true,
+        message: '로그인이 필요합니다.',
+        type: 'info',
+        onClose: () => navigate('/login'),
+      });
       return;
     }
     setIsBooking(true);
@@ -559,9 +618,11 @@ export const ProductDetailPage: React.FC = () => {
         endDate.toISOString().split("T")[0],
       );
       if (!isAvailable) {
-        setAvailabilityError(
-          "선택한 날짜에 이미 예약이 있습니다. 다른 날짜를 선택해주세요.",
-        );
+        setBookingModal({
+          show: true,
+          message: '선택한 날짜에 이미 예약이 있습니다.\n다른 날짜를 선택해주세요.',
+          type: 'error',
+        });
         setIsBooking(false);
         return;
       }
@@ -572,6 +633,19 @@ export const ProductDetailPage: React.FC = () => {
         quantity: number;
         price: number;
       }[] = [];
+
+      // Cooperative Items
+      Object.keys(selectedCooperative).forEach((key) => {
+        const qty = selectedCooperative[key];
+        const item = globalCooperative.find((p) => p.id === key);
+        if (item && qty > 0) {
+          selectedOptions.push({
+            name: item.name,
+            quantity: qty,
+            price: item.price || 0,
+          });
+        }
+      });
 
       // Additional Items
       Object.keys(selectedAdditional).forEach((key) => {
@@ -641,11 +715,19 @@ export const ProductDetailPage: React.FC = () => {
         "/mypage" // Link to mypage
       );
 
-      alert("예약이 완료되었습니다! 마이페이지에서 확인하세요.");
-      navigate("/mypage");
+      setBookingModal({
+        show: true,
+        message: '예약이 완료되었습니다!\n마이페이지에서 확인하세요.',
+        type: 'success',
+        onClose: () => navigate('/mypage'),
+      });
     } catch (error) {
       console.error("Booking failed", error);
-      alert("예약 처리에 실패했습니다.");
+      setBookingModal({
+        show: true,
+        message: '예약 처리에 실패했습니다.\n잠시 후 다시 시도해주세요.',
+        type: 'error',
+      });
     } finally {
       setIsBooking(false);
     }
@@ -654,6 +736,12 @@ export const ProductDetailPage: React.FC = () => {
   // Calculate selected options summary
   const getSelectedOptionsSummary = () => {
     const summary: { name: string; qty: number; subtotal: number }[] = [];
+    Object.entries(selectedCooperative).forEach(([key, qty]) => {
+      const quantity = qty as number;
+      const item = globalCooperative.find((p) => p.id === key);
+      if (item && quantity > 0)
+        summary.push({ name: item.name, qty: quantity, subtotal: item.price * quantity });
+    });
     Object.entries(selectedAdditional).forEach(([key, qty]) => {
       const quantity = qty as number;
       const item = globalAdditional.find((p) => p.id === key);
@@ -707,6 +795,16 @@ export const ProductDetailPage: React.FC = () => {
 
   const optionTabs = [
     {
+      id: "cooperative" as const,
+      label: "협력 업체",
+      icon: Users,
+      show:
+        product?.cooperative_components &&
+        product.cooperative_components.length > 0 &&
+        globalCooperative.length > 0,
+      count: Object.values(selectedCooperative).filter(qty => (qty as number) > 0).length,
+    },
+    {
       id: "additional" as const,
       label: "추가 구성",
       icon: Package,
@@ -717,14 +815,14 @@ export const ProductDetailPage: React.FC = () => {
       id: "place" as const,
       label: "장소 상품",
       icon: MapPin,
-      show: true, // Always show
+      show: false, // Hidden
       count: Object.values(selectedPlaces).filter(qty => (qty as number) > 0).length,
     },
     {
       id: "food" as const,
       label: "음식 상품",
       icon: UtensilsCrossed,
-      show: true, // Always show
+      show: false, // Hidden
       count: Object.values(selectedFoods).filter(qty => (qty as number) > 0).length,
     },
   ].filter((tab) => tab.show);
@@ -1076,6 +1174,8 @@ export const ProductDetailPage: React.FC = () => {
 
                   {/* Chip Filter & List Content */}
                   <div className="bg-white rounded-b-xl border border-gray-100 shadow-sm overflow-hidden">
+                    {activeOptionTab === "cooperative" &&
+                      <OptionListTypeA items={globalCooperative} selectedQty={selectedCooperative} setQty={setSelectedCooperative} componentProducts={componentProducts} menuItems={menuItems} tabType="cooperative" selectionMode="checkbox" />}
                     {activeOptionTab === "additional" &&
                       <OptionListTypeA items={globalAdditional} selectedQty={selectedAdditional} setQty={setSelectedAdditional} componentProducts={componentProducts} menuItems={menuItems} tabType="additional" />}
                     {activeOptionTab === "place" &&
@@ -1107,11 +1207,11 @@ export const ProductDetailPage: React.FC = () => {
                     </button>
                   ))}
                 </div>
-                <div className="p-6 min-h-[200px]">
+                <div className={`min-h-[200px] ${activeTab === 'detail' ? '' : 'p-6'}`}>
                   {activeTab === "detail" &&
                     (product.description ? (
                       <div
-                        className="prose prose-slate max-w-none"
+                        className="prose prose-slate max-w-none w-full [&>p]:m-0 [&>img]:w-full [&>img]:m-0"
                         dangerouslySetInnerHTML={{
                           __html: product.description.replace(/\n/g, "<br/>"),
                         }}
@@ -1853,6 +1953,50 @@ export const ProductDetailPage: React.FC = () => {
                 닫기
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Booking Result Modal */}
+      {bookingModal.show && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => {
+          setBookingModal(prev => ({ ...prev, show: false }));
+          bookingModal.onClose?.();
+        }}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[360px] p-8 text-center animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-5">
+              {bookingModal.type === 'success' && (
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle size={32} className="text-green-500" />
+                </div>
+              )}
+              {bookingModal.type === 'error' && (
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                  <XCircle size={32} className="text-red-500" />
+                </div>
+              )}
+              {bookingModal.type === 'info' && (
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                  <AlertCircle size={32} className="text-blue-500" />
+                </div>
+              )}
+            </div>
+            <p className="text-gray-800 font-semibold text-base leading-relaxed whitespace-pre-line mb-8">
+              {bookingModal.message}
+            </p>
+            <button
+              onClick={() => {
+                setBookingModal(prev => ({ ...prev, show: false }));
+                bookingModal.onClose?.();
+              }}
+              className="w-full py-3 bg-[#FF5B60] text-white font-bold rounded-xl hover:bg-[#E04F54] transition-colors shadow-sm"
+            >
+              확인
+            </button>
           </div>
         </div>
       )}

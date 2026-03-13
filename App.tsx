@@ -6,6 +6,8 @@ import { MainPage } from './pages/MainPage';
 import { ProductListPage } from './pages/ProductListPage';
 import { ProductDetailPage } from './pages/ProductDetail';
 import { MyPage } from './pages/MyPage';
+import { MyInfoPage } from './pages/MyInfoPage';
+import { InquiryPage } from './pages/InquiryPage';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
 import { RedirectToProduct } from './pages/RedirectToProduct';
@@ -17,6 +19,7 @@ import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { AlliancePage } from './pages/AlliancePage';
 import { EventPage } from './pages/EventPage';
 import { BlankPage } from './pages/BlankPage';
+import { NotFound } from './pages/NotFound';
 import { AuthProvider } from './src/context/AuthContext';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { ProductManager } from './pages/admin/ProductManager';
@@ -29,6 +32,7 @@ import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminSignup } from './pages/admin/AdminSignup';
 import { NavMenuManager } from './pages/admin/NavMenuManager';
 import { FAQManager } from './pages/admin/FAQManager';
+import { InquiryManager } from './pages/admin/InquiryManager';
 import { AdminRoute } from './src/components/AdminRoute';
 
 function App() {
@@ -46,6 +50,7 @@ function App() {
             <Route path="users" element={<UserManager />} />
             <Route path="menus" element={<NavMenuManager />} />
             <Route path="faqs" element={<FAQManager />} />
+            <Route path="inquiries" element={<InquiryManager />} />
           </Route>
 
           {/* Admin Login - Separate Route */}
@@ -63,6 +68,8 @@ function App() {
                   <Route path="/products" element={<ProductListPage />} />
                   <Route path="/products/:id" element={<ProductDetailPage />} />
                   <Route path="/mypage" element={<MyPage />} />
+                  <Route path="/mypage/info" element={<MyInfoPage />} />
+                  <Route path="/mypage/inquiry" element={<InquiryPage />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<SignUp />} />
                   <Route path="/cs" element={<CSCenter />} />
@@ -74,6 +81,7 @@ function App() {
                   <Route path="/blank" element={<BlankPage />} />
                   <Route path="/terms" element={<TermsOfService />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
                 <Footer />
               </div>

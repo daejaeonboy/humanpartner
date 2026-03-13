@@ -77,7 +77,7 @@ export const MainPage: React.FC = () => {
             title: p.name,
             subtitle: p.name,
             imageUrl: p.image_url || 'https://picsum.photos/seed/product/400/500',
-            category: resolveCategory(p.category), // Use resolved (Parent) category
+            category: p.category, // Use raw category
             price: p.price,
             discountRate: p.discount_rate,
             reviewCount: p.review_count,
@@ -85,18 +85,18 @@ export const MainPage: React.FC = () => {
         }));
     };
 
-    // Get unique categories from all products (resolved to 1st level)
+    // Get unique categories from all products (using raw category)
     const getCategories = (products: any[]) => {
-        const resolvedCats = products.map(p => resolveCategory(p.category)).filter(Boolean);
-        return ['전체', ...Array.from(new Set(resolvedCats))];
+        const cats = products.map(p => p.category).filter(Boolean);
+        return ['전체', ...Array.from(new Set(cats))];
     };
 
-    // Get unique categories for a section (resolved to 1st level)
+    // Get unique categories for a section (using raw category)
     const getSectionCategories = (section: Section, products: any[]) => {
         if (section.categories && section.categories.length > 0) {
-            // Map configured child categories to their parents
-            const resolvedCats = section.categories.map(c => resolveCategory(c.name));
-            return ['전체', ...Array.from(new Set(resolvedCats))];
+            // Map configured child categories
+            const cats = section.categories.map(c => c.name);
+            return ['전체', ...Array.from(new Set(cats))];
         }
         return getCategories(products);
     };

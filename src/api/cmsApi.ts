@@ -178,7 +178,6 @@ export const deleteNavMenuItem = async (id: string): Promise<void> => {
         .eq('id', id);
     if (error) throw error;
 };
-
 // ==================== Banners ====================
 export interface Banner {
     id?: string;

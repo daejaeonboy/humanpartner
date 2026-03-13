@@ -1,9 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Pencil, Trash2, X, Save, Loader2, Upload, Image as ImageIcon, Grid3X3, Bold, Italic, Underline } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save, Loader2, Upload, Image as ImageIcon, Grid3X3, Bold, Italic, Underline, Copy } from 'lucide-react';
 import { getProducts, addProduct, updateProduct, deleteProduct, Product } from '../../src/api/productApi';
 import { getSections, getProductSections, setProductSections, Section } from '../../src/api/sectionApi';
 import { getAllNavMenuItems, NavMenuItem } from '../../src/api/cmsApi';
 import { uploadImage } from '../../src/api/storageApi';
+
+const sanitizeComponents = (components: any[] = []) =>
+    components
+        .filter(component => component.name)
+        .map(({ _category, ...rest }) => ({ ...rest }));
+
+const cloneComponents = (components: any[] = []) =>
+    components.map(component => ({ ...component }));
 
 // 간단한 에디터 컴포넌트
 const SimpleEditor = ({ initialValue, onChange }: { initialValue: string, onChange: (val: string) => void }) => {
@@ -72,23 +80,27 @@ export const ProductManager = () => {
     const [showForm, setShowForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [saving, setSaving] = useState(false);
+    const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+    const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     const [selectedSections, setSelectedSections] = useState<string[]>([]);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState({
         name: '', category: '', price: 0, description: '', short_description: '', image_url: '', stock: 99999, discount_rate: 0,
         product_type: 'basic' as any,
         basic_components: [] as any[], additional_components: [] as any[],
-        place_components: [] as any[], food_components: [] as any[],
+        cooperative_components: [] as any[], place_components: [] as any[], food_components: [] as any[],
     });
 
     const [viewMode, setViewMode] = useState<'products' | 'options'>('products');
-    const [viewTab, setViewTab] = useState<'essential' | 'additional' | 'place' | 'food'>('additional');
+    const [viewTab, setViewTab] = useState<'essential' | 'cooperative' | 'additional' | 'place' | 'food'>('additional');
     const [selectedParentCategoryFilter, setSelectedParentCategoryFilter] = useState<string | null>(null);
     const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
 
     // UI 토글 상태
+    const [useCooperative, setUseCooperative] = useState(false);
     const [useAdditional, setUseAdditional] = useState(false);
     const [usePlace, setUsePlace] = useState(false);
     const [useFood, setUseFood] = useState(false);
@@ -100,6 +112,7 @@ export const ProductManager = () => {
             setLoading(true);
             const [p, s, m] = await Promise.all([getProducts(), getSections(), getAllNavMenuItems()]);
             setProducts(p); setSections(s); setMenuItems(m);
+            setSelectedProductIds(prev => prev.filter(id => p.some(product => product.id === id)));
         } catch (error) { console.error(error); } finally { setLoading(false); }
     };
 
@@ -107,10 +120,10 @@ export const ProductManager = () => {
         setFormData({
             name: '', category: '', price: 0, description: '', short_description: '', image_url: '', stock: 99999, discount_rate: 0,
             product_type: 'basic',
-            basic_components: [], additional_components: [], place_components: [], food_components: [],
+            basic_components: [], additional_components: [], cooperative_components: [], place_components: [], food_components: [],
         });
         setEditingProduct(null); setSelectedSections([]);
-        setUseAdditional(false); setUsePlace(false); setUseFood(false);
+        setUseCooperative(false); setUseAdditional(false); setUsePlace(false); setUseFood(false);
         setSelectedParentCategory('');
         setShowForm(false);
     };
@@ -128,9 +141,11 @@ export const ProductManager = () => {
             product_type: product.product_type || 'basic',
             basic_components: product.basic_components || [],
             additional_components: product.additional_components || [],
+            cooperative_components: product.cooperative_components || [],
             place_components: product.place_components || [],
             food_components: product.food_components || [],
         });
+        setUseCooperative((product.cooperative_components || []).length > 0);
         setUseAdditional((product.additional_components || []).length > 0);
         setUsePlace((product.place_components || []).length > 0);
         setUseFood((product.food_components || []).length > 0);
@@ -158,13 +173,13 @@ export const ProductManager = () => {
         e.preventDefault();
         setSaving(true);
         try {
-            const clean = (arr: any[]) => (arr || []).filter(i => i.name).map(({ _category, ...rest }) => rest);
             const data = {
                 ...formData,
-                basic_components: clean(formData.basic_components),
-                additional_components: clean(formData.additional_components),
-                place_components: clean(formData.place_components),
-                food_components: clean(formData.food_components),
+                basic_components: sanitizeComponents(formData.basic_components),
+                cooperative_components: sanitizeComponents(formData.cooperative_components),
+                additional_components: sanitizeComponents(formData.additional_components),
+                place_components: sanitizeComponents(formData.place_components),
+                food_components: sanitizeComponents(formData.food_components),
             };
 
             let id;
@@ -194,11 +209,111 @@ export const ProductManager = () => {
         }
     };
 
+    const handleDuplicate = async (product: Product) => {
+        if (!product.id) return;
+
+        setDuplicatingId(product.id);
+        try {
+            const sectionIds = await getProductSections(product.id);
+            const duplicatedProduct = await addProduct({
+                name: product.name,
+                category: product.category || '',
+                price: product.price,
+                description: product.description || '',
+                short_description: product.short_description || '',
+                image_url: product.image_url || '',
+                stock: product.stock ?? 99999,
+                discount_rate: product.discount_rate || 0,
+                product_type: product.product_type || 'basic',
+                basic_components: sanitizeComponents(cloneComponents(product.basic_components)),
+                additional_components: sanitizeComponents(cloneComponents(product.additional_components)),
+                cooperative_components: sanitizeComponents(cloneComponents(product.cooperative_components)),
+                place_components: sanitizeComponents(cloneComponents(product.place_components)),
+                food_components: sanitizeComponents(cloneComponents(product.food_components)),
+            });
+
+            await setProductSections(duplicatedProduct.id!, sectionIds);
+            await loadData();
+        } catch (error: any) {
+            console.error('Failed to duplicate product:', error);
+            alert(`복사에 실패했습니다: ${error.message}`);
+        } finally {
+            setDuplicatingId(null);
+        }
+    };
+
     const toggleSection = (sectionId: string) => {
         setSelectedSections(prev =>
             prev.includes(sectionId)
                 ? prev.filter(id => id !== sectionId)
                 : [...prev, sectionId]
+        );
+    };
+
+    const filteredProducts = products.filter(p => {
+        let typeMatch = false;
+        if (viewMode === 'products') {
+            typeMatch = p.product_type === 'basic' || !p.product_type;
+        } else if (viewTab === 'additional') {
+            typeMatch = p.product_type === 'essential' || p.product_type === 'additional';
+        } else if (viewTab === 'cooperative') {
+            typeMatch = p.product_type === 'cooperative';
+        } else {
+            typeMatch = p.product_type === viewTab;
+        }
+
+        if (!typeMatch) return false;
+
+        if (viewMode === 'products') {
+            if (selectedCategoryFilter) {
+                return p.category === selectedCategoryFilter;
+            }
+
+            if (selectedParentCategoryFilter) {
+                const childCategories = menuItems
+                    .filter(m => m.category === selectedParentCategoryFilter)
+                    .map(m => m.name);
+                return childCategories.includes(p.category || '');
+            }
+
+            return true;
+        }
+
+        if (selectedCategoryFilter) {
+            return p.category === selectedCategoryFilter;
+        }
+
+        return true;
+    });
+
+    const visibleSelectedCount = filteredProducts.filter(product => product.id && selectedProductIds.includes(product.id)).length;
+
+    useEffect(() => {
+        if (!selectAllCheckboxRef.current) return;
+        selectAllCheckboxRef.current.indeterminate = visibleSelectedCount > 0 && visibleSelectedCount < filteredProducts.length;
+    }, [visibleSelectedCount, filteredProducts.length]);
+
+    const toggleProductSelection = (productId: string) => {
+        setSelectedProductIds(prev =>
+            prev.includes(productId)
+                ? prev.filter(id => id !== productId)
+                : [...prev, productId]
+        );
+    };
+
+    const toggleSelectAllProducts = () => {
+        const visibleProductIds = filteredProducts
+            .map(product => product.id)
+            .filter((id): id is string => Boolean(id));
+
+        if (visibleProductIds.length === 0) return;
+
+        const isAllVisibleSelected = visibleProductIds.every(id => selectedProductIds.includes(id));
+
+        setSelectedProductIds(prev =>
+            isAllVisibleSelected
+                ? prev.filter(id => !visibleProductIds.includes(id))
+                : [...new Set([...prev, ...visibleProductIds])]
         );
     };
 
@@ -337,16 +452,16 @@ export const ProductManager = () => {
                 <div className="space-y-4 mb-6">
                     {/* 상품 타입 탭 */}
                     <div className="flex gap-2 bg-slate-100 p-1 rounded-lg w-fit">
-                        {['additional', 'place', 'food'].map(t => (
+                        {['cooperative', 'additional'].map(t => (
                             <button
                                 key={t}
                                 onClick={() => {
                                     setViewTab(t as any);
-                                    setSelectedCategoryFilter(null); // 탭 변경 시 카테고리 필터 초기화
+                                    setSelectedCategoryFilter(null);
                                 }}
                                 className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewTab === t ? 'bg-white text-[#FF5B60] shadow-sm' : 'text-slate-500'}`}
                             >
-                                {t === 'additional' ? '기본/추가 상품' : t === 'place' ? '장소' : '음식'}
+                                {t === 'cooperative' ? '협력 업체' : t === 'additional' ? '기본/추가 상품' : ''}
                             </button>
                         ))}
                     </div>
@@ -505,10 +620,9 @@ export const ProductManager = () => {
                                         </div>
                                     </div>
 
-                                    {/* 음식/장소/추가 옵션 (옵션 활성화 여부만 선택) */}
+                                    {/* 추가 옵션 (옵션 활성화 여부만 선택) */}
                                     {[
-                                        { id: 'food', label: '음식(케이터링) 옵션 활성화', state: useFood, setState: setUseFood, key: 'food_components', desc: '고객이 공통 음식 메뉴에서 선택할 수 있도록 합니다.' },
-                                        { id: 'place', label: '장소(공간) 옵션 활성화', state: usePlace, setState: setUsePlace, key: 'place_components', desc: '고객이 공통 장소 목록에서 선택할 수 있도록 합니다.' },
+                                        { id: 'cooperative', label: '협력 업체 옵션 활성화', state: useCooperative, setState: setUseCooperative, key: 'cooperative_components', desc: '고객이 공통 협력 업체 목록에서 선택할 수 있도록 합니다.' },
                                         { id: 'additional', label: '추가 물품 옵션 활성화', state: useAdditional, setState: setUseAdditional, key: 'additional_components', desc: '고객이 공통 추가 물품 목록에서 선택할 수 있도록 합니다.' }
                                     ].map(opt => (
                                         <div key={opt.id} className="bg-slate-50 p-5 rounded-xl border border-slate-200">
@@ -556,6 +670,16 @@ export const ProductManager = () => {
                 <table className="w-full">
                     <thead className="bg-[#FF5B60] text-white">
                         <tr>
+                            <th className="w-14 px-4 py-4 text-center">
+                                <input
+                                    ref={selectAllCheckboxRef}
+                                    type="checkbox"
+                                    checked={filteredProducts.length > 0 && visibleSelectedCount === filteredProducts.length}
+                                    onChange={toggleSelectAllProducts}
+                                    className="w-4 h-4 accent-white cursor-pointer"
+                                    aria-label="현재 목록 전체 선택"
+                                />
+                            </th>
                             <th className="text-left px-6 py-4 text-sm font-bold uppercase tracking-wider">상품 정보</th>
                             <th className="text-left px-6 py-4 text-sm font-bold uppercase tracking-wider">메뉴(카테고리)</th>
                             <th className="text-right px-6 py-4 text-sm font-bold uppercase tracking-wider">가격</th>
@@ -563,44 +687,17 @@ export const ProductManager = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {products
-                            .filter(p => {
-                                // 상품 타입 필터
-                                let typeMatch = false;
-                                if (viewMode === 'products') {
-                                    typeMatch = p.product_type === 'basic' || !p.product_type;
-                                } else if (viewTab === 'additional') {
-                                    typeMatch = p.product_type === 'essential' || p.product_type === 'additional';
-                                } else {
-                                    typeMatch = p.product_type === viewTab;
-                                }
-
-                                if (!typeMatch) return false;
-
-                                // 패키지 상품 관리: 대분류/중분류 필터
-                                if (viewMode === 'products') {
-                                    if (selectedCategoryFilter) {
-                                        // 중분류가 선택된 경우
-                                        return p.category === selectedCategoryFilter;
-                                    } else if (selectedParentCategoryFilter) {
-                                        // 대분류만 선택된 경우: 해당 대분류의 모든 중분류 상품 표시
-                                        const childCategories = menuItems
-                                            .filter(m => m.category === selectedParentCategoryFilter)
-                                            .map(m => m.name);
-                                        return childCategories.includes(p.category || '');
-                                    }
-                                    return true;
-                                }
-
-                                // 공통 옵션 관리: 중분류 필터
-                                if (viewMode === 'options' && selectedCategoryFilter) {
-                                    return p.category === selectedCategoryFilter;
-                                }
-
-                                return true;
-                            })
-                            .map(p => (
+                        {filteredProducts.map(p => (
                                 <tr key={p.id} className="hover:bg-slate-50/80 transition-all">
+                                    <td className="px-4 py-4 text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={Boolean(p.id && selectedProductIds.includes(p.id))}
+                                            onChange={() => p.id && toggleProductSelection(p.id)}
+                                            className="w-4 h-4 accent-[#FF5B60] cursor-pointer"
+                                            aria-label={`${p.name} 선택`}
+                                        />
+                                    </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
                                             {p.image_url ? <img src={p.image_url} className="w-12 h-12 object-cover rounded-xl shadow-sm" /> : <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-300"><ImageIcon size={20} /></div>}
@@ -611,8 +708,17 @@ export const ProductManager = () => {
                                     <td className="px-6 py-4 text-right font-bold text-slate-900">{p.price.toLocaleString()}원</td>
                                     <td className="px-6 py-4">
                                         <div className="flex justify-center gap-2">
-                                            <button onClick={() => handleEdit(p)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"><Pencil size={18} /></button>
-                                            <button onClick={() => handleDelete(p.id!)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={18} /></button>
+                                            <button onClick={() => handleEdit(p)} title="상품 수정" aria-label="상품 수정" className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"><Pencil size={18} /></button>
+                                            <button
+                                                onClick={() => handleDuplicate(p)}
+                                                title="상품 복사"
+                                                aria-label="상품 복사"
+                                                disabled={duplicatingId === p.id}
+                                                className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all disabled:text-slate-300 disabled:hover:bg-transparent"
+                                            >
+                                                {duplicatingId === p.id ? <Loader2 size={18} className="animate-spin" /> : <Copy size={18} />}
+                                            </button>
+                                            <button onClick={() => handleDelete(p.id!)} title="상품 삭제" aria-label="상품 삭제" className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={18} /></button>
                                         </div>
                                     </td>
                                 </tr>

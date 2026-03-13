@@ -124,7 +124,7 @@ export const checkAvailability = async (
         .from('bookings')
         .select('id')
         .eq('product_id', productId)
-        .neq('status', 'cancelled')
+        .eq('status', 'confirmed')
         .lte('start_date', endDate)
         .gte('end_date', startDate);
 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Plus, Edit2, Trash2, X, Save, Loader2, HelpCircle, ChevronDown, ChevronUp
+    Plus, Edit2, Trash2, X, Save, Loader2, HelpCircle, Tag, Check
 } from 'lucide-react';
-import { getFAQs, addFAQ, updateFAQ, deleteFAQ, FAQ } from '../../src/api/faqApi';
+import { getFAQs, addFAQ, updateFAQ, deleteFAQ, FAQ, getFAQCategories, addFAQCategory, updateFAQCategory, deleteFAQCategory, FAQCategory } from '../../src/api/faqApi';
 
-const CATEGORIES = ['공통', '이용문의', '예약/결제', '취소/환불', '상품문의', '기타'];
+const DEFAULT_CATEGORIES = ['자주 묻는 질문', '공통', '이용문의', '예약/결제', '취소/환불', '상품문의', '기타'];
 
 export const FAQManager: React.FC = () => {
     const [faqs, setFaqs] = useState<FAQ[]>([]);
@@ -19,6 +19,31 @@ export const FAQManager: React.FC = () => {
     });
     const [saving, setSaving] = useState(false);
 
+    // Category Management State
+    const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
+    const [dbCategories, setDbCategories] = useState<FAQCategory[]>([]);
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+    const [editingCategoryName, setEditingCategoryName] = useState('');
+    const [categoryLoading, setCategoryLoading] = useState(false);
+
+    const loadCategories = async () => {
+        try {
+            const data = await getFAQCategories();
+            if (data.length > 0) {
+                setDbCategories(data);
+                setCategories(data.map(c => c.name));
+            } else {
+                setCategories(DEFAULT_CATEGORIES);
+                setDbCategories([]);
+            }
+        } catch (error) {
+            console.error('Failed to load categories, using defaults:', error);
+            setCategories(DEFAULT_CATEGORIES);
+        }
+    };
+
     const loadFAQs = async () => {
         try {
             const data = await getFAQs();
@@ -31,13 +56,13 @@ export const FAQManager: React.FC = () => {
     };
 
     useEffect(() => {
-        loadFAQs();
+        Promise.all([loadFAQs(), loadCategories()]);
     }, []);
 
     const openAddModal = () => {
         setEditingFaq(null);
         setFormData({
-            category: '공통',
+            category: categories[0] || '공통',
             question: '',
             answer: '',
             display_order: faqs.length + 1
@@ -86,6 +111,71 @@ export const FAQManager: React.FC = () => {
         }
     };
 
+    // Category CRUD handlers
+    const handleAddCategory = async () => {
+        if (!newCategoryName.trim()) return;
+        setCategoryLoading(true);
+        try {
+            await addFAQCategory({
+                name: newCategoryName.trim(),
+                display_order: dbCategories.length + 1
+            });
+            setNewCategoryName('');
+            await loadCategories();
+        } catch (error) {
+            console.error('Failed to add category:', error);
+            alert('카테고리 추가에 실패했습니다. 테이블이 생성되었는지 확인해주세요.');
+        } finally {
+            setCategoryLoading(false);
+        }
+    };
+
+    const handleUpdateCategory = async (id: string) => {
+        if (!editingCategoryName.trim()) return;
+        setCategoryLoading(true);
+        try {
+            const oldCat = dbCategories.find(c => c.id === id);
+            await updateFAQCategory(id, { name: editingCategoryName.trim() });
+
+            // Also update faqs that used the old category name
+            if (oldCat) {
+                const affectedFaqs = faqs.filter(f => f.category === oldCat.name);
+                for (const faq of affectedFaqs) {
+                    await updateFAQ(faq.id!, { category: editingCategoryName.trim() });
+                }
+            }
+
+            setEditingCategoryId(null);
+            setEditingCategoryName('');
+            await Promise.all([loadCategories(), loadFAQs()]);
+        } catch (error) {
+            console.error('Failed to update category:', error);
+            alert('카테고리 수정에 실패했습니다.');
+        } finally {
+            setCategoryLoading(false);
+        }
+    };
+
+    const handleDeleteCategory = async (id: string) => {
+        const cat = dbCategories.find(c => c.id === id);
+        const usedCount = faqs.filter(f => f.category === cat?.name).length;
+        if (usedCount > 0) {
+            alert(`이 카테고리를 사용 중인 FAQ가 ${usedCount}개 있습니다. 먼저 해당 FAQ의 카테고리를 변경해주세요.`);
+            return;
+        }
+        if (!confirm(`'${cat?.name}' 카테고리를 삭제하시겠습니까?`)) return;
+        setCategoryLoading(true);
+        try {
+            await deleteFAQCategory(id);
+            await loadCategories();
+        } catch (error) {
+            console.error('Failed to delete category:', error);
+            alert('카테고리 삭제에 실패했습니다.');
+        } finally {
+            setCategoryLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
@@ -105,13 +195,22 @@ export const FAQManager: React.FC = () => {
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">고객센터 페이지에 표시될 자주 묻는 질문을 관리합니다.</p>
                 </div>
-                <button
-                    onClick={openAddModal}
-                    className="flex items-center gap-2 bg-[#FF5B60] text-white px-5 py-2.5 rounded-xl hover:bg-[#e54a4f] transition-all shadow-lg shadow-[#FF5B60]/20 font-bold"
-                >
-                    <Plus size={20} />
-                    FAQ 추가
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setShowCategoryModal(true)}
+                        className="flex items-center gap-2 bg-white text-slate-700 px-5 py-2.5 rounded-xl hover:bg-slate-50 transition-all border border-slate-200 font-bold"
+                    >
+                        <Tag size={18} />
+                        카테고리 관리
+                    </button>
+                    <button
+                        onClick={openAddModal}
+                        className="flex items-center gap-2 bg-[#FF5B60] text-white px-5 py-2.5 rounded-xl hover:bg-[#e54a4f] transition-all shadow-lg shadow-[#FF5B60]/20 font-bold"
+                    >
+                        <Plus size={20} />
+                        FAQ 추가
+                    </button>
+                </div>
             </div>
 
             {/* List */}
@@ -169,7 +268,7 @@ export const FAQManager: React.FC = () => {
                 )}
             </div>
 
-            {/* Modal */}
+            {/* FAQ Add/Edit Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
                     <div className="bg-white rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl animate-fadeIn">
@@ -194,7 +293,7 @@ export const FAQManager: React.FC = () => {
                                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                         className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 focus:ring-4 focus:ring-[#FF5B60]/10 focus:border-[#FF5B60] outline-none transition-all font-medium"
                                     >
-                                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-1.5">
@@ -258,6 +357,130 @@ export const FAQManager: React.FC = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Category Management Modal */}
+            {showCategoryModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+                    <div className="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl animate-fadeIn">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <Tag size={20} className="text-[#FF5B60]" />
+                                FAQ 카테고리 관리
+                            </h2>
+                            <button
+                                onClick={() => setShowCategoryModal(false)}
+                                className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            {/* Add New Category */}
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={newCategoryName}
+                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                    placeholder="새 카테고리명 입력"
+                                    className="flex-1 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:ring-4 focus:ring-[#FF5B60]/10 focus:border-[#FF5B60] outline-none transition-all font-medium text-sm"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
+                                />
+                                <button
+                                    onClick={handleAddCategory}
+                                    disabled={categoryLoading || !newCategoryName.trim()}
+                                    className="px-4 py-3 bg-[#FF5B60] text-white rounded-xl font-bold hover:bg-[#e54a4f] transition-all disabled:bg-slate-300 flex items-center gap-1 text-sm"
+                                >
+                                    {categoryLoading ? <Loader2 className="animate-spin" size={16} /> : <Plus size={16} />}
+                                    추가
+                                </button>
+                            </div>
+
+                            {/* Category List */}
+                            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                                {dbCategories.length === 0 ? (
+                                    <div className="text-center py-8 text-slate-400 text-sm">
+                                        <Tag size={32} className="mx-auto mb-3 text-slate-300" />
+                                        <p>등록된 카테고리가 없습니다.</p>
+                                        <p className="text-xs mt-1">위에서 카테고리를 추가해주세요.</p>
+                                        <p className="text-xs mt-3 text-slate-300">Supabase에서 SQL을 실행해야 합니다.</p>
+                                    </div>
+                                ) : (
+                                    dbCategories.map((cat, idx) => {
+                                        const usedCount = faqs.filter(f => f.category === cat.name).length;
+                                        return (
+                                            <div
+                                                key={cat.id}
+                                                className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-slate-200 bg-white transition-all group"
+                                            >
+                                                <span className="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-400">
+                                                    {idx + 1}
+                                                </span>
+
+                                                {editingCategoryId === cat.id ? (
+                                                    <div className="flex-1 flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={editingCategoryName}
+                                                            onChange={(e) => setEditingCategoryName(e.target.value)}
+                                                            className="flex-1 px-3 py-1.5 rounded-lg border border-[#FF5B60] bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#FF5B60]/20"
+                                                            autoFocus
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') handleUpdateCategory(cat.id!);
+                                                                if (e.key === 'Escape') setEditingCategoryId(null);
+                                                            }}
+                                                        />
+                                                        <button
+                                                            onClick={() => handleUpdateCategory(cat.id!)}
+                                                            className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                                                        >
+                                                            <Check size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setEditingCategoryId(null)}
+                                                            className="p-1.5 text-slate-400 hover:bg-slate-50 rounded-lg transition-all"
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span className="flex-1 font-medium text-slate-800 text-sm">{cat.name}</span>
+                                                        <span className="text-xs text-slate-400">{usedCount}건</span>
+                                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingCategoryId(cat.id!);
+                                                                    setEditingCategoryName(cat.name);
+                                                                }}
+                                                                className="p-1.5 text-slate-400 hover:text-[#FF5B60] hover:bg-[#FF5B60]/5 rounded-lg transition-all"
+                                                                title="수정"
+                                                            >
+                                                                <Edit2 size={14} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteCategory(cat.id!)}
+                                                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                                title="삭제"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+
+                            <p className="text-xs text-slate-400 text-center pt-2">
+                                카테고리명을 수정하면 해당 카테고리의 FAQ도 자동으로 업데이트됩니다.
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}

@@ -75,7 +75,7 @@ export const QuickMenu: React.FC = () => {
         <div className="relative">
             {/* 2-row Grid for mobile, Flex for desktop */}
             <div 
-               className="grid grid-cols-5 gap-y-6 md:flex md:justify-between items-start pb-4 md:pb-0"
+               className="grid grid-cols-5 gap-y-6 gap-x-1 sm:gap-x-2 md:flex md:justify-between items-start pb-4 md:pb-0"
             >
           {items.map((item, index) => {
             // 카테고리가 있으면 해당 카테고리 필터링 링크 생성, 없으면 기존 링크 사용
@@ -94,7 +94,7 @@ export const QuickMenu: React.FC = () => {
               <Link
                 key={item.id}
                 to={linkUrl}
-                className="group flex flex-col items-center gap-2 flex-shrink-0 w-full md:w-auto md:flex-1 min-w-0"
+                className="group flex flex-col items-center gap-3 flex-shrink-0 w-full md:w-auto md:flex-1 min-w-0"
               >
                 <div className="w-12 h-12 md:h-16 lg:w-20 lg:h-20 rounded-2xl bg-slate-50 flex items-center justify-center bg-opacity-10 group-hover:bg-opacity-25 transition-all duration-300 group-hover:-translate-y-1">
                   <div className="scale-90 md:scale-110 lg:scale-125">
@@ -105,7 +105,7 @@ export const QuickMenu: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <span className="text-[11px] md:text-xs lg:text-sm text-slate-600 font-medium tracking-tight opacity-90 truncate w-full text-center px-1">
+                <span className="text-[13px] md:text-sm lg:text-base text-slate-700 font-semibold tracking-tight truncate w-full text-center px-1">
                   {item.name}
                 </span>
               </Link>

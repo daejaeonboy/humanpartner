@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from '../components/ui/Container';
-import { Calendar, User, Clock, Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Calendar, User, Clock, Loader2, CheckCircle, XCircle, AlertCircle, Package } from 'lucide-react';
 import { getUserBookings, Booking } from '../src/api/bookingApi';
+import { getProducts } from '../src/api/productApi';
 import { useAuth } from '../src/context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -10,23 +11,37 @@ export const MyPage: React.FC = () => {
     const navigate = useNavigate();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
+    const [imageMap, setImageMap] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        const fetchBookings = async () => {
+        const fetchBookingsAndProducts = async () => {
             if (!user) {
                 setLoading(false);
                 return;
             }
             try {
-                const data = await getUserBookings(user.uid);
-                setBookings(data);
+                const [bookingData, productsData] = await Promise.all([
+                    getUserBookings(user.uid),
+                    getProducts()
+                ]);
+                
+                // Build a map of name -> image_url for fast lookup
+                const imgMap: Record<string, string> = {};
+                productsData.forEach(p => {
+                    if (p.image_url) {
+                        imgMap[p.name] = p.image_url;
+                    }
+                });
+                
+                setImageMap(imgMap);
+                setBookings(bookingData);
             } catch (error) {
-                console.error('Failed to fetch bookings:', error);
+                console.error('Failed to fetch data:', error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchBookings();
+        fetchBookingsAndProducts();
     }, [user]);
 
     const getStatusBadge = (status: Booking['status']) => {
@@ -102,10 +117,10 @@ export const MyPage: React.FC = () => {
                                 <Link to="/mypage" className="text-sm font-bold text-[#FF5B60] block w-full text-left py-2 px-2 rounded hover:bg-[#FF5B60]/5">
                                     예약 내역
                                 </Link>
-                                <Link to="#" className="text-sm text-gray-500 block w-full text-left py-2 px-2 rounded hover:bg-gray-50 hover:text-black" onClick={(e) => { e.preventDefault(); alert('준비 중인 기능입니다.'); }}>
+                                <Link to="/mypage/info" className="text-sm text-gray-500 block w-full text-left py-2 px-2 rounded hover:bg-gray-50 hover:text-black">
                                     내 정보 관리
                                 </Link>
-                                <Link to="#" className="text-sm text-gray-500 block w-full text-left py-2 px-2 rounded hover:bg-gray-50 hover:text-black" onClick={(e) => { e.preventDefault(); alert('준비 중인 기능입니다.'); }}>
+                                <Link to="/mypage/inquiry" className="text-sm text-gray-500 block w-full text-left py-2 px-2 rounded hover:bg-gray-50 hover:text-black">
                                     1:1 문의 내역
                                 </Link>
                             </div>
@@ -134,7 +149,10 @@ export const MyPage: React.FC = () => {
                                         {/* Mobile/Tablet Layout (Visible on screens < lg) */}
                                         <div 
                                             className="lg:hidden cursor-pointer active:bg-gray-50 transition-colors"
-                                            onClick={() => navigate(`/products/${booking.product_id}`)}
+                                            onClick={() => {
+                                                const el = document.getElementById(`details-${booking.id}`);
+                                                if (el) el.classList.toggle('hidden');
+                                            }}
                                         >
                                             <div className="relative aspect-video bg-gray-100">
                                                 <img
@@ -172,7 +190,10 @@ export const MyPage: React.FC = () => {
                                         {/* Desktop Layout (Visible on screens >= lg) */}
                                         <div 
                                             className="hidden lg:flex p-6 md:p-8 flex-col md:flex-row justify-between items-center gap-6 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors"
-                                            onClick={() => navigate(`/products/${booking.product_id}`)}
+                                            onClick={() => {
+                                                const el = document.getElementById(`details-${booking.id}`);
+                                                if (el) el.classList.toggle('hidden');
+                                            }}
                                         >
                                             <div className="flex gap-8 items-center flex-grow">
                                                 {/* Left: Image */}
@@ -200,11 +221,8 @@ export const MyPage: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Right: Actions & Price */}
-                                            <div className="flex flex-col items-end gap-4 flex-shrink-0 min-w-[180px]">
-                                                <div className="text-2xl font-bold text-[#FF5B60] tracking-tight">
-                                                    {booking.total_price.toLocaleString()}원
-                                                </div>
+                                            {/* Right: Actions */}
+                                            <div className="flex flex-col items-end gap-4 flex-shrink-0">
                                                 <div className="flex gap-2 w-full md:w-auto">
                                                     {(booking.selected_options?.length || 0) + (booking.basic_components?.length || 0) > 0 && (
                                                         <button
@@ -239,15 +257,18 @@ export const MyPage: React.FC = () => {
                                                         <div className="border-t-2 border-slate-900 pt-6">
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
                                                                 {booking.basic_components.map((comp, i) => {
-                                                                     const imageUrl = getItemImage(comp.name);
+                                                                     const imageUrl = imageMap[comp.name] || getItemImage(comp.name);
                                                                      return (
                                                                         <div key={i} className="flex items-center gap-4 group">
-                                                                            <div className="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
+                                                                            <div className="w-14 h-14 flex-shrink-0 rounded-lg bg-white flex items-center justify-center border border-gray-100 shadow-sm overflow-hidden relative">
                                                                                 {imageUrl ? (
                                                                                     <img src={imageUrl} alt={comp.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement?.classList.add('fallback-icon'); }} />
                                                                                 ) : (
-                                                                                    <div className="text-gray-300">📦</div>
+                                                                                    <Package size={20} className="text-slate-400" />
                                                                                 )}
+                                                                                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 -z-10">
+                                                                                    <Package size={20} className="text-slate-400" />
+                                                                                </div>
                                                                             </div>
                                                                             <div className="flex-1 min-w-0">
                                                                                 <div className="flex justify-between items-start">
@@ -280,25 +301,25 @@ export const MyPage: React.FC = () => {
                                                         <div className="border-t-2 border-[#FF5B60] pt-6">
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
                                                                 {booking.selected_options.map((opt, i) => {
-                                                                     const imageUrl = getItemImage(opt.name);
+                                                                     const imageUrl = imageMap[opt.name] || getItemImage(opt.name);
                                                                      return (
                                                                          <div key={i} className="flex items-center gap-4 group">
-                                                                            <div className="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
+                                                                            <div className="w-14 h-14 flex-shrink-0 rounded-lg bg-white flex items-center justify-center border border-gray-100 shadow-sm overflow-hidden relative">
                                                                                 {imageUrl ? (
                                                                                     <img src={imageUrl} alt={opt.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement?.classList.add('fallback-icon'); }} />
                                                                                 ) : (
-                                                                                    <div className="text-gray-300">⚡</div>
+                                                                                    <Package size={20} className="text-slate-400" />
                                                                                 )}
+                                                                                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 -z-10">
+                                                                                    <Package size={20} className="text-slate-400" />
+                                                                                </div>
                                                                             </div>
                                                                              <div className="flex-1 min-w-0">
                                                                                  <div className="flex justify-between items-start">
                                                                                      <div>
                                                                                          <p className="font-bold text-gray-800 text-lg leading-tight">{opt.name}</p>
-                                                                                         <p className="text-xs text-gray-500 mt-1">{opt.price.toLocaleString()}원 × {opt.quantity}개</p>
                                                                                      </div>
-                                                                                     <div className="text-right">
-                                                                                          <span className="text-lg font-bold text-[#FF5B60]">{(opt.price * opt.quantity).toLocaleString()}원</span>
-                                                                                     </div>
+                                                                                     <span className="text-lg font-bold text-[#FF5B60] whitespace-nowrap ml-2">{opt.quantity}개</span>
                                                                                  </div>
                                                                              </div>
                                                                          </div>

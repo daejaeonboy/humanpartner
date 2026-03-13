@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Package, CalendarCheck, LayoutDashboard, ArrowLeft, Layers, Tag, Settings, Users, LogOut, User, Menu, HelpCircle } from 'lucide-react';
+import { Package, CalendarCheck, LayoutDashboard, ArrowLeft, Layers, Tag, Settings, Users, LogOut, User, Menu, HelpCircle, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../src/context/AuthContext';
 
 export const AdminDashboard = () => {
@@ -25,6 +25,7 @@ export const AdminDashboard = () => {
         { path: '/admin/users', label: '회원 관리', icon: Users },
         { path: '/admin/menus', label: '전체 메뉴 관리', icon: Menu },
         { path: '/admin/faqs', label: 'FAQ 관리', icon: HelpCircle },
+        { path: '/admin/inquiries', label: '1:1 문의 관리', icon: MessageSquare },
     ];
 
     const isActive = (path: string, exact?: boolean) => {
@@ -203,6 +204,21 @@ export const AdminDashboard = () => {
                                         <div>
                                             <h3 className="font-bold text-lg text-slate-800 group-hover:text-[#FF5B60] transition-colors">FAQ 관리</h3>
                                             <p className="text-slate-500 text-sm">고객센터 자주 묻는 질문 편집</p>
+                                        </div>
+                                    </div>
+                                </Link>
+                                
+                                <Link
+                                    to="/admin/inquiries"
+                                    className="group bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-[#FF5B60]/30"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-4 bg-gradient-to-br from-[#FF5B60]/10 to-[#FF5B60]/5 rounded-xl group-hover:from-[#FF5B60] group-hover:to-[#FF8A8E] transition-all duration-300">
+                                            <MessageSquare className="text-[#FF5B60] group-hover:text-white transition-colors" size={28} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-slate-800 group-hover:text-[#FF5B60] transition-colors">1:1 문의 관리</h3>
+                                            <p className="text-slate-500 text-sm">고객 1:1 문의 확인 및 답변</p>
                                         </div>
                                     </div>
                                 </Link>

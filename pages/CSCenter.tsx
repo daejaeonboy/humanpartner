@@ -2,23 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { Container } from '../components/ui/Container';
 import { Phone, MessageCircle, ChevronDown, Loader2 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { getFAQs, FAQ } from '../src/api/faqApi';
+import { getFAQs, FAQ, getFAQCategories } from '../src/api/faqApi';
 
-const CATEGORIES = ['자주 묻는 질문', '공통', '이용문의', '예약/결제', '취소/환불', '상품문의', '기타'];
 
 export const CSCenter: React.FC = () => {
     const [faqs, setFaqs] = useState<FAQ[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('자주 묻는 질문');
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [categories, setCategories] = useState<string[]>(['자주 묻는 질문']);
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const data = await getFAQs();
-                setFaqs(data);
+                const [faqData, catData] = await Promise.all([
+                    getFAQs(),
+                    getFAQCategories()
+                ]);
+                setFaqs(faqData);
+                if (catData.length > 0) {
+                    setCategories(catData.map(c => c.name));
+                } else {
+                    setCategories(['자주 묻는 질문', '공통', '이용문의', '예약/결제', '취소/환불', '상품문의', '기타']);
+                }
             } catch (error) {
-                console.error('Failed to load FAQs:', error);
+                console.error('Failed to load data:', error);
+                setCategories(['자주 묻는 질문', '공통', '이용문의', '예약/결제', '취소/환불', '상품문의', '기타']);
             } finally {
                 setLoading(false);
             }
@@ -31,7 +40,6 @@ export const CSCenter: React.FC = () => {
     };
 
     const filteredFAQ = faqs.filter(item => {
-        if (activeCategory === '자주 묻는 질문') return true;
         return item.category === activeCategory;
     });
 
@@ -81,7 +89,7 @@ export const CSCenter: React.FC = () => {
 
                     {/* Category Tabs */}
                     <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-8 -mx-4 px-4 md:mx-0 md:px-0">
-                        {CATEGORIES.map(cat => (
+                        {categories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}

@@ -3,23 +3,25 @@ import { supabase } from '../lib/supabase';
 export interface Product {
     id?: string;
     name: string;
-    category: string;
+    category?: string; // 카테고리 (중분류)
+    _parent_category?: string; // VIEW 등에서 조인으로 가져올 대분류
     price: number;
     description?: string;
-    short_description?: string; // 간단 소개 (상품명 아래 표시)
+    short_description?: string;
     image_url?: string;
     stock: number;
     discount_rate?: number;
-    rating?: number;
-    review_count?: number;
     created_at?: string;
-    product_code?: string; // New: User-friendly product code (e.g. P1001)
-    model_name?: string; // New: Model name for options
-    product_type?: 'basic' | 'essential' | 'additional' | 'place' | 'food'; // New: basic(package), essential(basic component), additional, place, food
-    basic_components?: { name: string; model_name?: string; quantity: number; _category?: string; image_url?: string }[];
+    
+    // 패키지 및 상품옵션 타입
+    product_type?: 'basic' | 'essential' | 'additional' | 'cooperative' | 'place' | 'food'; // New: basic(package), essential(basic component), additional, cooperative, place, food
+    
+    // 관계형 데이터 (JSON 형태로 저장)
+    basic_components?: { name: string; model_name?: string; quantity: number }[];
     additional_components?: { name: string; model_name?: string; price: number; _category?: string }[];
-    place_components?: { name: string; model_name?: string; price: number; _category?: string }[];
-    food_components?: { name: string; model_name?: string; price: number; _category?: string }[];
+    cooperative_components?: { name: string; model_name?: string; price: number; _category?: string }[];
+    place_components?: { name: string; price: number }[];
+    food_components?: { name: string; price: number }[];
 }
 
 // 모든 상품 조회
@@ -46,10 +48,10 @@ export const getProductsByCategory = async (category: string): Promise<Product[]
     return data || [];
 };
 
-// 타입별 상품 조회 (basic, essential, additional, place, food)
+// 타입별 상품 조회 (basic, essential, additional, cooperative, place, food)
 export const getProductsByType = async (type: string): Promise<Product[]> => {
     let query = supabase.from('products').select('*');
-
+    
     if (type === 'additional' || type === 'essential') {
         // 'essential'와 'additional'은 '물품'으로 통합 관리
         query = query.in('product_type', ['essential', 'additional']);

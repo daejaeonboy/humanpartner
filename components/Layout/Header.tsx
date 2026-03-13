@@ -1,13 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { Container } from '../ui/Container';
-import { NAV_LINKS, TOP_LINKS } from '../../constants';
-import { getActiveSections, Section } from '../../src/api/sectionApi';
-import { getAllNavMenuItems, NavMenuItem } from '../../src/api/cmsApi';
-import { useAuth } from '../../src/context/AuthContext';
-import { FullMenu } from './FullMenu';
-import { getNotifications, markAsRead, markAllAsRead, Notification } from '../../src/api/notificationApi';
+import React, { useState, useEffect, useRef } from "react";
+import { Search } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Container } from "../ui/Container";
+import { NAV_LINKS, TOP_LINKS } from "../../constants";
+import { getActiveSections, Section } from "../../src/api/sectionApi";
+import { getAllNavMenuItems, NavMenuItem } from "../../src/api/cmsApi";
+import { useAuth } from "../../src/context/AuthContext";
+import { FullMenu } from "./FullMenu";
+import {
+  getNotifications,
+  markAsRead,
+  markAllAsRead,
+  Notification,
+} from "../../src/api/notificationApi";
 
 const BellIcon = ({ className }: { className?: string }) => (
   <img src="/notifications.svg" alt="알림" className={className} />
@@ -25,7 +30,7 @@ const NotificationDropdown = ({
   notifications,
   unreadCount,
   onMarkAllRead,
-  onNotificationClick
+  onNotificationClick,
 }: {
   notifications: Notification[];
   unreadCount: number;
@@ -35,9 +40,9 @@ const NotificationDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative z-50">
       <button
-        className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-slate-600 transition-colors rounded-xl md:rounded-full hover:bg-slate-100 ${isOpen ? 'text-[#FF5B60] bg-red-50' : ''}`}
+        className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-slate-600 transition-colors rounded-xl md:rounded-full hover:bg-slate-100 ${isOpen ? "text-[#FF5B60] bg-red-50" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <BellIcon className="w-6 h-6 md:w-7 md:h-7" />
@@ -50,12 +55,20 @@ const NotificationDropdown = ({
       {/* Dropdown */}
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
           <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
             <div className="flex items-center justify-between p-3 border-b border-gray-50 bg-gray-50/50">
               <span className="font-bold text-gray-900 text-sm">알림</span>
               {unreadCount > 0 && (
-                <button onClick={onMarkAllRead} className="text-xs text-gray-400 hover:text-[#FF5B60]">모두 읽음</button>
+                <button
+                  onClick={onMarkAllRead}
+                  className="text-xs text-gray-400 hover:text-[#FF5B60]"
+                >
+                  모두 읽음
+                </button>
               )}
             </div>
             <div className="max-h-[300px] overflow-y-auto">
@@ -68,13 +81,23 @@ const NotificationDropdown = ({
                         onNotificationClick(noti);
                         setIsOpen(false);
                       }}
-                      className={`w-full text-left p-3 hover:bg-gray-50 transition-colors flex gap-3 ${!noti.is_read ? 'bg-red-50/10' : ''}`}
+                      className={`w-full text-left p-3 hover:bg-gray-50 transition-colors flex gap-3 ${!noti.is_read ? "bg-red-50/10" : ""}`}
                     >
-                      <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${!noti.is_read ? 'bg-[#FF5B60]' : 'bg-gray-200'}`} />
+                      <div
+                        className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${!noti.is_read ? "bg-[#FF5B60]" : "bg-gray-200"}`}
+                      />
                       <div>
-                        <p className={`text-sm ${!noti.is_read ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{noti.title}</p>
-                        <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{noti.message}</p>
-                        <p className="text-[10px] text-gray-300 mt-1">{new Date(noti.created_at).toLocaleDateString()}</p>
+                        <p
+                          className={`text-sm ${!noti.is_read ? "font-bold text-gray-900" : "text-gray-600"}`}
+                        >
+                          {noti.title}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
+                          {noti.message}
+                        </p>
+                        <p className="text-[10px] text-gray-300 mt-1">
+                          {new Date(noti.created_at).toLocaleDateString()}
+                        </p>
                       </div>
                     </button>
                   ))}
@@ -110,7 +133,8 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+      const currentScrollY =
+        window.pageYOffset || document.documentElement.scrollTop;
       const diff = currentScrollY - lastScrollYRef.current;
 
       // 1. Top Zone Logic - Always show
@@ -132,8 +156,8 @@ export const Header: React.FC = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Fetch notifications
@@ -142,7 +166,7 @@ export const Header: React.FC = () => {
       const fetchNotis = async () => {
         const data = await getNotifications(user.uid);
         setNotifications(data);
-        setUnreadCount(data.filter(n => !n.is_read).length);
+        setUnreadCount(data.filter((n) => !n.is_read).length);
       };
       fetchNotis();
       // Optional: Set up real-time subscription here
@@ -157,8 +181,10 @@ export const Header: React.FC = () => {
   const handleNotificationClick = async (noti: Notification) => {
     if (!noti.is_read) {
       await markAsRead(noti.id);
-      setNotifications(prev => prev.map(n => n.id === noti.id ? { ...n, is_read: true } : n));
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === noti.id ? { ...n, is_read: true } : n)),
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     }
     if (noti.link_url) {
       window.location.href = noti.link_url;
@@ -168,7 +194,7 @@ export const Header: React.FC = () => {
   const handleMarkAllRead = async () => {
     if (user) {
       await markAllAsRead(user.uid);
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
     }
   };
@@ -178,12 +204,12 @@ export const Header: React.FC = () => {
       try {
         const [items, menuData] = await Promise.all([
           getActiveSections(),
-          getAllNavMenuItems()
+          getAllNavMenuItems(),
         ]);
         setNavItems(items);
         setAllMenuItems(menuData);
       } catch (error) {
-        console.error('Failed to load sections:', error);
+        console.error("Failed to load sections:", error);
         setNavItems([]);
       } finally {
         setLoadingNav(false);
@@ -198,26 +224,55 @@ export const Header: React.FC = () => {
       <div className="h-[112px] md:h-[175px]"></div>
 
       {/* Smart Reveal Header Container - SWITCHED TO FIXED */}
-      <div className={`
+      <div
+        className={`
         fixed top-0 left-0 w-full z-40 transition-all duration-300 ease-in-out bg-white border-b border-gray-200
-        ${isVisible ? 'translate-y-0 shadow-sm' : '-translate-y-full shadow-none'}
-      `}>
+        ${isVisible ? "translate-y-0 shadow-sm" : "-translate-y-full shadow-none"}
+      `}
+      >
         {/* Top Utility Links - Premium Subtle Style */}
         <div className="hidden md:block bg-[#F8F9FA] border-b border-gray-100 py-2">
           <Container>
             <div className="flex justify-end gap-5 text-[12px] text-gray-500 font-medium items-center">
               {user ? (
                 <>
-                  <span className="text-gray-900">{user.displayName || user.email}님 안녕하세요</span>
+                  <span className="text-gray-900">
+                    {user.displayName || user.email}님 안녕하세요
+                  </span>
                   <div className="w-px h-3 bg-gray-300 mx-1" />
-                  <button onClick={logout} className="hover:text-gray-900 transition-colors">로그아웃</button>
-                  <Link to="/cs" className="hover:text-gray-900 transition-colors">고객센터</Link>
+                  <button
+                    onClick={logout}
+                    className="hover:text-gray-900 transition-colors"
+                  >
+                    로그아웃
+                  </button>
+                  <Link
+                    to="/cs"
+                    className="hover:text-gray-900 transition-colors"
+                  >
+                    고객센터
+                  </Link>
                 </>
               ) : (
                 <>
-                  <Link to="/login" className="hover:text-gray-900 transition-colors">로그인</Link>
-                  <Link to="/signup" className="hover:text-gray-900 transition-colors">회원가입</Link>
-                  <Link to="/cs" className="hover:text-gray-900 transition-colors">고객센터</Link>
+                  <Link
+                    to="/login"
+                    className="hover:text-gray-900 transition-colors"
+                  >
+                    로그인
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="hover:text-gray-900 transition-colors"
+                  >
+                    회원가입
+                  </Link>
+                  <Link
+                    to="/cs"
+                    className="hover:text-gray-900 transition-colors"
+                  >
+                    고객센터
+                  </Link>
                 </>
               )}
             </div>
@@ -225,116 +280,99 @@ export const Header: React.FC = () => {
         </div>
 
         {/* Main Header Area */}
-        <div className="py-3 md:py-4 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="py-3 md:py-4 bg-white/80 backdrop-blur-md border-b border-gray-100 relative z-50">
           <Container>
-            <div className="flex items-center justify-between gap-1 md:gap-8">
+            <div className="flex items-center justify-between gap-4 md:gap-8">
               {/* Logo and Subtitle */}
-              <a href="/" className="flex-shrink-0 flex items-center gap-1.5 md:gap-2">
-                <img src="/logo.png" alt="행사어때" className="h-[17px] md:h-6 object-contain" />
-                <span className="text-[0.8rem] text-gray-400 font-medium mt-0.5 whitespace-nowrap hidden sm:block tracking-[1px]">| 대전형 MICE 행사 통합운영 플랫폼</span>
+              <a
+                href="/"
+                className="flex-shrink-0 flex items-center gap-1.5 md:gap-2"
+              >
+                <img
+                  src="/logo.png"
+                  alt="행사어때"
+                  className="h-[22px] md:h-6 object-contain"
+                />
+                <span className="text-[0.8rem] text-gray-400 font-medium mt-0.5 whitespace-nowrap hidden sm:block tracking-[1px]">
+                  | 대전형 MICE 행사 통합운영 플랫폼
+                </span>
               </a>
 
               <div className="hidden md:block flex-1" />
 
               {/* Right Aligned Area: Search + Actions */}
               <div className="flex items-center gap-1 md:gap-6 justify-end">
-
                 {/* Search Bar (Responsive for both Mobile and Desktop) */}
-                <div className="flex flex-1 md:flex-none relative group max-w-[140px] sm:max-w-[180px] md:max-w-none md:w-[220px]">
+                <div className="flex flex-1 md:flex-none relative group max-w-[200px] sm:max-w-[250px] md:max-w-none md:w-[280px]">
                   <input
                     type="text"
                     placeholder="무엇을 도와드릴까요?"
-                    className="w-full pl-3 md:pl-4 pr-8 md:pr-10 py-1.5 md:py-2.5 rounded-lg bg-[#F1F5F9] border border-slate-200 focus:border-[#FF5B60] focus:ring-1 focus:ring-[#FF5B60] focus:bg-white transition-all text-[11px] md:text-sm text-slate-700 placeholder-slate-400 text-ellipsis overflow-hidden whitespace-nowrap"
+                    className="w-full h-[44px] md:h-auto pl-4 md:pl-5 pr-10 md:pr-12 py-0 md:py-2.5 rounded-xl bg-[#F1F5F9] border border-slate-200 focus:border-[#FF5B60] focus:ring-1 focus:ring-[#FF5B60] focus:bg-white transition-all text-[14px] md:text-sm text-slate-700 placeholder-slate-400 text-ellipsis overflow-hidden whitespace-nowrap"
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         const target = e.target as HTMLInputElement;
-                        if (target.value.trim()) window.location.href = `/search?q=${encodeURIComponent(target.value)}`;
+                        if (target.value.trim())
+                          window.location.href = `/search?q=${encodeURIComponent(target.value)}`;
                       }
                     }}
                   />
-                  <Search className="absolute right-2.5 md:right-3 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5 md:w-4 md:h-4" />
+                  <Search className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 md:w-5 md:h-5" />
                 </div>
 
                 {/* Actions (Both Mobile & Desktop) */}
-                <div className="flex items-center gap-0 md:gap-2">
+                <div className="flex items-center gap-0 relative z-50">
                   <Link
                     to={user ? "/mypage" : "/login"}
                     className="hidden md:flex w-10 h-10 md:w-12 md:h-12 items-center justify-center text-gray-800 transition-colors rounded-full hover:bg-gray-100"
                   >
                     <ProfileIcon className="w-6 h-6 md:w-7 md:h-7" />
                   </Link>
-                  <NotificationDropdown
-                    notifications={notifications}
-                    unreadCount={unreadCount}
-                    onMarkAllRead={handleMarkAllRead}
-                    onNotificationClick={handleNotificationClick}
-                  />
+                  <div className="relative z-[60]">
+                    <NotificationDropdown
+                      notifications={notifications}
+                      unreadCount={unreadCount}
+                      onMarkAllRead={handleMarkAllRead}
+                      onNotificationClick={handleNotificationClick}
+                    />
+                  </div>
                   {/* Mobile Menu Toggle Button */}
                   <button
-                    className="md:hidden w-10 h-10 flex items-center justify-center text-gray-800 hover:bg-gray-100 rounded-full ml-1"
+                    className="md:hidden w-10 h-10 flex items-center justify-center text-gray-800 hover:bg-gray-100 rounded-full"
                     onClick={() => setShowMobileMenu(true)}
                   >
                     <MenuIcon className="w-6 h-6" />
                   </button>
                 </div>
-
               </div>
             </div>
           </Container>
         </div>
 
         {/* Premium GNB - Centered and Generous Spacing */}
-        <div className="border-t border-b border-gray-100 relative bg-white shadow-sm">
+        <div className="border-t border-b border-gray-100 relative bg-white shadow-sm z-40">
           <Container>
             <div className="relative flex justify-start w-full">
-              <nav className="flex items-center justify-start gap-4 sm:gap-6 md:gap-[1.8rem] w-full md:w-auto overflow-x-auto no-scrollbar scroll-smooth snap-x md:-ml-4 px-4 md:px-0">
+              <nav className="flex items-center justify-between sm:justify-start sm:gap-6 md:gap-2 w-full md:w-auto overflow-x-auto no-scrollbar scroll-smooth snap-x md:-ml-4 px-0">
                 <div
                   className="hidden md:block"
                   onMouseEnter={() => setShowDesktopMenu(true)}
                   onMouseLeave={() => setShowDesktopMenu(false)}
                 >
                   <button
-                    className={`flex items-center gap-2 whitespace-nowrap text-[15px] font-[550] px-4 py-4 border-b-[3px] transition-all text-[#FF5B60] ${showDesktopMenu ? 'border-[#FF5B60]' : 'border-transparent hover:border-[#FF5B60]'}`}
+                    className={`flex items-center gap-2 whitespace-nowrap text-[15px] font-[550] px-4 py-4 border-b-2 transition-all ${showDesktopMenu ? "text-[#FF5B60] border-[#FF5B60]" : "text-gray-900 border-transparent hover:text-[#FF5B60] hover:border-[#FF5B60]"}`}
                   >
                     <MenuIcon className="w-[18px] h-[18px]" /> 전체 서비스
                   </button>
                 </div>
 
                 <Link
-                  to="/company"
-                  className={`whitespace-nowrap text-[15px] font-[550] transition-all px-4 py-4 border-b-[3px] ${location.pathname === '/company'
-                    ? 'text-[#FF5B60] border-[#FF5B60]'
-                    : 'text-gray-900 border-transparent hover:border-gray-900'
-                    }`}
-                >
-                  회사소개
-                </Link>
-                <Link
                   to="/alliance"
-                  className={`whitespace-nowrap text-[15px] font-[550] transition-all px-4 py-4 border-b-[3px] ${location.pathname === '/alliance'
+                  className={`whitespace-nowrap text-[14px] min-[357px]:text-[15px] font-[550] transition-all px-0.5 min-[375px]:px-2 sm:px-4 py-4 border-b-2 ${location.pathname === '/alliance'
                     ? 'text-[#FF5B60] border-[#FF5B60]'
-                    : 'text-gray-900 border-transparent hover:border-gray-900'
+                    : 'text-gray-900 border-transparent hover:text-[#FF5B60] hover:border-[#FF5B60]'
                     }`}
                 >
                   MICE 회원사
-                </Link>
-                <Link
-                  to="/event"
-                  className={`whitespace-nowrap text-[15px] font-[550] transition-all px-4 py-4 border-b-[3px] ${location.pathname === '/event'
-                    ? 'text-[#FF5B60] border-[#FF5B60]'
-                    : 'text-gray-900 border-transparent hover:border-gray-900'
-                    }`}
-                >
-                  EVENT
-                </Link>
-                <Link
-                  to="/blank"
-                  className={`whitespace-nowrap text-[15px] font-[550] transition-all px-4 py-4 border-b-[3px] ${location.pathname === '/blank'
-                    ? 'text-[#FF5B60] border-[#FF5B60]'
-                    : 'text-gray-900 border-transparent hover:border-gray-900'
-                    }`}
-                >
-                  BLANK
                 </Link>
               </nav>
               <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
@@ -345,12 +383,16 @@ export const Header: React.FC = () => {
           <div
             className={`
               absolute top-full left-0 w-full z-50 transition-all duration-300 ease-in-out origin-top block
-              ${showDesktopMenu ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}
+              ${showDesktopMenu ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible pointer-events-none"}
             `}
             onMouseEnter={() => setShowDesktopMenu(true)}
             onMouseLeave={() => setShowDesktopMenu(false)}
           >
-            <FullMenu variant="desktop" items={allMenuItems} onClose={() => setShowDesktopMenu(false)} />
+            <FullMenu
+              variant="desktop"
+              items={allMenuItems}
+              onClose={() => setShowDesktopMenu(false)}
+            />
           </div>
         </div>
       </div>

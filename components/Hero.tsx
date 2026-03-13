@@ -110,28 +110,45 @@ export const Hero: React.FC = () => {
               className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-[7000ms] group-hover/slide:scale-105"
               style={{ backgroundImage: `url(${slide.image_url})` }}
             >
-              {/* Overlay gradient */}
-              <div className="absolute inset-0 bg-black/30 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              {/* Overlay gradient - Adjusted for better background visibility */}
+              <div className="absolute inset-0 bg-black/30 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
             </div>
 
-            {/* Content */}
+            {/* Content Area */}
             <Container className="relative h-full flex flex-col justify-center text-white z-20">
-              <div className={`max-w-2xl space-y-4 md:space-y-6 transition-all duration-1000 delay-300 transform
-                 ${index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}
-              `}>
-                <h1 className="text-3xl md:text-6xl font-light leading-tight tracking-tight text-white">
-                  <span className="block opacity-90 mb-2 text-lg md:text-2xl font-medium text-white">{slide.brand_text || '행사어때'}</span>
+              <div className="max-w-4xl">
+                {/* Brand Pill */}
+                <div className={`inline-flex items-center gap-2 px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-black/20 backdrop-blur-lg border border-white/10 text-[8px] md:text-[9px] font-medium text-[#FF5B60] transition-all duration-1000 delay-300 transform uppercase tracking-[0.2em] mb-6 md:mb-8
+                  ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+                `}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B60] shadow-[0_0_8px_#FF5B60] animate-pulse"></span>
+                  {slide.brand_text || 'Premium Solution'}
+                </div>
+
+                {/* Main Title */}
+                <h1 className={`text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tighter text-white mb-6 md:mb-8 transition-all duration-1000 delay-500 transform
+                  ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
+                `}>
                   {slide.title}
                 </h1>
-                <p className="text-lg md:text-2xl font-extralight text-slate-300">
+
+                {/* Subtitle */}
+                <p className={`text-sm md:text-base font-normal text-slate-100/80 leading-relaxed break-keep max-w-xl transition-all duration-1000 delay-700 transform
+                  ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
+                `}>
                   {slide.subtitle}
                 </p>
 
-                <div
-                  className="mt-8 px-10 py-3.5 bg-[#FF5B60] text-white text-sm font-semibold hover:bg-[#e54a4f] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/20 inline-flex items-center gap-2 group/btn"
-                >
-                  {slide.button_text || '상세보기'}
-                  <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+                {/* Action Button */}
+                <div className={`mt-10 md:mt-14 transition-all duration-1000 delay-1000 transform
+                  ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
+                `}>
+                  <div className="inline-flex items-center gap-3 px-4 py-2 md:px-8 md:py-4 bg-[#FF5B60] text-white text-sm md:text-base font-black rounded-2xl hover:bg-[#e54a4f] hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-[#FF5B60]/30 group/btn">
+                    {slide.button_text || '자세히 보기'}
+                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover/btn:translate-x-1 transition-transform">
+                      <ArrowRight size={16} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </Container>
@@ -182,17 +199,19 @@ export const Hero: React.FC = () => {
         <ChevronRight size={28} />
       </button>
 
-      {/* Dots Indicators - Responsive Layout */}
-      <div className="absolute top-6 left-6 md:top-auto md:bottom-8 md:left-1/2 md:-translate-x-1/2 z-30 flex gap-2">
+      {/* Indicators - Premium Bar Style */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-3">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 
-              ${index === currentSlide ? 'bg-[#FF5B60]' : 'bg-white/40 hover:bg-white/60'}
-            `}
+            className="group relative py-4"
             aria-label={`Go to slide ${index + 1}`}
-          />
+          >
+            <div className={`h-1 transition-all duration-500 rounded-full
+              ${index === currentSlide ? 'w-10 bg-[#FF5B60]' : 'w-6 bg-white/30 group-hover:bg-white/50'}
+            `} />
+          </button>
         ))}
       </div>
     </section>

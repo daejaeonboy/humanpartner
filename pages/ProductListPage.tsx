@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from '../components/ui/Container';
-import { Star, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getProducts, Product } from '../src/api/productApi';
 import { getProductsBySection } from '../src/api/sectionApi';
@@ -34,7 +34,7 @@ export const ProductListPage: React.FC = () => {
                 // Filter basic products
                 const basicProducts = productData.filter(p =>
                     p.product_type === 'basic' ||
-                    (!p.product_type && !p.category.includes('추가') && !p.category.includes('장소') && !p.category.includes('음식'))
+                    (!p.product_type && !((p.category || '').includes('추가')) && !((p.category || '').includes('장소')) && !((p.category || '').includes('음식')))
                 );
                 setProducts(basicProducts);
 
@@ -55,7 +55,7 @@ export const ProductListPage: React.FC = () => {
                 setChildToParentMap(cMap);
 
                 // Extract unique categories from actual products for fallback
-                const uniqueCategories = ['전체', ...new Set(basicProducts.map(p => p.category))];
+                const uniqueCategories = ['전체', ...new Set(basicProducts.map(p => p.category).filter(Boolean) as string[])];
 
                 // Determine Group & Active Category
                 let targetGroup: string | null = null;
@@ -111,22 +111,24 @@ export const ProductListPage: React.FC = () => {
 
     // Enhanced Filter Logic
     const filteredProducts = products.filter(p => {
+        const productCategory = p.category || '';
+
         // 1. If Active is "전체"
         if (activeCategory === "전체") {
             // If we are in a group context, "전체" means "Any product belonging to this group's children"
             if (currentGroup && parentToChildMap[currentGroup]) {
-                return parentToChildMap[currentGroup].includes(p.category);
+                return [currentGroup, ...parentToChildMap[currentGroup]].includes(productCategory);
             }
             // Otherwise, it means EVERYTHING
             return true;
         }
 
         // 2. Direct Match
-        if (p.category === activeCategory) return true;
+        if (productCategory === activeCategory) return true;
 
         // 3. Comma-separated list Match
         if (activeCategory.includes(',')) {
-            return activeCategory.split(',').includes(p.category);
+            return activeCategory.split(',').includes(productCategory);
         }
 
         return false;
@@ -143,14 +145,15 @@ export const ProductListPage: React.FC = () => {
                 </div>
 
                 {/* Category Filter */}
-                <div className="flex flex-wrap gap-2 mb-8">
+                <div className="flex flex-wrap gap-4 mb-6">
                     {displayedCategories.map((cat, idx) => (
                         <button
                             key={`${cat}-${idx}`}
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-4 py-2 rounded-full text-sm transition-all border ${activeCategory === cat
-                                ? 'bg-[#FF5B60] text-white border-[#FF5B60]'
-                                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+                            className={`h-[40px] min-w-[100px] px-4 rounded-lg text-[14px] md:text-[15px] font-semibold transition-all border
+                                ${activeCategory === cat
+                                    ? 'bg-[#FF5B60] text-white border-[#FF5B60] shadow-sm'
+                                    : 'bg-white text-slate-600 border-slate-200 hover:border-[#FF5B60] hover:text-[#FF5B60]'
                                 }`}
                         >
                             {cat}
@@ -197,12 +200,6 @@ export const ProductListPage: React.FC = () => {
                                         <span className="font-bold text-lg">
                                             {product.price?.toLocaleString()}원/일
                                         </span>
-                                    </div>
-
-                                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                                        <Star size={14} className="fill-yellow-400 text-yellow-400" />
-                                        <span className="font-bold text-black">{product.rating || 0}</span>
-                                        <span>({product.review_count?.toLocaleString() || 0})</span>
                                     </div>
 
                                     {product.stock !== undefined && product.stock > 0 && product.stock <= 3 && (
