@@ -16,7 +16,7 @@ content = content.replace(/{loading \? '가입 처리 중\.\.\.' : '가입하기
 content = content.replace(/{loading \? '.*?'.*?: '.*?媛€.*?\}/, "{loading ? '가입 처리 중...' : '가입하기'}");
 
 // Fix login link (line 711)
-content = content.replace(/이미 계정이 있으신가요\? <Link to=\"\/login\" className=\"text-\[#FF5B60\] font-bold hover:underline\">.*?<\/Link>/, '이미 계정이 있으신가요? <Link to="/login" className="text-[#FF5B60] font-bold hover:underline">로그인</Link>');
+content = content.replace(/이미 계정이 있으신가요\? <Link to=\"\/login\" className=\"text-\[#39B54A\] font-bold hover:underline\">.*?<\/Link>/, '이미 계정이 있으신가요? <Link to="/login" className="text-[#39B54A] font-bold hover:underline">로그인</Link>');
 // Fix trailing garbage if link was double-replaced or something
 content = content.replace(/濡쒓렇\?\?\/Link>/, '로그인</Link>');
 

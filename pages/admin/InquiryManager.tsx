@@ -68,7 +68,7 @@ export const InquiryManager: React.FC = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
-                <Loader2 className="animate-spin text-[#FF5B60]" size={40} />
+                <Loader2 className="animate-spin text-[#39B54A]" size={40} />
             </div>
         );
     }
@@ -78,7 +78,7 @@ export const InquiryManager: React.FC = () => {
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                    <MessageSquare size={24} className="text-[#FF5B60]" />
+                    <MessageSquare size={24} className="text-[#39B54A]" />
                     1:1 문의 관리
                 </h1>
                 <p className="text-sm text-slate-500 mt-1">고객 문의를 확인하고 답변을 작성합니다.</p>
@@ -86,7 +86,7 @@ export const InquiryManager: React.FC = () => {
 
             {/* Status Cards */}
             <div className="grid grid-cols-3 gap-4 mb-6">
-                <button onClick={() => setFilter('all')} className={`p-4 rounded-2xl border transition-all ${filter === 'all' ? 'bg-[#FF5B60] text-white border-[#FF5B60] shadow-lg shadow-[#FF5B60]/20' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
+                <button onClick={() => setFilter('all')} className={`p-4 rounded-2xl border transition-all ${filter === 'all' ? 'bg-[#39B54A] text-white border-[#39B54A] shadow-lg shadow-[#39B54A]/20' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
                     <div className={`text-2xl font-extrabold ${filter === 'all' ? 'text-white' : 'text-slate-900'}`}>{inquiries.length}</div>
                     <div className={`text-xs font-bold ${filter === 'all' ? 'text-white/80' : 'text-slate-500'}`}>전체 문의</div>
                 </button>

@@ -18,7 +18,7 @@ export function Footer() {
                     <div className="flex flex-wrap items-center gap-x-4 md:gap-x-6 text-[13px] md:text-sm font-semibold text-gray-600">
                         <Link to="/" className="hover:text-black transition-colors whitespace-nowrap flex items-center h-full">홈</Link>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
-                        <Link to="/cs" className="hover:text-[#FF5B60] font-bold text-[#FF5B60] transition-colors whitespace-nowrap flex items-center h-full">고객센터</Link>
+                        <Link to="/cs" className="hover:text-[#39B54A] font-bold text-[#39B54A] transition-colors whitespace-nowrap flex items-center h-full">고객센터</Link>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
                         <Link to="/company" className="cursor-pointer hover:text-black transition-colors whitespace-nowrap flex items-center h-full">회사소개</Link>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
@@ -53,7 +53,7 @@ export function Footer() {
                             <div>
                                 <h3 className="font-bold text-gray-800 mb-2 text-[13px] tracking-wide">입금계좌</h3>
                                 <div className="text-gray-800 font-bold text-sm mb-1 tracking-tight">
-                                    <span className="text-[#FF5B60]">하나은행</span> 734-910239-17507
+                                    <span className="text-[#39B54A]">하나은행</span> 734-910239-17507
                                 </div>
                                 <div className="text-gray-500 text-[11px]">
                                     예금주 : micepartner (이기섭)

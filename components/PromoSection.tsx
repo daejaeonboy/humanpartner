@@ -68,7 +68,7 @@ export const PromoSection: React.FC = () => {
   if (loading) {
     return (
       <div className="pb-16 bg-white flex items-center justify-center py-12">
-        <Loader2 className="animate-spin text-[#FF5B60]" size={32} />
+        <Loader2 className="animate-spin text-[#39B54A]" size={32} />
       </div>
     );
   }
@@ -92,7 +92,7 @@ export const PromoSection: React.FC = () => {
                   transform: `translateX(${tabs.findIndex(t => t.id === activeTabId) * 100}%)`,
                 }}
               >
-                <div className="h-full bg-[#FF5B60] rounded-xl shadow-lg shadow-[#FF5B60]/20 mx-0.5" />
+                <div className="h-full bg-[#39B54A] rounded-xl shadow-lg shadow-[#39B54A]/20 mx-0.5" />
               </div>
             )}
           </div>
@@ -115,7 +115,7 @@ export const PromoSection: React.FC = () => {
         {/* Banners Slider */}
         {loadingBanners ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="animate-spin text-[#FF5B60]" size={32} />
+            <Loader2 className="animate-spin text-[#39B54A]" size={32} />
           </div>
         ) : banners.length === 0 ? (
           <div className="text-center py-16 text-slate-400">
@@ -128,7 +128,7 @@ export const PromoSection: React.FC = () => {
             {/* Left Button */}
             <button
               onClick={scrollPrev}
-              className="absolute left-0 top-[calc(50%-8px)] -translate-y-1/2 -translate-x-3 md:-translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
+              className="absolute left-0 top-[calc(50%-8px)] -translate-y-1/2 -translate-x-3 md:-translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#39B54A] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
               aria-label="Previous slide"
             >
               <ChevronLeft size={24} />
@@ -137,7 +137,7 @@ export const PromoSection: React.FC = () => {
             {/* Right Button */}
             <button
               onClick={scrollNext}
-              className="absolute right-0 top-[calc(50%-8px)] -translate-y-1/2 translate-x-3 md:translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
+              className="absolute right-0 top-[calc(50%-8px)] -translate-y-1/2 translate-x-3 md:translate-x-4 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#39B54A] hover:scale-105 transition-all opacity-0 group-hover/slider:opacity-100"
               aria-label="Next slide"
             >
               <ChevronRight size={24} />
@@ -172,7 +172,7 @@ export const PromoSection: React.FC = () => {
                         {item.subtitle}
                       </p>
 
-                      <div className="self-start flex items-center gap-1.5 px-4 py-2 bg-[#FF5B60] text-white text-[12px] font-black rounded-lg shadow-lg shadow-[#FF5B60]/20 hover:bg-[#e54a4f] transition-all transform group-hover:scale-105 active:scale-95 pointer-events-auto group/btn">
+                      <div className="self-start flex items-center gap-1.5 px-4 py-2 bg-[#39B54A] text-white text-[12px] font-black rounded-lg shadow-lg shadow-[#39B54A]/20 hover:bg-[#39B54A] transition-all transform group-hover:scale-105 active:scale-95 pointer-events-auto group/btn">
                         {item.button_text || '바로가기'}
                         <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
                       </div>

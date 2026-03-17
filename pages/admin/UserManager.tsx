@@ -183,7 +183,7 @@ export const UserManager = () => {
     if (loading && users.length === 0) {
         return (
             <div className="flex items-center justify-center h-64">
-                <Loader2 className="animate-spin text-[#FF5B60]" size={40} />
+                <Loader2 className="animate-spin text-[#39B54A]" size={40} />
             </div>
         );
     }
@@ -210,10 +210,10 @@ export const UserManager = () => {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                         />
                     </div>
-                    <button onClick={handleSearch} className="px-6 py-2.5 bg-[#FF5B60] text-white rounded-lg hover:bg-[#002d66] transition-colors">
+                    <button onClick={handleSearch} className="px-6 py-2.5 bg-[#39B54A] text-white rounded-lg hover:bg-[#39B54A] transition-colors">
                         검색
                     </button>
                     {searchQuery && (
@@ -248,7 +248,7 @@ export const UserManager = () => {
                                 <tr key={user.id} className={`hover:bg-slate-50 ${!user.is_approved ? 'bg-amber-50/50' : ''}`}>
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${user.is_approved ? 'bg-gradient-to-br from-[#FF5B60] to-[#003366]' : 'bg-slate-400'}`}>
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${user.is_approved ? 'bg-gradient-to-br from-[#39B54A] to-[#39B54A]' : 'bg-slate-400'}`}>
                                                 {user.name.charAt(0)}
                                             </div>
                                             <div>
@@ -375,7 +375,7 @@ export const UserManager = () => {
                                             type="text"
                                             value={editData.name || ''}
                                             onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                         />
                                     </div>
                                     <div>
@@ -384,7 +384,7 @@ export const UserManager = () => {
                                             type="email"
                                             value={editData.email || ''}
                                             onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                         />
                                         <p className="text-xs text-green-600 mt-1">※ 이메일 변경 시 Firebase 로그인 아이디도 함께 변경됩니다.</p>
                                     </div>
@@ -396,7 +396,7 @@ export const UserManager = () => {
                                                 value={newPassword}
                                                 onChange={(e) => setNewPassword(e.target.value)}
                                                 placeholder="새 비밀번호 (최소 6자)"
-                                                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                                                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                             />
                                             <button
                                                 type="button"
@@ -416,7 +416,7 @@ export const UserManager = () => {
                                             type="tel"
                                             value={editData.phone || ''}
                                             onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                         />
                                     </div>
                                     <div>
@@ -425,7 +425,7 @@ export const UserManager = () => {
                                             type="text"
                                             value={editData.company_name || ''}
                                             onChange={(e) => setEditData({ ...editData, company_name: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
@@ -435,7 +435,7 @@ export const UserManager = () => {
                                                 type="text"
                                                 value={editData.department || ''}
                                                 onChange={(e) => setEditData({ ...editData, department: e.target.value })}
-                                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                             />
                                         </div>
                                         <div>
@@ -444,7 +444,7 @@ export const UserManager = () => {
                                                 type="text"
                                                 value={editData.position || ''}
                                                 onChange={(e) => setEditData({ ...editData, position: e.target.value })}
-                                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                             />
                                         </div>
                                     </div>
@@ -454,7 +454,7 @@ export const UserManager = () => {
                                             type="text"
                                             value={editData.business_number || ''}
                                             onChange={(e) => setEditData({ ...editData, business_number: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                         />
                                     </div>
                                     <div>
@@ -463,7 +463,7 @@ export const UserManager = () => {
                                             type="text"
                                             value={editData.address || ''}
                                             onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                         />
                                     </div>
                                 </div>
@@ -471,7 +471,7 @@ export const UserManager = () => {
                                 /* View Mode */
                                 <>
                                     <div className="flex items-center gap-4 pb-4 border-b">
-                                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold ${selectedUser.is_approved ? 'bg-gradient-to-br from-[#FF5B60] to-[#003366]' : 'bg-slate-400'}`}>
+                                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold ${selectedUser.is_approved ? 'bg-gradient-to-br from-[#39B54A] to-[#39B54A]' : 'bg-slate-400'}`}>
                                             {selectedUser.name.charAt(0)}
                                         </div>
                                         <div>
@@ -578,7 +578,7 @@ export const UserManager = () => {
                                     <button
                                         onClick={handleSaveEdit}
                                         disabled={saving}
-                                        className="px-4 py-2 bg-[#001E45] text-white rounded-lg hover:bg-[#002d66] transition-colors flex items-center gap-2 disabled:opacity-50"
+                                        className="px-4 py-2 bg-[#39B54A] text-white rounded-lg hover:bg-[#39B54A] transition-colors flex items-center gap-2 disabled:opacity-50"
                                     >
                                         {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                                         저장

@@ -98,7 +98,7 @@ export const GnbManager = () => {
         }
     };
 
-    if (loading) return <div className="flex justify-center h-64 items-center"><Loader2 className="animate-spin text-[#FF5B60]" /></div>;
+    if (loading) return <div className="flex justify-center h-64 items-center"><Loader2 className="animate-spin text-[#39B54A]" /></div>;
 
     return (
         <div className="h-[calc(100vh-100px)] flex flex-col">
@@ -107,14 +107,14 @@ export const GnbManager = () => {
                     <h2 className="text-2xl font-bold text-slate-800">상단 GNB 관리</h2>
                     <p className="text-slate-500 text-sm mt-1">상단바(Header)에 표시되는 메인 네비게이션 메뉴를 관리합니다.</p>
                 </div>
-                <button onClick={() => openModal()} className="bg-[#FF5B60] text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition flex items-center gap-2">
+                <button onClick={() => openModal()} className="bg-[#39B54A] text-white px-4 py-2 rounded-lg hover:bg-[#39B54A]/90 transition flex items-center gap-2">
                     <Plus size={18} /> GNB 메뉴 추가
                 </button>
             </div>
 
             <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
                 <div className="p-4 border-b bg-slate-50 flex items-center gap-2">
-                    <List size={18} className="text-[#FF5B60]" />
+                    <List size={18} className="text-[#39B54A]" />
                     <h3 className="font-bold">GNB 항목 목록</h3>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4">
@@ -170,12 +170,12 @@ export const GnbManager = () => {
                         <form onSubmit={handleSubmit} className="p-6 space-y-5">
                             <div>
                                 <label className="block text-sm font-bold text-slate-800 mb-1.5">메뉴명 (표시할 텍스트)</label>
-                                <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF5B60] outline-none transition-all" placeholder="예: 회사소개" />
+                                <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#39B54A] outline-none transition-all" placeholder="예: 회사소개" />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-bold text-slate-800 mb-1.5">이동 링크 (페이지 경로)</label>
-                                <input required type="text" value={formData.link} onChange={e => setFormData({ ...formData, link: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF5B60] outline-none transition-all text-sm" placeholder="예: /company 또는 /product-list?sectionId=..." />
+                                <input required type="text" value={formData.link} onChange={e => setFormData({ ...formData, link: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#39B54A] outline-none transition-all text-sm" placeholder="예: /company 또는 /product-list?sectionId=..." />
                                 <p className="text-xs text-slate-400 mt-1.5">클릭 시 이동할 주소를 입력해주세요.</p>
                             </div>
 
@@ -186,7 +186,7 @@ export const GnbManager = () => {
                                 </div>
                                 <div className="flex items-center pt-7">
                                     <label className="flex items-center gap-2 cursor-pointer group">
-                                        <input type="checkbox" checked={formData.is_active} onChange={e => setFormData({ ...formData, is_active: e.target.checked })} className="w-5 h-5 accent-[#FF5B60] cursor-pointer" />
+                                        <input type="checkbox" checked={formData.is_active} onChange={e => setFormData({ ...formData, is_active: e.target.checked })} className="w-5 h-5 accent-[#39B54A] cursor-pointer" />
                                         <span className="text-sm font-bold text-slate-600 group-hover:text-slate-800 transition-colors">노출 활성화</span>
                                     </label>
                                 </div>
@@ -194,7 +194,7 @@ export const GnbManager = () => {
 
                             <div className="pt-4 flex justify-end gap-3">
                                 <button type="button" onClick={closeModal} className="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors">취소</button>
-                                <button type="submit" disabled={saving} className="px-5 py-2.5 bg-[#FF5B60] text-white font-bold rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 min-w-[100px]">
+                                <button type="submit" disabled={saving} className="px-5 py-2.5 bg-[#39B54A] text-white font-bold rounded-xl hover:bg-[#39B54A]/90 transition-colors disabled:opacity-50 min-w-[100px]">
                                     {saving ? '저장 중...' : '저장하기'}
                                 </button>
                             </div>

@@ -216,14 +216,14 @@ export const ProductManager = () => {
         } catch (error) { alert('업로드 실패'); } finally { setUploading(false); }
     };
 
-    if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-[#FF5B60]" size={40} /></div>;
+    if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-[#39B54A]" size={40} /></div>;
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
             {/* 상단 탭: 패키지 관리 vs 공통 옵션 관리 */}
             <div className="flex border-b mb-6">
-                <button onClick={() => setViewMode('products')} className={`px-6 py-3 font-bold transition-all ${viewMode === 'products' ? 'border-b-2 border-[#FF5B60] text-[#FF5B60]' : 'text-slate-400'}`}>패키지 상품 관리</button>
-                <button onClick={() => setViewMode('options')} className={`px-6 py-3 font-bold transition-all ${viewMode === 'options' ? 'border-b-2 border-[#FF5B60] text-[#FF5B60]' : 'text-slate-400'}`}>공통 옵션 관리</button>
+                <button onClick={() => setViewMode('products')} className={`px-6 py-3 font-bold transition-all ${viewMode === 'products' ? 'border-b-2 border-[#39B54A] text-[#39B54A]' : 'text-slate-400'}`}>패키지 상품 관리</button>
+                <button onClick={() => setViewMode('options')} className={`px-6 py-3 font-bold transition-all ${viewMode === 'options' ? 'border-b-2 border-[#39B54A] text-[#39B54A]' : 'text-slate-400'}`}>공통 옵션 관리</button>
             </div>
 
             <div className="flex items-center justify-between mb-4">
@@ -234,7 +234,7 @@ export const ProductManager = () => {
                         setFormData({ ...formData, product_type: type });
                         setShowForm(true);
                     }}
-                    className="flex items-center gap-2 bg-[#FF5B60] text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition-all font-medium"
+                    className="flex items-center gap-2 bg-[#39B54A] text-white px-4 py-2 rounded-lg hover:bg-[#39B54A]/90 transition-all font-medium"
                 >
                     <Plus size={20} /> {viewMode === 'products' ? '새 패키지 추가' : '새 옵션 품목 추가'}
                 </button>
@@ -277,7 +277,7 @@ export const ProductManager = () => {
                                     setSelectedCategoryFilter(null);
                                 }}
                                 className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${selectedParentCategoryFilter === null
-                                    ? 'bg-white text-[#FF5B60] shadow-sm'
+                                    ? 'bg-white text-[#39B54A] shadow-sm'
                                     : 'text-slate-500'
                                     }`}
                             >
@@ -294,7 +294,7 @@ export const ProductManager = () => {
                                             setSelectedCategoryFilter(null);
                                         }}
                                         className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${selectedParentCategoryFilter === parent.name
-                                            ? 'bg-white text-[#FF5B60] shadow-sm'
+                                            ? 'bg-white text-[#39B54A] shadow-sm'
                                             : 'text-slate-500'
                                             }`}
                                     >
@@ -310,7 +310,7 @@ export const ProductManager = () => {
                                 <button
                                     onClick={() => setSelectedCategoryFilter(null)}
                                     className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${selectedCategoryFilter === null
-                                        ? 'bg-[#FF5B60] text-white shadow-sm'
+                                        ? 'bg-[#39B54A] text-white shadow-sm'
                                         : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
                                         }`}
                                 >
@@ -323,7 +323,7 @@ export const ProductManager = () => {
                                             key={child.id}
                                             onClick={() => setSelectedCategoryFilter(child.name)}
                                             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${selectedCategoryFilter === child.name
-                                                ? 'bg-[#FF5B60] text-white shadow-sm'
+                                                ? 'bg-[#39B54A] text-white shadow-sm'
                                                 : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
                                                 }`}
                                         >
@@ -348,7 +348,7 @@ export const ProductManager = () => {
                                     setViewTab(t as any);
                                     setSelectedCategoryFilter(null);
                                 }}
-                                className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewTab === t ? 'bg-white text-[#FF5B60] shadow-sm' : 'text-slate-500'}`}
+                                className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewTab === t ? 'bg-white text-[#39B54A] shadow-sm' : 'text-slate-500'}`}
                             >
                                 {t === 'cooperative' ? '협력 업체' : t === 'additional' ? '기본/추가 상품' : ''}
                             </button>
@@ -370,7 +370,7 @@ export const ProductManager = () => {
                                 <button
                                     onClick={() => setSelectedCategoryFilter(null)}
                                     className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${selectedCategoryFilter === null
-                                        ? 'bg-[#FF5B60] text-white shadow-sm'
+                                        ? 'bg-[#39B54A] text-white shadow-sm'
                                         : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
                                         }`}
                                 >
@@ -383,7 +383,7 @@ export const ProductManager = () => {
                                             key={cat}
                                             onClick={() => setSelectedCategoryFilter(cat)}
                                             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${selectedCategoryFilter === cat
-                                                ? 'bg-[#FF5B60] text-white shadow-sm'
+                                                ? 'bg-[#39B54A] text-white shadow-sm'
                                                 : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
                                                 }`}
                                         >
@@ -410,8 +410,8 @@ export const ProductManager = () => {
                             {/* 기본 정보 */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
-                                    <div><label className="block text-sm font-bold text-slate-700 mb-1">상품명 *</label><input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60] outline-none" /></div>
-                                    <div><label className="block text-sm font-bold text-slate-700 mb-1">간단 소개 <span className="text-slate-400 font-normal text-xs">(상품명 아래 표시)</span></label><textarea value={formData.short_description} onChange={(e) => setFormData({ ...formData, short_description: e.target.value })} placeholder="예: 전시회와 박람회에 필요한 모든 것을 한번에!" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60] outline-none resize-none h-16" /></div>
+                                    <div><label className="block text-sm font-bold text-slate-700 mb-1">상품명 *</label><input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A] outline-none" /></div>
+                                    <div><label className="block text-sm font-bold text-slate-700 mb-1">간단 소개 <span className="text-slate-400 font-normal text-xs">(상품명 아래 표시)</span></label><textarea value={formData.short_description} onChange={(e) => setFormData({ ...formData, short_description: e.target.value })} placeholder="예: 전시회와 박람회에 필요한 모든 것을 한번에!" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A] outline-none resize-none h-16" /></div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-bold text-slate-700 mb-1">1차 메뉴 (대분류)</label>
@@ -460,7 +460,7 @@ export const ProductManager = () => {
                                     <label className="block text-sm font-bold text-slate-700">대표 이미지</label>
                                     <div onClick={() => fileInputRef.current?.click()} className="w-full h-48 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all overflow-hidden relative border-slate-300">
                                         {formData.image_url ? <img src={formData.image_url} className="w-full h-full object-cover" /> : <div className="text-center text-slate-400"><Upload size={40} className="mx-auto mb-2" /><span className="text-sm">클릭하여 업로드</span></div>}
-                                        {uploading && <div className="absolute inset-0 bg-white/80 flex items-center justify-center"><Loader2 className="animate-spin text-[#FF5B60]" /></div>}
+                                        {uploading && <div className="absolute inset-0 bg-white/80 flex items-center justify-center"><Loader2 className="animate-spin text-[#39B54A]" /></div>}
                                     </div>
                                     <input type="file" ref={fileInputRef} className="hidden" onChange={handleImageUpload} />
                                     <input type="url" placeholder="또는 이미지 URL 입력" value={formData.image_url} onChange={(e) => setFormData({ ...formData, image_url: e.target.value })} className="w-full px-4 py-2 text-sm border rounded-lg outline-none" />
@@ -470,7 +470,7 @@ export const ProductManager = () => {
                             {/* 노출 섹션 */}
                             <div><label className="block text-sm font-bold text-slate-700 mb-2">노출 섹션 (메인페이지)</label>
                                 <div className="flex flex-wrap gap-2">
-                                    {sections.map(s => <button key={s.id} type="button" onClick={() => toggleSection(s.id!)} className={`px-4 py-1.5 rounded-full border text-sm font-medium transition-all ${selectedSections.includes(s.id!) ? 'bg-[#FF5B60] text-white border-[#FF5B60]' : 'bg-white text-slate-500 hover:border-slate-400'}`}>{s.name}</button>)}
+                                    {sections.map(s => <button key={s.id} type="button" onClick={() => toggleSection(s.id!)} className={`px-4 py-1.5 rounded-full border text-sm font-medium transition-all ${selectedSections.includes(s.id!) ? 'bg-[#39B54A] text-white border-[#39B54A]' : 'bg-white text-slate-500 hover:border-slate-400'}`}>{s.name}</button>)}
                                 </div>
                             </div>
 
@@ -480,7 +480,7 @@ export const ProductManager = () => {
                             {/* 패키지 구성 (패키지 상품일 때만 노출) */}
                             {formData.product_type === 'basic' && (
                                 <div className="space-y-6 pt-8 border-t">
-                                    <h4 className="font-bold text-lg flex items-center gap-2"><Grid3X3 size={22} className="text-[#FF5B60]" /> 패키지 구성 세부 설정</h4>
+                                    <h4 className="font-bold text-lg flex items-center gap-2"><Grid3X3 size={22} className="text-[#39B54A]" /> 패키지 구성 세부 설정</h4>
 
                                     {/* 기본 구성품 */}
                                     <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
@@ -531,7 +531,7 @@ export const ProductManager = () => {
                                                                 setFormData({ ...formData, [opt.key]: [] });
                                                             }
                                                         }}
-                                                        className="w-5 h-5 accent-[#FF5B60] cursor-pointer"
+                                                        className="w-5 h-5 accent-[#39B54A] cursor-pointer"
                                                     />
                                                     <label htmlFor={`toggle-${opt.id}`} className="font-bold text-slate-800 cursor-pointer text-lg">{opt.label}</label>
                                                 </div>
@@ -545,7 +545,7 @@ export const ProductManager = () => {
 
                         <div className="p-4 border-t bg-slate-50 flex gap-4 rounded-b-xl">
                             <button type="button" onClick={resetForm} className="flex-1 py-3 border border-slate-300 rounded-xl bg-white hover:bg-slate-100 font-bold transition-all">취소</button>
-                            <button type="submit" onClick={(e) => { e.preventDefault(); handleSubmit(e); }} disabled={saving} className="flex-1 py-3 bg-[#FF5B60] text-white rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800 disabled:bg-slate-300 shadow-lg font-bold transition-all">
+                            <button type="submit" onClick={(e) => { e.preventDefault(); handleSubmit(e); }} disabled={saving} className="flex-1 py-3 bg-[#39B54A] text-white rounded-xl flex items-center justify-center gap-2 hover:bg-[#39B54A]/90 disabled:bg-slate-300 shadow-lg font-bold transition-all">
                                 {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
                                 <span>{editingProduct ? '수정사항 저장' : '등록하기'}</span>
                             </button>
@@ -557,7 +557,7 @@ export const ProductManager = () => {
             {/* 상품 리스트 테이블 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden mt-8 border border-slate-100">
                 <table className="w-full">
-                    <thead className="bg-[#FF5B60] text-white">
+                    <thead className="bg-[#39B54A] text-white">
                         <tr>
                             <th className="text-left px-6 py-4 text-sm font-bold uppercase tracking-wider">상품 정보</th>
                             <th className="text-left px-6 py-4 text-sm font-bold uppercase tracking-wider">메뉴(카테고리)</th>

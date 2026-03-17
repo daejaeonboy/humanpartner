@@ -112,7 +112,7 @@ export const BookingList = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <Loader2 className="animate-spin text-[#FF5B60]" size={40} />
+                <Loader2 className="animate-spin text-[#39B54A]" size={40} />
             </div>
         );
     }
@@ -126,7 +126,7 @@ export const BookingList = () => {
                 </div>
                 <button
                     onClick={loadBookings}
-                    className="text-sm text-[#FF5B60] hover:text-teal-700"
+                    className="text-sm text-[#39B54A] hover:text-teal-700"
                 >
                     새로고침
                 </button>
@@ -277,9 +277,9 @@ export const BookingList = () => {
                                                         </div>
 
                                                         {/* Detail Block: Options */}
-                                                        <div className="flex-1 bg-white p-5 rounded-xl border border-[#FF5B60]/10 shadow-sm">
+                                                        <div className="flex-1 bg-white p-5 rounded-xl border border-[#39B54A]/10 shadow-sm">
                                                             <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
-                                                                <div className="w-1.5 h-4 bg-[#FF5B60] rounded-full"></div>
+                                                                <div className="w-1.5 h-4 bg-[#39B54A] rounded-full"></div>
                                                                 <h4 className="font-bold text-slate-800 text-sm">추가 선택 옵션</h4>
                                                             </div>
                                                             {booking.selected_options && booking.selected_options.length > 0 ? (
@@ -290,7 +290,7 @@ export const BookingList = () => {
                                                                                 <span className="text-base font-bold text-slate-800">{opt.name}</span>
                                                                                 <span className="text-xs text-slate-400">{opt.price.toLocaleString()}원 × {opt.quantity}개</span>
                                                                             </div>
-                                                                            <span className="font-black text-[#FF5B60] text-base">{(opt.price * opt.quantity).toLocaleString()}원</span>
+                                                                            <span className="font-black text-[#39B54A] text-base">{(opt.price * opt.quantity).toLocaleString()}원</span>
                                                                         </div>
                                                                     ))}
                                                                 </div>

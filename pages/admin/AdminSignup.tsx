@@ -87,7 +87,7 @@ export const AdminSignup: React.FC = () => {
             <div className="w-full max-w-md">
                 {/* Logo/Header */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#FF5B60] rounded-2xl mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#39B54A] rounded-2xl mb-4">
                         <Shield className="text-white" size={32} />
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900">관리자 회원가입</h1>
@@ -113,7 +113,7 @@ export const AdminSignup: React.FC = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                 placeholder="홍길동"
                             />
                         </div>
@@ -128,7 +128,7 @@ export const AdminSignup: React.FC = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                 placeholder="admin@micepartner.co.kr"
                             />
                         </div>
@@ -143,7 +143,7 @@ export const AdminSignup: React.FC = () => {
                                 value={formData.phone}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                 placeholder="010-1234-5678"
                                 maxLength={13}
                             />
@@ -161,7 +161,7 @@ export const AdminSignup: React.FC = () => {
                                         value={formData.password}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all pr-10"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all pr-10"
                                         placeholder="8자 이상"
                                     />
                                     <button
@@ -183,7 +183,7 @@ export const AdminSignup: React.FC = () => {
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                     placeholder="비밀번호 확인"
                                 />
                             </div>
@@ -198,7 +198,7 @@ export const AdminSignup: React.FC = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 bg-[#FF5B60] text-white rounded-lg font-semibold hover:bg-[#002d66] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-[#39B54A] text-white rounded-lg font-semibold hover:bg-[#39B54A] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
@@ -214,7 +214,7 @@ export const AdminSignup: React.FC = () => {
                     <div className="mt-6 pt-6 border-t border-gray-200">
                         <p className="text-center text-sm text-gray-600">
                             이미 계정이 있으신가요?{' '}
-                            <Link to="/admin/login" className="text-[#FF5B60] font-semibold hover:underline">
+                            <Link to="/admin/login" className="text-[#39B54A] font-semibold hover:underline">
                                 로그인
                             </Link>
                         </p>
@@ -224,7 +224,7 @@ export const AdminSignup: React.FC = () => {
                 <div className="text-center mt-6">
                     <a
                         href="/"
-                        className="text-sm text-gray-500 hover:text-[#FF5B60] transition-colors"
+                        className="text-sm text-gray-500 hover:text-[#39B54A] transition-colors"
                     >
                         ← 메인 사이트로 돌아가기
                     </a>

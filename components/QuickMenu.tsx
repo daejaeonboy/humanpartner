@@ -33,7 +33,7 @@ const getIcon = (iconName: string, colorClass: string = 'text-slate-500') => {
 // Color palette for icons
 const iconColors = [
   'text-rose-500', 'text-orange-500', 'text-green-600', 'text-blue-500',
-  'text-indigo-500', 'text-purple-500', 'text-yellow-600', 'text-[#FF5B60]',
+  'text-indigo-500', 'text-purple-500', 'text-yellow-600', 'text-[#39B54A]',
   'text-gray-500', 'text-pink-500', 'text-cyan-500', 'text-emerald-500'
 ];
 
@@ -60,7 +60,7 @@ export const QuickMenu: React.FC = () => {
   if (loading) {
     return (
       <div className="py-8 md:py-16 bg-white flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#FF5B60]" size={32} />
+        <Loader2 className="animate-spin text-[#39B54A]" size={32} />
       </div>
     );
   }

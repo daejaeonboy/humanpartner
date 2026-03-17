@@ -23,7 +23,7 @@ export const BottomNav: React.FC = () => {
                         <button
                             key={item.label}
                             onClick={() => navigate(item.path)}
-                            className={`flex flex-col items-center gap-1 min-w-[64px] transition-all duration-300 ${isActive ? 'text-[#FF5B60] scale-105' : 'text-slate-400'
+                            className={`flex flex-col items-center gap-1 min-w-[64px] transition-all duration-300 ${isActive ? 'text-[#39B54A] scale-105' : 'text-slate-400'
                                 }`}
                         >
                             <div className={`${isActive ? 'animate-pulse' : ''}`}>

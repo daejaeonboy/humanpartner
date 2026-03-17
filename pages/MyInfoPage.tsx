@@ -105,12 +105,12 @@ export const MyInfoPage: React.FC = () => {
         return (
             <div className="py-20 text-center">
                 <p className="text-gray-500 mb-4">로그인이 필요합니다.</p>
-                <Link to="/login" className="text-[#FF5B60] underline">로그인하기</Link>
+                <Link to="/login" className="text-[#39B54A] underline">로그인하기</Link>
             </div>
         );
     }
 
-    const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:ring-4 focus:ring-[#FF5B60]/10 focus:border-[#FF5B60] outline-none transition-all font-medium text-sm";
+    const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:ring-4 focus:ring-[#39B54A]/10 focus:border-[#39B54A] outline-none transition-all font-medium text-sm";
 
     return (
         <div className="py-12 bg-gray-50 min-h-screen">
@@ -120,7 +120,7 @@ export const MyInfoPage: React.FC = () => {
                     <div className="md:w-1/4">
                         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center">
                             <div className="w-20 h-20 bg-[#B3C1D4] rounded-full mx-auto mb-4 flex items-center justify-center">
-                                <User size={32} className="text-[#FF5B60]" />
+                                <User size={32} className="text-[#39B54A]" />
                             </div>
                             <h2 className="text-lg font-bold text-gray-900">{userProfile?.name || '고객'} 님</h2>
                             <p className="text-sm text-gray-500 mb-6">{userProfile?.email || user.email}</p>
@@ -128,7 +128,7 @@ export const MyInfoPage: React.FC = () => {
                                 <Link to="/mypage" className="text-sm text-gray-500 block w-full text-left py-2 px-2 rounded hover:bg-gray-50 hover:text-black">
                                     예약 내역
                                 </Link>
-                                <Link to="/mypage/info" className="text-sm font-bold text-[#FF5B60] block w-full text-left py-2 px-2 rounded hover:bg-[#FF5B60]/5">
+                                <Link to="/mypage/info" className="text-sm font-bold text-[#39B54A] block w-full text-left py-2 px-2 rounded hover:bg-[#39B54A]/5">
                                     내 정보 관리
                                 </Link>
                                 <Link to="/mypage/inquiry" className="text-sm text-gray-500 block w-full text-left py-2 px-2 rounded hover:bg-gray-50 hover:text-black">
@@ -147,7 +147,7 @@ export const MyInfoPage: React.FC = () => {
                         {/* Profile Form */}
                         <form onSubmit={handleSaveProfile} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-5">
                             <h3 className="font-bold text-gray-900 flex items-center gap-2 pb-3 border-b border-gray-100">
-                                <UserCircle size={20} className="text-[#FF5B60]" />
+                                <UserCircle size={20} className="text-[#39B54A]" />
                                 기본 정보
                             </h3>
 
@@ -194,7 +194,7 @@ export const MyInfoPage: React.FC = () => {
                                     type="submit"
                                     disabled={saving}
                                     className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all text-sm
-                                        ${saved ? 'bg-green-500 text-white' : 'bg-[#FF5B60] text-white hover:bg-[#e54a4f] shadow-lg shadow-[#FF5B60]/20'}
+                                        ${saved ? 'bg-green-500 text-white' : 'bg-[#39B54A] text-white hover:bg-[#39B54A] shadow-lg shadow-[#39B54A]/20'}
                                         disabled:bg-gray-300 disabled:shadow-none`}
                                 >
                                     {saving ? <Loader2 className="animate-spin" size={18} /> : saved ? '✓ 저장 완료' : <><Save size={18} /> 정보 저장</>}
@@ -205,7 +205,7 @@ export const MyInfoPage: React.FC = () => {
                         {/* Email Change */}
                         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
                             <h3 className="font-bold text-gray-900 flex items-center gap-2 pb-3 border-b border-gray-100">
-                                <Mail size={20} className="text-[#FF5B60]" />
+                                <Mail size={20} className="text-[#39B54A]" />
                                 이메일 변경
                             </h3>
                             <div className="flex gap-3">
@@ -228,7 +228,7 @@ export const MyInfoPage: React.FC = () => {
                         {/* Password Change */}
                         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
                             <h3 className="font-bold text-gray-900 flex items-center gap-2 pb-3 border-b border-gray-100">
-                                <Lock size={20} className="text-[#FF5B60]" />
+                                <Lock size={20} className="text-[#39B54A]" />
                                 비밀번호 변경
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -67,7 +67,7 @@ export const InquiryPage: React.FC = () => {
         return (
             <div className="py-20 text-center">
                 <p className="text-gray-500 mb-4">로그인이 필요합니다.</p>
-                <Link to="/login" className="text-[#FF5B60] underline">로그인하기</Link>
+                <Link to="/login" className="text-[#39B54A] underline">로그인하기</Link>
             </div>
         );
     }
@@ -80,7 +80,7 @@ export const InquiryPage: React.FC = () => {
                     <div className="md:w-1/4">
                         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center">
                             <div className="w-20 h-20 bg-[#B3C1D4] rounded-full mx-auto mb-4 flex items-center justify-center">
-                                <User size={32} className="text-[#FF5B60]" />
+                                <User size={32} className="text-[#39B54A]" />
                             </div>
                             <h2 className="text-lg font-bold text-gray-900">{userProfile?.name || '고객'} 님</h2>
                             <p className="text-sm text-gray-500 mb-6">{userProfile?.email || user.email}</p>
@@ -91,7 +91,7 @@ export const InquiryPage: React.FC = () => {
                                 <Link to="/mypage/info" className="text-sm text-gray-500 block w-full text-left py-2 px-2 rounded hover:bg-gray-50 hover:text-black">
                                     내 정보 관리
                                 </Link>
-                                <Link to="/mypage/inquiry" className="text-sm font-bold text-[#FF5B60] block w-full text-left py-2 px-2 rounded hover:bg-[#FF5B60]/5">
+                                <Link to="/mypage/inquiry" className="text-sm font-bold text-[#39B54A] block w-full text-left py-2 px-2 rounded hover:bg-[#39B54A]/5">
                                     1:1 문의 내역
                                 </Link>
                             </div>
@@ -124,7 +124,7 @@ export const InquiryPage: React.FC = () => {
                                             <select
                                                 value={formData.category}
                                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:ring-4 focus:ring-[#FF5B60]/10 focus:border-[#FF5B60] outline-none transition-all font-medium appearance-none"
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:ring-4 focus:ring-[#39B54A]/10 focus:border-[#39B54A] outline-none transition-all font-medium appearance-none"
                                             >
                                                 <option value="서비스 이용">서비스 이용</option>
                                                 <option value="예약/결제">예약/결제</option>
@@ -139,7 +139,7 @@ export const InquiryPage: React.FC = () => {
                                                 value={formData.title}
                                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                                 placeholder="문의 제목을 입력해주세요"
-                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:ring-4 focus:ring-[#FF5B60]/10 focus:border-[#FF5B60] outline-none transition-all font-medium"
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:ring-4 focus:ring-[#39B54A]/10 focus:border-[#39B54A] outline-none transition-all font-medium"
                                                 required
                                             />
                                         </div>
@@ -151,7 +151,7 @@ export const InquiryPage: React.FC = () => {
                                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                                             placeholder="문의하실 내용을 자세히 적어주세요"
                                             rows={6}
-                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:ring-4 focus:ring-[#FF5B60]/10 focus:border-[#FF5B60] outline-none transition-all font-medium resize-none"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:ring-4 focus:ring-[#39B54A]/10 focus:border-[#39B54A] outline-none transition-all font-medium resize-none"
                                             required
                                         />
                                     </div>
@@ -159,7 +159,7 @@ export const InquiryPage: React.FC = () => {
                                         <button
                                             type="submit"
                                             disabled={saving}
-                                            className="flex items-center gap-2 bg-[#FF5B60] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#e54a4f] shadow-lg shadow-[#FF5B60]/20 transition-all disabled:bg-gray-300 disabled:shadow-none"
+                                            className="flex items-center gap-2 bg-[#39B54A] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#39B54A] shadow-lg shadow-[#39B54A]/20 transition-all disabled:bg-gray-300 disabled:shadow-none"
                                         >
                                             {saving ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
                                             문의 등록
@@ -172,7 +172,7 @@ export const InquiryPage: React.FC = () => {
                         {/* Inquiry List */}
                         {loading ? (
                             <div className="flex items-center justify-center py-20">
-                                <Loader2 className="animate-spin text-[#FF5B60]" size={40} />
+                                <Loader2 className="animate-spin text-[#39B54A]" size={40} />
                             </div>
                         ) : inquiries.length === 0 ? (
                             <div className="bg-white p-12 rounded-xl border border-gray-200 text-center">
@@ -194,7 +194,7 @@ export const InquiryPage: React.FC = () => {
                                             <div className="flex items-center justify-between mb-4">
                                                 <div className="flex items-center gap-2">
                                                     {item.status === 'answered' ? (
-                                                        <span className="px-3 py-1 bg-[#FF5B60] text-white text-[10px] uppercase tracking-wider font-extrabold rounded-md shadow-sm">
+                                                        <span className="px-3 py-1 bg-[#39B54A] text-white text-[10px] uppercase tracking-wider font-extrabold rounded-md shadow-sm">
                                                             답변완료
                                                         </span>
                                                     ) : (
@@ -248,18 +248,18 @@ export const InquiryPage: React.FC = () => {
                                                     {/* Answer Section */}
                                                     {item.status === 'answered' && item.answer ? (
                                                         <div className="flex gap-4 sm:gap-6">
-                                                            <div className="w-10 h-10 rounded-2xl bg-[#FF5B60] text-white flex items-center justify-center font-black text-lg flex-shrink-0 shadow-lg shadow-[#FF5B60]/20">
+                                                            <div className="w-10 h-10 rounded-2xl bg-[#39B54A] text-white flex items-center justify-center font-black text-lg flex-shrink-0 shadow-lg shadow-[#39B54A]/20">
                                                                 A
                                                             </div>
                                                             <div className="flex-1 space-y-2">
                                                                 <div className="flex items-center justify-between">
                                                                     <div className="flex items-center gap-1.5">
-                                                                        <span className="text-xs font-black text-[#FF5B60] uppercase tracking-tight">행사어때 답변</span>
-                                                                        <CheckCircle size={10} className="text-[#FF5B60]" />
+                                                                        <span className="text-xs font-black text-[#39B54A] uppercase tracking-tight">행사어때 답변</span>
+                                                                        <CheckCircle size={10} className="text-[#39B54A]" />
                                                                     </div>
                                                                     <span className="text-[10px] font-medium text-gray-300">{formatDate(item.answered_at!)}</span>
                                                                 </div>
-                                                                <div className="bg-white rounded-2xl p-5 border-2 border-[#FF5B60]/10 shadow-sm">
+                                                                <div className="bg-white rounded-2xl p-5 border-2 border-[#39B54A]/10 shadow-sm">
                                                                     <p className="text-[15px] font-bold text-gray-800 leading-relaxed whitespace-pre-wrap italic">
                                                                         "{item.answer}"
                                                                     </p>

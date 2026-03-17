@@ -18,7 +18,7 @@ export const sendVerificationEmail = async (toName: string, toEmail: string, cod
     const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
             <div style="text-align: center; margin-bottom: 20px;">
-                <h1 style="color: #FF5B60; margin: 0;">마이스파트너</h1>
+                <h1 style="color: #39B54A; margin: 0;">마이스파트너</h1>
                 <p style="color: #666; font-size: 14px;">장소, 장비 </p>
             </div>
             
@@ -31,7 +31,7 @@ export const sendVerificationEmail = async (toName: string, toEmail: string, cod
                 </p>
                 
                 <div style="margin: 30px 0;">
-                    <span style="display: inline-block; background-color: #fff; padding: 15px 30px; font-size: 24px; font-weight: bold; color: #FF5B60; border: 2px solid #FF5B60; border-radius: 5px; letter-spacing: 5px;">
+                    <span style="display: inline-block; background-color: #fff; padding: 15px 30px; font-size: 24px; font-weight: bold; color: #39B54A; border: 2px solid #39B54A; border-radius: 5px; letter-spacing: 5px;">
                         ${code}
                     </span>
                 </div>

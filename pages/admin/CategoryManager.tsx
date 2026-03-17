@@ -201,7 +201,7 @@ export const CategoryManager: React.FC = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
-                <Loader2 className="animate-spin text-[#FF5B60]" size={40} />
+                <Loader2 className="animate-spin text-[#39B54A]" size={40} />
             </div>
         );
     }
@@ -221,7 +221,7 @@ export const CategoryManager: React.FC = () => {
                 </div>
                 <button
                     onClick={() => openAddModal(null, 1)}
-                    className="flex items-center gap-2 bg-[#FF5B60] text-white px-4 py-2 rounded-lg hover:bg-[#002a5c] transition-colors"
+                    className="flex items-center gap-2 bg-[#39B54A] text-white px-4 py-2 rounded-lg hover:bg-[#39B54A] transition-colors"
                 >
                     <Plus size={20} />
                     대분류 추가
@@ -293,7 +293,7 @@ export const CategoryManager: React.FC = () => {
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     placeholder={`예: ${formData.level === 1 ? 'IT 장비' : formData.level === 2 ? '노트북' : '맥북 프로'}`}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5B60]"
+                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#39B54A]"
                                     required
                                     autoFocus
                                 />
@@ -308,7 +308,7 @@ export const CategoryManager: React.FC = () => {
                                     value={formData.display_order}
                                     onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
                                     min="1"
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#001E45]"
+                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#39B54A]"
                                 />
                             </div>
 
@@ -323,7 +323,7 @@ export const CategoryManager: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#001E45] text-white rounded-lg hover:bg-[#002a5c] transition-colors disabled:bg-slate-400"
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#39B54A] text-white rounded-lg hover:bg-[#39B54A] transition-colors disabled:bg-slate-400"
                                 >
                                     {saving ? (
                                         <>
