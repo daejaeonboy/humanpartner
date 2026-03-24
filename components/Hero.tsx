@@ -118,10 +118,10 @@ export const Hero: React.FC = () => {
             <Container className="relative h-full flex flex-col justify-center text-white z-20">
               <div className="max-w-4xl">
                 {/* Brand Pill */}
-                <div className={`inline-flex items-center gap-2 px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-black/20 backdrop-blur-lg border border-white/10 text-[8px] md:text-[9px] font-medium text-[#FF5B60] transition-all duration-1000 delay-300 transform uppercase tracking-[0.2em] mb-6 md:mb-8
+                <div className={`inline-flex items-center gap-2 px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-black/20 backdrop-blur-lg border border-white/10 text-[8px] md:text-[9px] font-medium text-[#39B54A] transition-all duration-1000 delay-300 transform uppercase tracking-[0.2em] mb-6 md:mb-8
                   ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
                 `}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B60] shadow-[0_0_8px_#FF5B60] animate-pulse"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#39B54A] shadow-[0_0_8px_#39B54A] animate-pulse"></span>
                   {slide.brand_text || 'Premium Solution'}
                 </div>
 
@@ -144,7 +144,7 @@ export const Hero: React.FC = () => {
                   ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
                 `}>
                   <div className="flex flex-col gap-2">
-                    <div className="text-white/60 text-xs font-bold transition-all group-hover/slide:text-[#FF5B60] group-hover/slide:translate-x-2 flex items-center gap-2">
+                    <div className="text-white/60 text-xs font-bold transition-all group-hover/slide:text-[#39B54A] group-hover/slide:translate-x-2 flex items-center gap-2">
                       자세히 보기 <ArrowRight size={14} />
                     </div>
                   </div>
@@ -208,7 +208,7 @@ export const Hero: React.FC = () => {
             aria-label={`Go to slide ${index + 1}`}
           >
             <div className={`h-1 transition-all duration-500 rounded-full
-              ${index === currentSlide ? 'w-10 bg-[#FF5B60]' : 'w-6 bg-white/30 group-hover:bg-white/50'}
+              ${index === currentSlide ? 'w-10 bg-[#39B54A]' : 'w-6 bg-white/30 group-hover:bg-white/50'}
             `} />
           </button>
         ))}

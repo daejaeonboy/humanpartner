@@ -74,7 +74,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           <div>
             <h2 className="text-xl md:text-[28px] font-semibold text-slate-900 tracking-tight">{title}</h2>
           </div>
-          <button className="text-sm font-semibold text-slate-400 hover:text-[#FF5B60] transition-colors hidden md:block">전체보기</button>
+          <button className="text-sm font-semibold text-slate-400 hover:text-[#39B54A] transition-colors hidden md:block">전체보기</button>
         </div>
 
         {/* Filter Pills */}
@@ -85,8 +85,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               onClick={() => setActiveCategory(cat)}
               className={`h-[40px] min-w-[100px] px-4 rounded-lg text-[14px] md:text-[15px] font-semibold transition-all border flex-shrink-0 text-center shadow-sm hover:shadow
                 ${activeCategory === cat
-                  ? 'bg-[#FF5B60] text-white border-[#FF5B60]'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-[#FF5B60] hover:text-[#FF5B60]'
+                  ? 'bg-[#39B54A] text-white border-[#39B54A]'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-[#39B54A] hover:text-[#39B54A]'
                 }`}
             >
               {cat}
@@ -99,7 +99,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           {/* Left Arrow */}
           <button
             onClick={() => scroll('left')}
-            className="absolute -left-3 md:-left-6 top-[calc(50%-48px)] -translate-y-1/2 z-10 w-14 h-14 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0"
+            className="absolute -left-3 md:-left-6 top-[calc(50%-48px)] -translate-y-1/2 z-10 w-14 h-14 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#39B54A] hover:scale-105 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0"
           >
             <ChevronLeft size={28} />
           </button>
@@ -107,7 +107,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           {/* Right Arrow */}
           <button
             onClick={() => scroll('right')}
-            className="absolute -right-3 md:-right-6 top-[calc(50%-48px)] -translate-y-1/2 z-10 w-14 h-14 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#FF5B60] hover:scale-105 transition-all opacity-0 group-hover:opacity-100"
+            className="absolute -right-3 md:-right-6 top-[calc(50%-48px)] -translate-y-1/2 z-10 w-14 h-14 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-full shadow-xl flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-400 hover:text-[#39B54A] hover:scale-105 transition-all opacity-0 group-hover:opacity-100"
           >
             <ChevronRight size={28} />
           </button>
@@ -140,11 +140,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="font-bold text-[16px] text-slate-800 truncate group-hover/card:text-[#FF5B60] transition-colors">{product.title}</h3>
+                  <h3 className="font-bold text-[16px] text-slate-800 truncate group-hover/card:text-[#39B54A] transition-colors">{product.title}</h3>
 
                   <div className="flex items-center gap-2 mt-1">
                     {product.discountRate && (
-                      <span className="text-rose-500 font-bold text-[24px]">{product.discountRate}%</span>
+                      <span className="text-[#39B54A] font-bold text-[24px]">{product.discountRate}%</span>
                     )}
                     <span className="font-medium text-[20px] text-slate-900">
                       {product.price?.toLocaleString()}<span className="text-sm font-medium ml-0.5">원</span>

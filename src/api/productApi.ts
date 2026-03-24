@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 
 export interface Product {
     id?: string;
+    product_code?: string;
     name: string;
     category?: string; // 카테고리 (중분류)
     _parent_category?: string; // VIEW 등에서 조인으로 가져올 대분류

@@ -96,7 +96,7 @@ export const MyPage: React.FC = () => {
         return (
             <div className="py-20 text-center">
                 <p className="text-gray-500 mb-4">로그인이 필요합니다.</p>
-                <Link to="/login" className="text-[#FF5B60] underline">로그인하기</Link>
+                <Link to="/login" className="text-[#39B54A] underline">로그인하기</Link>
             </div>
         );
     }
@@ -109,12 +109,12 @@ export const MyPage: React.FC = () => {
                     <div className="md:w-1/4">
                         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center">
                             <div className="w-20 h-20 bg-[#B3C1D4] rounded-full mx-auto mb-4 flex items-center justify-center">
-                                <User size={32} className="text-[#FF5B60]" />
+                                <User size={32} className="text-[#39B54A]" />
                             </div>
                             <h2 className="text-lg font-bold text-gray-900">{userProfile?.name || '고객'} 님</h2>
                             <p className="text-sm text-gray-500 mb-6">{userProfile?.email || user.email}</p>
                             <div className="text-left space-y-1 border-t border-gray-100 pt-4">
-                                <Link to="/mypage" className="text-sm font-bold text-[#FF5B60] block w-full text-left py-2 px-2 rounded hover:bg-[#FF5B60]/5">
+                                <Link to="/mypage" className="text-sm font-bold text-[#39B54A] block w-full text-left py-2 px-2 rounded hover:bg-[#39B54A]/5">
                                     예약 내역
                                 </Link>
                                 <Link to="/mypage/info" className="text-sm text-gray-500 block w-full text-left py-2 px-2 rounded hover:bg-gray-50 hover:text-black">
@@ -135,12 +135,12 @@ export const MyPage: React.FC = () => {
 
                         {loading ? (
                             <div className="flex items-center justify-center py-20">
-                                <Loader2 className="animate-spin text-[#FF5B60]" size={40} />
+                                <Loader2 className="animate-spin text-[#39B54A]" size={40} />
                             </div>
                         ) : bookings.length === 0 ? (
                             <div className="bg-white p-12 rounded-xl border border-gray-200 text-center">
                                 <p className="text-gray-500 mb-4">예약 내역이 없습니다.</p>
-                                <Link to="/products" className="text-[#FF5B60] underline">상품 둘러보기</Link>
+                                <Link to="/products" className="text-[#39B54A] underline">상품 둘러보기</Link>
                             </div>
                         ) : (
                             <div className="space-y-4">
@@ -179,7 +179,7 @@ export const MyPage: React.FC = () => {
                                                             const el = document.getElementById(`details-${booking.id}`);
                                                             if (el) el.classList.toggle('hidden');
                                                         }}
-                                                        className="w-full py-4 bg-[#FF5B60] text-white rounded-xl text-base font-bold hover:bg-[#E04F54] transition-all shadow-md active:scale-[0.98]"
+                                                        className="w-full py-4 bg-[#39B54A] text-white rounded-xl text-base font-bold hover:bg-[#2F9A3F] transition-all shadow-md active:scale-[0.98]"
                                                     >
                                                         예약 내역보기
                                                     </button>
@@ -231,7 +231,7 @@ export const MyPage: React.FC = () => {
                                                                 const el = document.getElementById(`details-${booking.id}`);
                                                                 if (el) el.classList.toggle('hidden');
                                                             }}
-                                                            className="px-5 py-2.5 bg-[#FF5B60] text-white rounded-lg text-sm font-bold hover:bg-[#E04F54] transition-all shadow-sm flex items-center gap-2"
+                                                            className="px-5 py-2.5 bg-[#39B54A] text-white rounded-lg text-sm font-bold hover:bg-[#2F9A3F] transition-all shadow-sm flex items-center gap-2"
                                                         >
                                                             상세 구성 내역
                                                         </button>
@@ -276,7 +276,7 @@ export const MyPage: React.FC = () => {
                                                                                         <p className="font-bold text-gray-800 text-lg leading-tight">{comp.name}</p>
                                                                                         {comp.model_name && <p className="text-xs text-gray-400 mt-1">{comp.model_name}</p>}
                                                                                     </div>
-                                                                                    <span className="text-lg font-bold text-[#FF5B60] whitespace-nowrap ml-2">{comp.quantity}개</span>
+                                                                                    <span className="text-lg font-bold text-[#39B54A] whitespace-nowrap ml-2">{comp.quantity}개</span>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -292,13 +292,13 @@ export const MyPage: React.FC = () => {
                                                     <div>
                                                         <div className="flex items-center justify-between mb-4">
                                                             <h4 className="text-xl font-bold text-gray-900 flex items-center gap-3">
-                                                                <span className="w-1.5 h-6 bg-[#FF5B60] inline-block rounded-sm"></span>
+                                                                <span className="w-1.5 h-6 bg-[#39B54A] inline-block rounded-sm"></span>
                                                                 내가 추가한 유료 옵션
                                                             </h4>
-                                                            <span className="text-sm text-[#FF5B60] font-bold">{booking.selected_options.length}개 선택</span>
+                                                            <span className="text-sm text-[#39B54A] font-bold">{booking.selected_options.length}개 선택</span>
                                                         </div>
 
-                                                        <div className="border-t-2 border-[#FF5B60] pt-6">
+                                                        <div className="border-t-2 border-[#39B54A] pt-6">
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
                                                                 {booking.selected_options.map((opt, i) => {
                                                                      const imageUrl = imageMap[opt.name] || getItemImage(opt.name);
@@ -319,7 +319,7 @@ export const MyPage: React.FC = () => {
                                                                                      <div>
                                                                                          <p className="font-bold text-gray-800 text-lg leading-tight">{opt.name}</p>
                                                                                      </div>
-                                                                                     <span className="text-lg font-bold text-[#FF5B60] whitespace-nowrap ml-2">{opt.quantity}개</span>
+                                                                                     <span className="text-lg font-bold text-[#39B54A] whitespace-nowrap ml-2">{opt.quantity}개</span>
                                                                                  </div>
                                                                              </div>
                                                                          </div>

@@ -144,7 +144,7 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                 {user ? (
                                     <>
                                         <div className="mb-4">
-                                            <div className="w-16 h-16 bg-[#FF5B60]/10 text-[#FF5B60] rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-xl">
+                                            <div className="w-16 h-16 bg-[#39B54A]/10 text-[#39B54A] rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-xl">
                                                 {userProfile?.name?.[0] || user.email?.[0]?.toUpperCase() || 'U'}
                                             </div>
                                             <h3 className="font-bold text-lg text-slate-800 mb-1">
@@ -153,8 +153,8 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                             <p className="text-xs text-slate-500">행사어때와 함께<br />멋진 행사를 기획해보세요.</p>
                                         </div>
                                         <div className="flex gap-3">
-                                            <Link to="/mypage" onClick={onClose} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm hover:bg-[#FF5B60]/10 hover:text-[#FF5B60] transition-all text-center">마이페이지</Link>
-                                            <Link to="/cs" onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-[#FF5B60]/5 hover:border-[#FF5B60]/30 hover:text-[#FF5B60] transition-all text-center">고객센터</Link>
+                                            <Link to="/mypage" onClick={onClose} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm hover:bg-[#39B54A]/10 hover:text-[#39B54A] transition-all text-center">마이페이지</Link>
+                                            <Link to="/cs" onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-[#39B54A]/5 hover:border-[#39B54A]/30 hover:text-[#39B54A] transition-all text-center">고객센터</Link>
                                         </div>
                                     </>
                                 ) : (
@@ -162,7 +162,7 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                         <h3 className="font-bold text-lg text-slate-800 mb-1">환영합니다!</h3>
                                         <p className="text-sm text-slate-500 mb-4">로그인하고 더 많은 혜택을 받아보세요.</p>
                                         <div className="flex gap-3">
-                                            <Link to="/login" onClick={onClose} className="flex-1 py-3 rounded-xl bg-[#FF5B60] text-white font-bold text-sm hover:bg-[#e54a4f] transition-colors text-center">로그인</Link>
+                                            <Link to="/login" onClick={onClose} className="flex-1 py-3 rounded-xl bg-[#39B54A] text-white font-bold text-sm hover:bg-[#2F9A3F] transition-colors text-center">로그인</Link>
                                             <Link to="/signup" onClick={onClose} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm hover:bg-slate-200 transition-colors text-center">회원가입</Link>
                                         </div>
                                     </>
@@ -184,12 +184,12 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                             onClick={() => toggleSection(group.name)}
                                             className="w-full flex items-center justify-between py-4 text-left"
                                         >
-                                            <span className={`text-base font-bold ${openSections.has(group.name) ? 'text-[#FF5B60]' : 'text-slate-800'}`}>
+                                            <span className={`text-base font-bold ${openSections.has(group.name) ? 'text-[#39B54A]' : 'text-slate-800'}`}>
                                                 {group.name}
                                             </span>
                                             <ChevronRight
                                                 size={20}
-                                                className={`text-slate-400 transition-transform duration-300 ${openSections.has(group.name) ? 'rotate-90 text-[#FF5B60]' : ''}`}
+                                                className={`text-slate-400 transition-transform duration-300 ${openSections.has(group.name) ? 'rotate-90 text-[#39B54A]' : ''}`}
                                             />
                                         </button>
                                     ) : (
@@ -211,9 +211,9 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                                         <Link
                                                             to={`/products?category=${encodeURIComponent(item.name)}` /*&title removed to keep URL simple*/}
                                                             onClick={onClose}
-                                                            className={`block transition-all hover:text-[#FF5B60]
+                                                            className={`block transition-all hover:text-[#39B54A]
                                                             ${variant === 'mobile'
-                                                                    ? 'p-3 text-sm text-slate-600 font-medium hover:bg-[#FF5B60]/5 rounded-lg flex items-center justify-between'
+                                                                    ? 'p-3 text-sm text-slate-600 font-medium hover:bg-[#39B54A]/5 rounded-lg flex items-center justify-between'
                                                                     : 'text-slate-600 flex items-center gap-1 group text-sm'}
                                                         `}
                                                         >
@@ -230,7 +230,7 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                                             <Link
                                                                 to={parentObj.link}
                                                                 onClick={onClose}
-                                                                className="block p-3 text-sm text-slate-600 font-medium hover:text-[#FF5B60]"
+                                                                className="block p-3 text-sm text-slate-600 font-medium hover:text-[#39B54A]"
                                                             >
                                                                 바로가기
                                                             </Link>
@@ -246,7 +246,7 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                                 <div className="mt-10 pt-4 border-t border-gray-100 flex justify-center">
                                     <button
                                         onClick={() => { logout(); onClose(); }}
-                                        className="py-3 px-8 rounded-xl bg-slate-50 text-slate-400 font-medium text-sm hover:bg-red-50 hover:text-red-400 transition-colors"
+                                        className="py-3 px-8 rounded-xl bg-slate-50 text-slate-400 font-medium text-sm hover:bg-[#39B54A]/5 hover:text-[#39B54A] transition-colors"
                                     >
                                         로그아웃
                                     </button>

@@ -40,6 +40,42 @@ export const CMSManager: React.FC = () => {
         loadData();
     }, []);
 
+    const promoProducts = products.filter((product) => product.product_type === 'basic' || !product.product_type);
+
+    const findProductByKey = (key?: string | null) => {
+        if (!key) return null;
+        return products.find((product) => product.product_code === key || product.id === key) || null;
+    };
+
+    const getProductRoutingKey = (product: Product) => product.product_code || product.id || '';
+
+    const applyLinkedProductToBanner = (productKey: string) => {
+        const selectedProduct = findProductByKey(productKey);
+
+        setFormData((prev: any) => {
+            if (!selectedProduct) {
+                return {
+                    ...prev,
+                    target_product_code: '',
+                };
+            }
+
+            return {
+                ...prev,
+                target_product_code: productKey,
+                title: selectedProduct.name,
+                subtitle: selectedProduct.short_description || prev.subtitle || '',
+                image_url: selectedProduct.image_url || prev.image_url || '',
+                link: `/p/${getProductRoutingKey(selectedProduct)}`,
+                button_text: prev.button_text || '상품 보기',
+            };
+        });
+    };
+
+    const selectedPromoProduct = formData.banner_type === 'promo'
+        ? findProductByKey(formData.target_product_code)
+        : null;
+
     const loadData = async () => {
         setLoading(true);
         try {
@@ -135,10 +171,33 @@ export const CMSManager: React.FC = () => {
                     await addTabMenuItem(formData);
                 }
             } else if (activeTab === 'banners') {
+                let bannerPayload = { ...formData };
+
+                if (bannerPayload.banner_type === 'promo') {
+                    const selectedProduct = findProductByKey(bannerPayload.target_product_code);
+
+                    if (!bannerPayload.tab_id) {
+                        throw new Error('프로모션 탭을 선택해 주세요.');
+                    }
+
+                    if (!selectedProduct) {
+                        throw new Error('프로모션에 노출할 상품을 선택해 주세요.');
+                    }
+
+                    bannerPayload = {
+                        ...bannerPayload,
+                        title: selectedProduct.name,
+                        subtitle: selectedProduct.short_description || '',
+                        image_url: selectedProduct.image_url || '',
+                        link: `/p/${getProductRoutingKey(selectedProduct)}`,
+                        button_text: bannerPayload.button_text || '상품 보기',
+                    };
+                }
+
                 if (editingItem) {
-                    await updateBanner(editingItem.id, formData);
+                    await updateBanner(editingItem.id, bannerPayload);
                 } else {
-                    await addBanner(formData);
+                    await addBanner(bannerPayload);
                 }
             } else if (activeTab === 'popups') {
                 // Handle empty dates as null
@@ -214,7 +273,7 @@ export const CMSManager: React.FC = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
-                <Loader2 className="animate-spin text-[#FF5B60]" size={40} />
+                <Loader2 className="animate-spin text-[#39B54A]" size={40} />
             </div>
         );
     }
@@ -243,7 +302,7 @@ export const CMSManager: React.FC = () => {
                 </div>
                 <button
                     onClick={openAddModal}
-                    className="flex items-center gap-2 bg-[#FF5B60] text-white px-4 py-2 rounded-lg hover:bg-[#FF5B60] transition-colors"
+                    className="flex items-center gap-2 bg-[#39B54A] text-white px-4 py-2 rounded-lg hover:bg-[#39B54A] transition-colors"
                 >
                     <Plus size={20} />
                     추가
@@ -257,7 +316,7 @@ export const CMSManager: React.FC = () => {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors border-b-2 -mb-px ${activeTab === tab.id
-                            ? 'text-[#FF5B60] border-[#FF5B60]'
+                            ? 'text-[#39B54A] border-[#39B54A]'
                             : 'text-slate-500 border-transparent hover:text-slate-700'
                             }`}
                     >
@@ -327,9 +386,23 @@ export const CMSManager: React.FC = () => {
                                             </>
                                         )}
                                     </div>
-                                    <span className="text-sm text-slate-400">
+                                    <div className="text-sm text-slate-400">
                                         {activeTab === 'alliance' ? item.phone : item.link}
-                                    </span>
+                                    </div>
+                                    {activeTab === 'banners' && item.banner_type === 'promo' && (
+                                        <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                                            {item.tab_id && (
+                                                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">
+                                                    탭: {tabMenuItems.find((tab) => tab.id === item.tab_id)?.name || '-'}
+                                                </span>
+                                            )}
+                                            {item.target_product_code && (
+                                                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                                                    상품: {findProductByKey(item.target_product_code)?.name || item.target_product_code}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <span className="text-xs text-slate-400">순서: {item.display_order}</span>
@@ -387,7 +460,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.name || ''}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             required
                                         />
                                     </div>
@@ -399,7 +472,7 @@ export const CMSManager: React.FC = () => {
                                                 value={formData.image_url || ''}
                                                 onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                                                 placeholder="이미지 URL 입력 또는 업로드"
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60] text-sm"
+                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A] text-sm"
                                             />
                                             <input
                                                 type="file"
@@ -439,7 +512,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.link || ''}
                                             onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             placeholder="/products?category=hotel"
                                         />
                                         <p className="text-xs text-slate-500 mt-1">클릭 시 이동할 경로를 입력하세요.</p>
@@ -456,7 +529,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.name || ''}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             required
                                         />
                                     </div>
@@ -466,7 +539,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.link || ''}
                                             onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             placeholder="/products?category=notebook"
                                         />
                                     </div>
@@ -480,8 +553,13 @@ export const CMSManager: React.FC = () => {
                                         <label className="block text-sm font-medium text-slate-700 mb-1">배너 위치</label>
                                         <select
                                             value={formData.banner_type || 'hero'}
-                                            onChange={(e) => setFormData({ ...formData, banner_type: e.target.value, tab_id: e.target.value === 'hero' ? null : formData.tab_id })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                banner_type: e.target.value,
+                                                tab_id: e.target.value === 'hero' ? null : formData.tab_id,
+                                                target_product_code: e.target.value === 'hero' ? '' : formData.target_product_code
+                                            })}
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                         >
                                             <option value="hero">메인 슬라이드 (상단 전체 배너)</option>
                                             <option value="promo">프로모션 (탭 메뉴 하단)</option>
@@ -495,7 +573,7 @@ export const CMSManager: React.FC = () => {
                                             <select
                                                 value={formData.tab_id || ''}
                                                 onChange={(e) => setFormData({ ...formData, tab_id: e.target.value || null })}
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                                 required
                                             >
                                                 <option value="">탭을 선택하세요</option>
@@ -507,6 +585,11 @@ export const CMSManager: React.FC = () => {
                                         </div>
                                     )}
 
+                                    {formData.banner_type === 'promo' && (
+                                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+                                            프로모션은 선택한 상품을 탭 카드로 노출하는 방식이며 수동 배너 입력보다 상품 선택이 우선 적용됩니다.
+                                        </div>
+                                    )}
                                     {/* Brand text - only show when banner_type is hero */}
                                     {formData.banner_type === 'hero' && (
                                         <div>
@@ -516,7 +599,7 @@ export const CMSManager: React.FC = () => {
                                                 value={formData.brand_text || ''}
                                                 onChange={(e) => setFormData({ ...formData, brand_text: e.target.value })}
                                                 placeholder="행사어때"
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             />
                                             <p className="text-xs text-slate-500 mt-1">제목 위에 표시되는 작은 텍스트 (비우면 기본값 사용)</p>
                                         </div>
@@ -527,7 +610,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.title || ''}
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             required
                                         />
                                     </div>
@@ -537,7 +620,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.subtitle || ''}
                                             onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                         />
                                     </div>
                                     <div>
@@ -565,10 +648,10 @@ export const CMSManager: React.FC = () => {
                                                 type="button"
                                                 onClick={() => fileInputRef.current?.click()}
                                                 disabled={uploading}
-                                                className="w-full h-24 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-[#FF5B60] transition-colors"
+                                                className="w-full h-24 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-[#39B54A] transition-colors"
                                             >
                                                 {uploading ? (
-                                                    <Loader2 className="animate-spin text-[#FF5B60]" size={20} />
+                                                    <Loader2 className="animate-spin text-[#39B54A]" size={20} />
                                                 ) : (
                                                     <>
                                                         <Upload className="text-slate-400" size={20} />
@@ -584,7 +667,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.button_text || ''}
                                             onChange={(e) => setFormData({ ...formData, button_text: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                         />
                                     </div>
                                     <div>
@@ -593,7 +676,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.link || ''}
                                             onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                         />
                                     </div>
                                     <div>
@@ -601,14 +684,12 @@ export const CMSManager: React.FC = () => {
                                         <div className="space-y-2">
                                             <select
                                                 value={formData.target_product_code || ''}
-                                                onChange={(e) => {
-                                                    setFormData({ ...formData, target_product_code: e.target.value });
-                                                }}
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                                onChange={(e) => applyLinkedProductToBanner(e.target.value)}
+                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             >
                                                 <option value="">상품 선택 없음</option>
-                                                {products.map((product) => (
-                                                    <option key={product.id} value={product.product_code || product.id}>
+                                                {promoProducts.map((product) => (
+                                                    <option key={product.id} value={getProductRoutingKey(product)}>
                                                         {product.name} ({product.product_code || 'No Code'})
                                                     </option>
                                                 ))}
@@ -617,6 +698,33 @@ export const CMSManager: React.FC = () => {
                                         <p className="text-xs text-slate-500 mt-1">
                                             선택 시 해당 상품의 상세 페이지로 자동 연결됩니다.
                                         </p>
+                                        {formData.banner_type === 'promo' && selectedPromoProduct && (
+                                            <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-16 w-16 overflow-hidden rounded-lg bg-slate-200 flex-shrink-0">
+                                                        {selectedPromoProduct.image_url ? (
+                                                            <img
+                                                                src={selectedPromoProduct.image_url}
+                                                                alt={selectedPromoProduct.name}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="flex h-full w-full items-center justify-center text-[11px] text-slate-500">
+                                                                No Image
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <div className="font-semibold text-slate-900 truncate">
+                                                            {selectedPromoProduct.name}
+                                                        </div>
+                                                        <div className="mt-1 text-xs text-slate-500 line-clamp-2">
+                                                            {selectedPromoProduct.short_description || '등록된 요약 설명이 없습니다.'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </>
                             )}
@@ -630,7 +738,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.title || ''}
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             required
                                         />
                                     </div>
@@ -659,10 +767,10 @@ export const CMSManager: React.FC = () => {
                                                 type="button"
                                                 onClick={() => fileInputRef.current?.click()}
                                                 disabled={uploading}
-                                                className="w-full h-24 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-[#FF5B60] transition-colors"
+                                                className="w-full h-24 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-[#39B54A] transition-colors"
                                             >
                                                 {uploading ? (
-                                                    <Loader2 className="animate-spin text-[#FF5B60]" size={20} />
+                                                    <Loader2 className="animate-spin text-[#39B54A]" size={20} />
                                                 ) : (
                                                     <>
                                                         <Upload className="text-slate-400" size={20} />
@@ -678,7 +786,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.link || ''}
                                             onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             placeholder="https:// or /products"
                                         />
                                     </div>
@@ -689,7 +797,7 @@ export const CMSManager: React.FC = () => {
                                                 type="date"
                                                 value={formData.start_date || ''}
                                                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             />
                                         </div>
                                         <div className="flex-1">
@@ -698,7 +806,7 @@ export const CMSManager: React.FC = () => {
                                                 type="date"
                                                 value={formData.end_date || ''}
                                                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             />
                                         </div>
                                     </div>
@@ -716,7 +824,7 @@ export const CMSManager: React.FC = () => {
                                                         link: selectedProduct ? `/p/${selectedProduct.product_code || selectedProduct.id}` : formData.link
                                                     });
                                                 }}
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             >
                                                 <option value="">상품 선택 없음</option>
                                                 {products.map((product) => (
@@ -742,7 +850,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.name || ''}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             required
                                         />
                                     </div>
@@ -752,7 +860,7 @@ export const CMSManager: React.FC = () => {
                                             <select
                                                 value={formData.category1 || 'MICE 시설분과'}
                                                 onChange={(e) => setFormData({ ...formData, category1: e.target.value })}
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             >
                                                 <option value="MICE 시설분과">MICE 시설분과</option>
                                                 <option value="MICE 기획 · 운영분과">MICE 기획 · 운영분과</option>
@@ -766,7 +874,7 @@ export const CMSManager: React.FC = () => {
                                                 type="text"
                                                 value={formData.category2 || ''}
                                                 onChange={(e) => setFormData({ ...formData, category2: e.target.value })}
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                                 placeholder="예: 호텔, 컨벤션센터 등"
                                                 required
                                             />
@@ -778,7 +886,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.address || ''}
                                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             placeholder="주소 입력"
                                         />
                                     </div>
@@ -788,7 +896,7 @@ export const CMSManager: React.FC = () => {
                                             type="text"
                                             value={formData.phone || ''}
                                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                             placeholder="042-000-0000"
                                         />
                                     </div>
@@ -817,10 +925,10 @@ export const CMSManager: React.FC = () => {
                                                 type="button"
                                                 onClick={() => fileInputRef.current?.click()}
                                                 disabled={uploading}
-                                                className="w-full h-24 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-[#FF5B60] transition-colors"
+                                                className="w-full h-24 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-[#39B54A] transition-colors"
                                             >
                                                 {uploading ? (
-                                                    <Loader2 className="animate-spin text-[#FF5B60]" size={20} />
+                                                    <Loader2 className="animate-spin text-[#39B54A]" size={20} />
                                                 ) : (
                                                     <>
                                                         <Upload className="text-slate-400" size={20} />
@@ -842,7 +950,7 @@ export const CMSManager: React.FC = () => {
                                     value={formData.display_order || 1}
                                     onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 1 })}
                                     min="1"
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60]"
+                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                 />
                             </div>
 
@@ -857,7 +965,7 @@ export const CMSManager: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#FF5B60] text-white rounded-lg hover:bg-[#FF5B60] disabled:bg-slate-400"
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#39B54A] text-white rounded-lg hover:bg-[#39B54A] disabled:bg-slate-400"
                                 >
                                     {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                                     저장

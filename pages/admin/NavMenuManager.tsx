@@ -177,8 +177,8 @@ export const NavMenuManager = () => {
                 {/* Left: Parent Groups (Depth 1) */}
                 <div className="w-1/3 bg-white rounded-xl shadow-md flex flex-col border border-slate-200">
                     <div className="p-4 border-b bg-slate-50 flex justify-between items-center rounded-t-xl">
-                        <h3 className="font-bold flex items-center gap-2"><Folder size={18} className="text-[#FF5B60]" /> 1차 메뉴 (그룹)</h3>
-                        <button onClick={() => openModal('parent')} className="text-xs bg-[#FF5B60] text-white px-2 py-1.5 rounded hover:bg-slate-800 transition flex items-center gap-1"><Plus size={14} /> 그룹 추가</button>
+                        <h3 className="font-bold flex items-center gap-2"><Folder size={18} className="text-[#39B54A]" /> 1차 메뉴 (그룹)</h3>
+                        <button onClick={() => openModal('parent')} className="text-xs bg-[#39B54A] text-white px-2 py-1.5 rounded hover:bg-slate-800 transition flex items-center gap-1"><Plus size={14} /> 그룹 추가</button>
                     </div>
                     <div className="flex-1 overflow-y-auto p-2 space-y-1">
                         {allGroups.map(p => (
@@ -193,7 +193,7 @@ export const NavMenuManager = () => {
                                     ) : (
                                         <span className="text-[10px] font-bold px-1 py-0.5 bg-red-50 text-red-400 rounded border border-red-100">자동</span>
                                     )}
-                                    <span className={`font-medium ${selectedParentId === p.id ? 'text-[#FF5B60]' : 'text-slate-700'}`}>{p.name}</span>
+                                    <span className={`font-medium ${selectedParentId === p.id ? 'text-[#39B54A]' : 'text-slate-700'}`}>{p.name}</span>
                                     {p.type === 'real' && !p.is_active && <span className="text-[10px] bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded">숨김</span>}
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -220,14 +220,14 @@ export const NavMenuManager = () => {
                 <div className="flex-1 bg-white rounded-xl shadow-md flex flex-col border border-slate-200">
                     <div className="p-4 border-b bg-slate-50 flex justify-between items-center rounded-t-xl">
                         <h3 className="font-bold flex items-center gap-2">
-                            <FileText size={18} className="text-[#FF5B60]" />
+                            <FileText size={18} className="text-[#39B54A]" />
                             2차 메뉴 (하위 항목)
                             {selectedParent && <span className="text-slate-400 font-normal text-sm ml-2">- {selectedParent.name}</span>}
                         </h3>
                         <button
                             onClick={() => selectedParent ? openModal('child') : alert('좌측에서 1차 메뉴(그룹)를 먼저 선택해주세요.')}
                             disabled={!selectedParent}
-                            className="text-xs bg-[#FF5B60] text-white px-2 py-1.5 rounded hover:bg-slate-800 transition flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-xs bg-[#39B54A] text-white px-2 py-1.5 rounded hover:bg-slate-800 transition flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Plus size={14} /> 메뉴 추가
                         </button>
@@ -300,13 +300,13 @@ export const NavMenuManager = () => {
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1">메뉴명 *</label>
-                                <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60] outline-none" placeholder="메뉴 이름 입력" />
+                                <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A] outline-none" placeholder="메뉴 이름 입력" />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1">이동 링크</label>
                                 <div className="flex gap-2">
-                                    <input type="text" value={formData.link} onChange={e => setFormData({ ...formData, link: e.target.value })} className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF5B60] outline-none text-sm" placeholder="예: /products" />
+                                    <input type="text" value={formData.link} onChange={e => setFormData({ ...formData, link: e.target.value })} className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A] outline-none text-sm" placeholder="예: /products" />
                                 </div>
                                 <p className="text-xs text-slate-400 mt-1">{modalType === 'parent' ? '그룹명으로만 사용하려면 # 을 입력하세요.' : '클릭 시 이동할 주소입니다.'}</p>
                             </div>
@@ -318,7 +318,7 @@ export const NavMenuManager = () => {
                                 </div>
                                 <div className="flex items-center pt-6">
                                     <label className="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" checked={formData.is_active} onChange={e => setFormData({ ...formData, is_active: e.target.checked })} className="w-5 h-5 accent-[#FF5B60]" />
+                                        <input type="checkbox" checked={formData.is_active} onChange={e => setFormData({ ...formData, is_active: e.target.checked })} className="w-5 h-5 accent-[#39B54A]" />
                                         <span className="text-sm font-medium">노출 활성화</span>
                                     </label>
                                 </div>
@@ -326,7 +326,7 @@ export const NavMenuManager = () => {
 
                             <div className="pt-4 flex justify-end gap-2">
                                 <button type="button" onClick={closeModal} className="px-4 py-2 border rounded-lg hover:bg-slate-50">취소</button>
-                                <button type="submit" disabled={saving} className="px-4 py-2 bg-[#FF5B60] text-white rounded-lg hover:bg-slate-800 disabled:opacity-50">
+                                <button type="submit" disabled={saving} className="px-4 py-2 bg-[#39B54A] text-white rounded-lg hover:bg-slate-800 disabled:opacity-50">
                                     {saving ? '저장 중...' : '저장하기'}
                                 </button>
                             </div>

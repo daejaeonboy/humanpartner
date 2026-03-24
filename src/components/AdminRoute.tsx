@@ -16,7 +16,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
         return (
             <div className="min-h-screen bg-slate-100 flex items-center justify-center">
                 <div className="text-center">
-                    <Loader2 className="animate-spin text-[#FF5B60] mx-auto" size={48} />
+                    <Loader2 className="animate-spin text-[#39B54A] mx-auto" size={48} />
                     <p className="mt-4 text-slate-600">인증 확인 중...</p>
                 </div>
             </div>
@@ -45,7 +45,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
                     <div className="space-y-3">
                         <a
                             href="/"
-                            className="block w-full py-3 bg-[#FF5B60] text-white rounded-lg font-medium hover:bg-[#002d66] transition-colors"
+                            className="block w-full py-3 bg-[#39B54A] text-white rounded-lg font-medium hover:bg-[#2F9A3F] transition-colors"
                         >
                             홈으로 돌아가기
                         </a>

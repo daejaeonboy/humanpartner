@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { generateVerificationCode, sendVerificationEmail } from '../src/utils/email';
 import { Container } from '../components/ui/Container';
 import { Link, useNavigate } from 'react-router-dom';
@@ -133,7 +133,7 @@ const AgreementSection = ({
                 <label className="flex items-center gap-3 cursor-pointer flex-1">
                     <div
                         className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${checked
-                            ? 'bg-[#FF5B60] border-[#FF5B60]'
+                            ? 'bg-[#39B54A] border-[#39B54A]'
                             : 'border-gray-300 bg-white'
                             }`}
                         onClick={() => onChange(!checked)}
@@ -141,7 +141,7 @@ const AgreementSection = ({
                         {checked && <Check size={14} className="text-white" />}
                     </div>
                     <span className="text-sm font-medium text-gray-700">
-                        {required && <span className="text-red-500 mr-1">*</span>}
+                        {required && <span className="text-[#39B54A] mr-1">*</span>}
                         {title}
                     </span>
                 </label>
@@ -420,7 +420,7 @@ export const SignUp: React.FC = () => {
                                 onClick={() => setMemberType('business')}
                                 className={`py-4 px-4 rounded-xl border-2 transition-all font-medium text-center ${
                                     memberType === 'business'
-                                        ? 'border-[#FF5B60] bg-[#FF5B60]/5 text-[#FF5B60]'
+                                        ? 'border-[#39B54A] bg-[#39B54A]/5 text-[#39B54A]'
                                         : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
                                 }`}
                             >
@@ -433,7 +433,7 @@ export const SignUp: React.FC = () => {
                                 onClick={() => setMemberType('public')}
                                 className={`py-4 px-4 rounded-xl border-2 transition-all font-medium text-center ${
                                     memberType === 'public'
-                                        ? 'border-[#FF5B60] bg-[#FF5B60]/5 text-[#FF5B60]'
+                                        ? 'border-[#39B54A] bg-[#39B54A]/5 text-[#39B54A]'
                                         : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
                                 }`}
                             >
@@ -450,12 +450,12 @@ export const SignUp: React.FC = () => {
                             <h3 className="text-sm font-semibold text-gray-800 border-b pb-2">기본 정보</h3>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">이름 <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">이름 <span className="text-[#39B54A]">*</span></label>
                                 <input
                                     type="text"
                                     name="name"
                                     required
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                     placeholder="이름을 입력하세요"
                                     value={formData.name}
                                     onChange={handleChange}
@@ -464,13 +464,13 @@ export const SignUp: React.FC = () => {
 
                             <div className="relative">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    이메일<span className="text-red-500">*</span>
+                                    이메일<span className="text-[#39B54A]">*</span>
                                 </label>
                                 <input
                                     type="email"
                                     name="email"
                                     required
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                     placeholder="example@company.com"
                                     value={formData.email}
                                     onChange={handleChange}
@@ -483,7 +483,7 @@ export const SignUp: React.FC = () => {
                                         disabled={verifying || isCodeSent}
                                         className={`w-full mt-2 py-3 rounded-lg font-bold text-sm transition-all border ${isCodeSent
                                             ? 'bg-gray-100 text-gray-400 border-gray-200'
-                                            : 'bg-white text-[#FF5B60] border-[#FF5B60] hover:bg-[#FF5B60] hover:text-white'
+                                            : 'bg-white text-[#39B54A] border-[#39B54A] hover:bg-[#39B54A] hover:text-white'
                                             }`}
                                     >
                                         {verifying ? (
@@ -505,7 +505,7 @@ export const SignUp: React.FC = () => {
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
-                                            className="flex-1 px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] outline-none text-sm"
+                                            className="flex-1 px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-[#39B54A] outline-none text-sm"
                                             placeholder="6자리 숫자"
                                             value={inputCode}
                                             onChange={(e) => setInputCode(e.target.value)}
@@ -531,13 +531,13 @@ export const SignUp: React.FC = () => {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    전화번호 <span className="text-red-500">*</span>
+                                    전화번호 <span className="text-[#39B54A]">*</span>
                                 </label>
                                 <input
                                     type="tel"
                                     name="phone"
                                     required
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                     placeholder="010-1234-5678"
                                     value={formData.phone}
                                     onChange={handlePhoneChange}
@@ -548,14 +548,14 @@ export const SignUp: React.FC = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        비밀번호 <span className="text-red-500">*</span>
+                                        비밀번호 <span className="text-[#39B54A]">*</span>
                                     </label>
                                     <input
                                         type="password"
                                         name="password"
                                         required
                                         minLength={8}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                         placeholder="8자 이상"
                                         value={formData.password}
                                         onChange={handleChange}
@@ -563,13 +563,13 @@ export const SignUp: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        비밀번호 확인 <span className="text-red-500">*</span>
+                                        비밀번호 확인 <span className="text-[#39B54A]">*</span>
                                     </label>
                                     <input
                                         type="password"
                                         name="confirmPassword"
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                         placeholder="비밀번호 확인"
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
@@ -585,13 +585,13 @@ export const SignUp: React.FC = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        회사/단체명<span className="text-red-500">*</span>
+                                        회사/단체명<span className="text-[#39B54A]">*</span>
                                     </label>
                                     <input
                                         type="text"
                                         name="companyName"
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                         placeholder="(주)휴먼파트너"
                                         value={formData.companyName}
                                         onChange={handleChange}
@@ -606,7 +606,7 @@ export const SignUp: React.FC = () => {
                                         <input
                                             type="text"
                                             name="department"
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                             placeholder="기획팀"
                                             value={formData.department}
                                             onChange={handleChange}
@@ -619,7 +619,7 @@ export const SignUp: React.FC = () => {
                                         <input
                                             type="text"
                                             name="position"
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                             placeholder="대리"
                                             value={formData.position}
                                             onChange={handleChange}
@@ -629,13 +629,13 @@ export const SignUp: React.FC = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        배송주소 <span className="text-red-500">*</span>
+                                        배송주소 <span className="text-[#39B54A]">*</span>
                                     </label>
                                     <input
                                         type="text"
                                         name="address"
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                         placeholder="서울시 강남구 테헤란로 123 OO빌딩 4층"
                                         value={formData.address}
                                         onChange={handleChange}
@@ -645,12 +645,12 @@ export const SignUp: React.FC = () => {
                                 {/* 사업자등록 정보 */}
                                 <div className="pt-3">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        사업자등록번호<span className="text-red-500">*</span>
+                                        사업자등록번호<span className="text-[#39B54A]">*</span>
                                     </label>
                                     <input
                                         type="text"
                                         name="businessNumber"
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                         placeholder="000-00-00000"
                                         value={formData.businessNumber}
                                         onChange={handleBusinessNumberChange}
@@ -660,7 +660,7 @@ export const SignUp: React.FC = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        사업자등록증 <span className="text-red-500">*</span>
+                                        사업자등록증 <span className="text-[#39B54A]">*</span>
                                     </label>
                                     {formData.businessLicenseUrl ? (
                                         <div className="relative border border-gray-200 rounded-lg p-3 bg-gray-50">
@@ -672,7 +672,7 @@ export const SignUp: React.FC = () => {
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, businessLicenseUrl: '' })}
-                                                    className="p-1 text-red-500 hover:bg-red-50 rounded"
+                                                    className="p-1 text-[#39B54A] hover:bg-[#39B54A]/10 rounded"
                                                 >
                                                     <X size={18} />
                                                 </button>
@@ -680,10 +680,10 @@ export const SignUp: React.FC = () => {
                                         </div>
                                     ) : (
                                         <label className="block">
-                                            <div className={`border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#FF5B60] hover:bg-gray-50 transition-colors ${uploadingLicense ? 'opacity-50 pointer-events-none' : ''}`}>
+                                            <div className={`border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#39B54A] hover:bg-gray-50 transition-colors ${uploadingLicense ? 'opacity-50 pointer-events-none' : ''}`}>
                                                 {uploadingLicense ? (
                                                     <div className="flex flex-col items-center">
-                                                        <Loader2 className="animate-spin text-[#FF5B60]" size={24} />
+                                                        <Loader2 className="animate-spin text-[#39B54A]" size={24} />
                                                         <span className="text-sm text-gray-500 mt-2">업로드 중...</span>
                                                     </div>
                                                 ) : (
@@ -713,13 +713,13 @@ export const SignUp: React.FC = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        기관명<span className="text-red-500">*</span>
+                                        기관명<span className="text-[#39B54A]">*</span>
                                     </label>
                                     <input
                                         type="text"
                                         name="institutionName"
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                         placeholder="서울특별시청, 한국전력공사 등"
                                         value={formData.institutionName}
                                         onChange={handleChange}
@@ -728,13 +728,13 @@ export const SignUp: React.FC = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        담당자 성함<span className="text-red-500">*</span>
+                                        담당자 성함<span className="text-[#39B54A]">*</span>
                                     </label>
                                     <input
                                         type="text"
                                         name="managerName"
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all"
                                         placeholder="담당자 성함을 입력하세요"
                                         value={formData.managerName}
                                         onChange={handleChange}
@@ -748,11 +748,11 @@ export const SignUp: React.FC = () => {
                             <h3 className="text-sm font-semibold text-gray-800 border-b pb-2">약관 동의</h3>
 
                             {/* 전체 동의 */}
-                            <div className="p-4 bg-[#FF5B60]/5 rounded-lg">
+                            <div className="p-4 bg-[#39B54A]/5 rounded-lg">
                                 <label className="flex items-center gap-3 cursor-pointer">
                                     <div
                                         className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${allAgreed
-                                            ? 'bg-[#FF5B60] border-[#FF5B60]'
+                                            ? 'bg-[#39B54A] border-[#39B54A]'
                                             : 'border-gray-300 bg-white'
                                             }`}
                                         onClick={() => handleAllAgree(!allAgreed)}
@@ -792,7 +792,7 @@ export const SignUp: React.FC = () => {
                             disabled={loading || !allRequiredAgreed}
                             className={`w-full py-4 rounded-lg font-bold transition-all mt-6 flex items-center justify-center gap-2 ${loading || !allRequiredAgreed
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : 'bg-[#FF5B60] text-white hover:bg-[#002d66]'
+                                : 'bg-[#39B54A] text-white hover:bg-[#2F9A3F]'
                                 }`}
                         >
                             {loading && <Loader2 className="animate-spin" size={20} />}
@@ -801,12 +801,11 @@ export const SignUp: React.FC = () => {
                     </form>
 
                     <div className="mt-6 text-center text-sm text-gray-500">
-                        이미 계정이 있으신가요? <Link to="/login" className="text-[#FF5B60] font-bold hover:underline">로그인</Link>
+                        이미 계정이 있으신가요? <Link to="/login" className="text-[#39B54A] font-bold hover:underline">로그인</Link>
                     </div>
                 </div>
             </Container>
         </div>
     );
 };
-
 

@@ -146,7 +146,7 @@ export const SectionManager: React.FC = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
-                <Loader2 className="animate-spin text-[#FF5B60]" size={40} />
+                <Loader2 className="animate-spin text-[#39B54A]" size={40} />
             </div>
         );
     }
@@ -161,7 +161,7 @@ export const SectionManager: React.FC = () => {
                 </div>
                 <button
                     onClick={openAddModal}
-                    className="flex items-center gap-2 bg-[#FF5B60] text-white px-4 py-2 rounded-lg hover:bg-[#FF5B60] transition-colors"
+                    className="flex items-center gap-2 bg-[#39B54A] text-white px-4 py-2 rounded-lg hover:bg-[#39B54A] transition-colors"
                 >
                     <Plus size={20} />
                     섹션 추가
@@ -259,7 +259,7 @@ export const SectionManager: React.FC = () => {
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="예: 추천 상품"
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5B60]"
+                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#39B54A]"
                                     required
                                 />
                             </div>
@@ -273,7 +273,7 @@ export const SectionManager: React.FC = () => {
                                     value={formData.display_order}
                                     onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
                                     min="1"
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5B60]"
+                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#39B54A]"
                                 />
                             </div>
 
@@ -284,7 +284,7 @@ export const SectionManager: React.FC = () => {
                                 <select
                                     value={formData.layout_mode || 'grid-4'}
                                     onChange={(e) => setFormData({ ...formData, layout_mode: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5B60]"
+                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#39B54A]"
                                 >
                                     <option value="grid-4">4개 (기본)</option>
                                     <option value="grid-2">2개 (크게 - 강조형)</option>
@@ -301,7 +301,7 @@ export const SectionManager: React.FC = () => {
                                     id="is_active"
                                     checked={formData.is_active}
                                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                                    className="w-4 h-4 text-[#FF5B60] rounded focus:ring-[#FF5B60]"
+                                    className="w-4 h-4 text-[#39B54A] rounded focus:ring-[#39B54A]"
                                 />
                                 <label htmlFor="is_active" className="text-sm text-slate-700">
                                     메인 페이지에 표시
@@ -319,7 +319,7 @@ export const SectionManager: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#FF5B60] text-white rounded-lg hover:bg-[#FF5B60] transition-colors disabled:bg-slate-400"
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#39B54A] text-white rounded-lg hover:bg-[#39B54A] transition-colors disabled:bg-slate-400"
                                 >
                                     {saving ? (
                                         <>
@@ -363,7 +363,7 @@ export const SectionManager: React.FC = () => {
                         <div className="flex-1 overflow-y-auto p-4 bg-slate-50">
                             {loadingProducts ? (
                                 <div className="flex justify-center py-10">
-                                    <Loader2 className="animate-spin text-[#FF5B60]" size={30} />
+                                    <Loader2 className="animate-spin text-[#39B54A]" size={30} />
                                 </div>
                             ) : sectionProducts.length === 0 ? (
                                 <div className="text-center py-10 text-slate-400">
@@ -377,14 +377,14 @@ export const SectionManager: React.FC = () => {
                                                 <button
                                                     onClick={() => handleMoveProduct(idx, 'up')}
                                                     disabled={idx === 0}
-                                                    className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-[#FF5B60] disabled:opacity-30"
+                                                    className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-[#39B54A] disabled:opacity-30"
                                                 >
                                                     <ArrowUp size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleMoveProduct(idx, 'down')}
                                                     disabled={idx === sectionProducts.length - 1}
-                                                    className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-[#FF5B60] disabled:opacity-30"
+                                                    className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-[#39B54A] disabled:opacity-30"
                                                 >
                                                     <ArrowDown size={16} />
                                                 </button>
@@ -415,7 +415,7 @@ export const SectionManager: React.FC = () => {
                             <button
                                 onClick={saveOrder}
                                 disabled={saving}
-                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#FF5B60] text-white rounded-lg hover:bg-[#FF5B60] transition-colors disabled:bg-slate-400"
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#39B54A] text-white rounded-lg hover:bg-[#39B54A] transition-colors disabled:bg-slate-400"
                             >
                                 {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                                 순서 저장

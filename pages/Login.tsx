@@ -82,7 +82,7 @@ export const Login: React.FC = () => {
                                 type="email"
                                 name="email"
                                 required
-                                className="w-full px-4 py-3 md:px-5 md:py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all text-base md:text-lg"
+                                className="w-full px-4 py-3 md:px-5 md:py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all text-base md:text-lg"
                                 placeholder="example@email.com"
                                 value={formData.email}
                                 onChange={handleChange}
@@ -95,7 +95,7 @@ export const Login: React.FC = () => {
                                 type="password"
                                 name="password"
                                 required
-                                className="w-full px-4 py-3 md:px-5 md:py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#FF5B60] focus:border-transparent outline-none transition-all text-base md:text-lg"
+                                className="w-full px-4 py-3 md:px-5 md:py-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none transition-all text-base md:text-lg"
                                 placeholder="비밀번호를 입력하세요"
                                 value={formData.password}
                                 onChange={handleChange}
@@ -112,7 +112,7 @@ export const Login: React.FC = () => {
                                             checked={rememberId}
                                             onChange={(e) => setRememberId(e.target.checked)}
                                         />
-                                        <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-gray-300 rounded peer-checked:bg-[#FF5B60] peer-checked:border-[#FF5B60] transition-all"></div>
+                                        <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-gray-300 rounded peer-checked:bg-[#39B54A] peer-checked:border-[#39B54A] transition-all"></div>
                                         <svg className="absolute w-2.5 h-2.5 md:w-3 md:h-3 text-white left-0.5 top-0.5 md:left-1 md:top-1 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                                             <polyline points="20 6 9 17 4 12"></polyline>
                                         </svg>
@@ -128,7 +128,7 @@ export const Login: React.FC = () => {
                                             checked={keepLoggedIn}
                                             onChange={(e) => setKeepLoggedIn(e.target.checked)}
                                         />
-                                        <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-gray-300 rounded peer-checked:bg-[#FF5B60] peer-checked:border-[#FF5B60] transition-all"></div>
+                                        <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-gray-300 rounded peer-checked:bg-[#39B54A] peer-checked:border-[#39B54A] transition-all"></div>
                                         <svg className="absolute w-2.5 h-2.5 md:w-3 md:h-3 text-white left-0.5 top-0.5 md:left-1 md:top-1 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                                             <polyline points="20 6 9 17 4 12"></polyline>
                                         </svg>
@@ -141,14 +141,14 @@ export const Login: React.FC = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full text-white py-3 md:py-4 rounded-lg font-bold transition-all mt-4 md:mt-6 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#FF5B60] hover:bg-[#e54a4f]'}`}
+                            className={`w-full text-white py-3 md:py-4 rounded-lg font-bold transition-all mt-4 md:mt-6 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#39B54A] hover:bg-[#2F9A3F]'}`}
                         >
                             {loading ? '로그인 중...' : '로그인하기'}
                         </button>
                     </form>
 
                     <div className="mt-6 text-center text-sm text-gray-500">
-                        계정이 없으신가요? <Link to="/signup" className="text-[#FF5B60] font-bold hover:underline">회원가입</Link>
+                        계정이 없으신가요? <Link to="/signup" className="text-[#39B54A] font-bold hover:underline">회원가입</Link>
                     </div>
                 </div>
             </Container>

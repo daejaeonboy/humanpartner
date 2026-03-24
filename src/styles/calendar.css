@@ -147,20 +147,20 @@
 .react-datepicker__day--in-selecting-range,
 .react-datepicker__day--range-start,
 .react-datepicker__day--range-end {
-  background-color: #ff5b60 !important;
+  background-color: #39b54a !important;
   color: white !important;
   border-radius: 9999px !important;
 }
 
 .react-datepicker__day--in-range {
-  background-color: rgba(0, 30, 69, 0.1) !important;
+  background-color: rgba(57, 181, 74, 0.1) !important;
   /* Lighter range fill */
-  color: #ff5b60 !important;
+  color: #39b54a !important;
   border-radius: 0 !important;
 }
 
 .react-datepicker__day--in-range:hover {
-  background-color: rgba(0, 30, 69, 0.2) !important;
+  background-color: rgba(57, 181, 74, 0.2) !important;
   border-radius: 0 !important;
 }
 
