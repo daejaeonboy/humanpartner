@@ -10,6 +10,38 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react()],
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks(id) {
+              if (!id.includes('node_modules')) {
+                return undefined;
+              }
+
+              if (id.includes('firebase')) {
+                return 'firebase-vendor';
+              }
+
+              if (id.includes('@supabase')) {
+                return 'supabase-vendor';
+              }
+
+              if (
+                id.includes('react-datepicker') ||
+                id.includes('date-fns')
+              ) {
+                return 'datepicker-vendor';
+              }
+
+              if (id.includes('jspdf') || id.includes('html2canvas')) {
+                return 'pdf-vendor';
+              }
+
+              return 'vendor';
+            },
+          },
+        },
+      },
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)

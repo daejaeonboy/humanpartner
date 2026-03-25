@@ -36,8 +36,6 @@ import { createNotification } from "../src/api/notificationApi";
 import { useAuth } from "../src/context/AuthContext";
 import { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale/ko";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
 registerLocale("ko", ko);
 
@@ -1971,12 +1969,16 @@ export const ProductDetailPage: React.FC = () => {
 
             {/* Modal Actions */}
             <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50">
-              <button
-                onClick={async () => {
-                  if (quoteRef.current) {
-                    const canvas = await html2canvas(quoteRef.current, {
-                      scale: 2,
-                      backgroundColor: "#ffffff",
+                <button
+                  onClick={async () => {
+                    if (quoteRef.current) {
+                      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+                        import("html2canvas"),
+                        import("jspdf"),
+                      ]);
+                      const canvas = await html2canvas(quoteRef.current, {
+                        scale: 2,
+                        backgroundColor: "#ffffff",
                     });
                     const imgData = canvas.toDataURL("image/png");
                     const pdf = new jsPDF("p", "mm", "a4");
