@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { Header } from './components/Layout/Header';
 import { Footer } from './components/Layout/Footer';
 import { AuthProvider } from './src/context/AuthContext';
+import { PublicContentProvider } from './src/context/PublicContentContext';
 import { AdminRoute } from './src/components/AdminRoute';
 
 const MainPage = lazy(() =>
@@ -51,6 +52,18 @@ const PrivacyPolicy = lazy(() =>
 const AlliancePage = lazy(() =>
   import('./pages/AlliancePage').then((module) => ({ default: module.AlliancePage }))
 );
+const InstallationCasePage = lazy(() =>
+  import('./pages/InstallationCasePage').then((module) => ({ default: module.InstallationCasePage }))
+);
+const InstallationCaseDetailPage = lazy(() =>
+  import('./pages/InstallationCaseDetailPage').then((module) => ({ default: module.InstallationCaseDetailPage }))
+);
+const NoticesPage = lazy(() =>
+  import('./pages/NoticesPage').then((module) => ({ default: module.NoticesPage }))
+);
+const NoticeDetailPage = lazy(() =>
+  import('./pages/NoticeDetailPage').then((module) => ({ default: module.NoticeDetailPage }))
+);
 const EventPage = lazy(() =>
   import('./pages/EventPage').then((module) => ({ default: module.EventPage }))
 );
@@ -96,6 +109,15 @@ const FAQManager = lazy(() =>
 const InquiryManager = lazy(() =>
   import('./pages/admin/InquiryManager').then((module) => ({ default: module.InquiryManager }))
 );
+const InstallationCaseManager = lazy(() =>
+  import('./pages/admin/InstallationCaseManager').then((module) => ({ default: module.InstallationCaseManager }))
+);
+const NoticeManager = lazy(() =>
+  import('./pages/admin/NoticeManager').then((module) => ({ default: module.NoticeManager }))
+);
+const BookingEmailSettingsPage = lazy(() =>
+  import('./pages/admin/BookingEmailSettings').then((module) => ({ default: module.BookingEmailSettingsPage }))
+);
 
 const RouteLoader = () => (
   <div className="flex min-h-[40vh] items-center justify-center">
@@ -136,6 +158,9 @@ function App() {
             <Route path="menus" element={<LazyRoute component={NavMenuManager} />} />
             <Route path="faqs" element={<LazyRoute component={FAQManager} />} />
             <Route path="inquiries" element={<LazyRoute component={InquiryManager} />} />
+            <Route path="cases" element={<LazyRoute component={InstallationCaseManager} />} />
+            <Route path="notices" element={<LazyRoute component={NoticeManager} />} />
+            <Route path="booking-email" element={<LazyRoute component={BookingEmailSettingsPage} />} />
           </Route>
 
           {/* Admin Login - Separate Route */}
@@ -146,30 +171,36 @@ function App() {
           <Route
             path="/*"
             element={
-              <div className="min-h-screen bg-white">
-                <Header />
-                <Routes>
-                  <Route path="/" element={<LazyRoute component={MainPage} />} />
-                  <Route path="/products" element={<LazyRoute component={ProductListPage} />} />
-                  <Route path="/products/:id" element={<LazyRoute component={ProductDetailPage} />} />
-                  <Route path="/mypage" element={<LazyRoute component={MyPage} />} />
-                  <Route path="/mypage/info" element={<LazyRoute component={MyInfoPage} />} />
-                  <Route path="/mypage/inquiry" element={<LazyRoute component={InquiryPage} />} />
-                  <Route path="/login" element={<LazyRoute component={Login} />} />
-                  <Route path="/signup" element={<LazyRoute component={SignUp} />} />
-                  <Route path="/cs" element={<LazyRoute component={CSCenter} />} />
-                  <Route path="/p/:code" element={<LazyRoute component={RedirectToProduct} />} />
-                  <Route path="/search" element={<LazyRoute component={ProductSearchResult} />} />
-                  <Route path="/company" element={<LazyRoute component={CompanyIntro} />} />
-                  <Route path="/alliance" element={<LazyRoute component={AlliancePage} />} />
-                  <Route path="/event" element={<LazyRoute component={EventPage} />} />
-                  <Route path="/blank" element={<LazyRoute component={BlankPage} />} />
-                  <Route path="/terms" element={<LazyRoute component={TermsOfService} />} />
-                  <Route path="/privacy" element={<LazyRoute component={PrivacyPolicy} />} />
-                  <Route path="*" element={<LazyRoute component={NotFound} />} />
-                </Routes>
-                <Footer />
-              </div>
+              <PublicContentProvider>
+                <div className="min-h-screen bg-white">
+                  <Header />
+                  <Routes>
+                    <Route path="/" element={<LazyRoute component={MainPage} />} />
+                    <Route path="/products" element={<LazyRoute component={ProductListPage} />} />
+                    <Route path="/products/:id" element={<LazyRoute component={ProductDetailPage} />} />
+                    <Route path="/mypage" element={<LazyRoute component={MyPage} />} />
+                    <Route path="/mypage/info" element={<LazyRoute component={MyInfoPage} />} />
+                    <Route path="/mypage/inquiry" element={<LazyRoute component={InquiryPage} />} />
+                    <Route path="/login" element={<LazyRoute component={Login} />} />
+                    <Route path="/signup" element={<LazyRoute component={SignUp} />} />
+                    <Route path="/cs" element={<LazyRoute component={CSCenter} />} />
+                    <Route path="/p/:code" element={<LazyRoute component={RedirectToProduct} />} />
+                    <Route path="/search" element={<LazyRoute component={ProductSearchResult} />} />
+                    <Route path="/company" element={<LazyRoute component={CompanyIntro} />} />
+                    <Route path="/alliance" element={<LazyRoute component={AlliancePage} />} />
+                    <Route path="/cases" element={<LazyRoute component={InstallationCasePage} />} />
+                    <Route path="/cases/:id" element={<LazyRoute component={InstallationCaseDetailPage} />} />
+                    <Route path="/notices" element={<LazyRoute component={NoticesPage} />} />
+                    <Route path="/notices/:id" element={<LazyRoute component={NoticeDetailPage} />} />
+                    <Route path="/event" element={<LazyRoute component={EventPage} />} />
+                    <Route path="/blank" element={<LazyRoute component={BlankPage} />} />
+                    <Route path="/terms" element={<LazyRoute component={TermsOfService} />} />
+                    <Route path="/privacy" element={<LazyRoute component={PrivacyPolicy} />} />
+                    <Route path="*" element={<LazyRoute component={NotFound} />} />
+                  </Routes>
+                  <Footer />
+                </div>
+              </PublicContentProvider>
             }
           />
         </Routes>

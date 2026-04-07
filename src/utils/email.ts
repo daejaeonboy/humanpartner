@@ -1,5 +1,72 @@
 // Email API 호출 유틸리티 (Firebase Cloud Functions)
 
+export interface BookingNotificationItem {
+    name: string;
+    quantity: number;
+    price?: number;
+    model_name?: string;
+}
+
+export interface BookingRequestNotificationPayload {
+    bookingId: string;
+    productName: string;
+    requesterName: string;
+    companyName?: string;
+    phone?: string;
+    userEmail?: string;
+    startDate: string;
+    endDate: string;
+    totalPrice: number;
+    basicComponents?: BookingNotificationItem[];
+    selectedOptions?: BookingNotificationItem[];
+}
+
+const isLocalhost = () =>
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+const resolveEmailApiUrl = (cloudFunctionName: string, hostedPath: string) =>
+    isLocalhost()
+        ? `https://us-central1-human-partner.cloudfunctions.net/${cloudFunctionName}`
+        : hostedPath;
+
+const getResponseErrorMessage = (payload: unknown) => {
+    if (payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string') {
+        return payload.error;
+    }
+    return '이메일 발송 실패';
+};
+
+const postEmailRequest = async (
+    apiUrl: string,
+    body: unknown,
+    idToken?: string,
+) => {
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+    };
+
+    if (idToken) {
+        headers.Authorization = `Bearer ${idToken}`;
+    }
+
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+    const payload = contentType.includes('application/json')
+        ? await response.json()
+        : await response.text();
+
+    if (!response.ok) {
+        throw new Error(getResponseErrorMessage(payload));
+    }
+
+    return payload;
+};
+
 /**
  * 6자리 랜덤 인증번호 생성
  */
@@ -14,7 +81,6 @@ export const generateVerificationCode = () => {
  * @param code 인증번호
  */
 export const sendVerificationEmail = async (toName: string, toEmail: string, code: string) => {
-    // HTML 템플릿 생성
     const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
             <div style="text-align: center; margin-bottom: 20px;">
@@ -49,33 +115,35 @@ export const sendVerificationEmail = async (toName: string, toEmail: string, cod
     `;
 
     try {
-        // 로컬 환경(localhost)에서는 클라우드 함수 URL 직접 호출
-        // 배포 환경(firebase hosting)에서는 rewrites 규칙에 따라 상대 경로 호출
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const apiUrl = isLocalhost
-            ? 'https://us-central1-human-partner.cloudfunctions.net/sendEmailVerification'
-            : '/api/email/verify';
+        const apiUrl = resolveEmailApiUrl(
+            'sendEmailVerification',
+            '/api/email/verify',
+        );
 
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                to: toEmail,
-                subject: '[행사어때] 회원가입 이메일 인증번호',
-                html: htmlContent
-            }),
+        return await postEmailRequest(apiUrl, {
+            to: toEmail,
+            subject: '[행사어때] 회원가입 이메일 인증번호',
+            html: htmlContent,
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || '이메일 발송 실패');
-        }
-
-        return await response.json();
     } catch (error) {
         console.error('Email send failed:', error);
+        throw error;
+    }
+};
+
+export const sendBookingRequestNotificationEmail = async (
+    payload: BookingRequestNotificationPayload,
+    idToken: string,
+) => {
+    try {
+        const apiUrl = resolveEmailApiUrl(
+            'sendBookingRequestNotification',
+            '/api/email/booking-request',
+        );
+
+        return await postEmailRequest(apiUrl, payload, idToken);
+    } catch (error) {
+        console.error('Booking notification email send failed:', error);
         throw error;
     }
 };

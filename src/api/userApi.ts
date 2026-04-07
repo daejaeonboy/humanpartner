@@ -22,6 +22,49 @@ export interface UserProfile {
     created_at?: string;
 }
 
+const USER_PROFILE_SELECT = `
+    id,
+    firebase_uid,
+    email,
+    name,
+    phone,
+    company_name,
+    department,
+    position,
+    address,
+    business_number,
+    business_license_url,
+    member_type,
+    manager_name,
+    is_admin,
+    is_approved,
+    agreed_terms,
+    agreed_privacy,
+    agreed_marketing,
+    created_at
+`;
+const USER_PROFILE_CACHE_TTL_MS = 60_000;
+const userProfileCache = new Map<string, { data: UserProfile | null; cachedAt: number }>();
+const userProfilePromiseCache = new Map<string, Promise<UserProfile | null>>();
+
+const setCachedUserProfile = (firebaseUid: string, data: UserProfile | null) => {
+    userProfileCache.set(firebaseUid, {
+        data,
+        cachedAt: Date.now(),
+    });
+};
+
+const invalidateCachedUserProfile = (firebaseUid?: string) => {
+    if (!firebaseUid) {
+        userProfileCache.clear();
+        userProfilePromiseCache.clear();
+        return;
+    }
+
+    userProfileCache.delete(firebaseUid);
+    userProfilePromiseCache.delete(firebaseUid);
+};
+
 // 사용자 프로필 생성
 export const createUserProfile = async (profile: Omit<UserProfile, 'id' | 'created_at' | 'is_admin'>): Promise<UserProfile> => {
     const { data, error } = await supabase
@@ -31,26 +74,45 @@ export const createUserProfile = async (profile: Omit<UserProfile, 'id' | 'creat
         .single();
 
     if (error) throw error;
+    setCachedUserProfile(data.firebase_uid, data);
     return data;
 };
 
 // Firebase UID로 사용자 프로필 조회
 export const getUserProfileByFirebaseUid = async (firebaseUid: string): Promise<UserProfile | null> => {
-    const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('firebase_uid', firebaseUid)
-        .single();
+    const cached = userProfileCache.get(firebaseUid);
+    if (cached && Date.now() - cached.cachedAt < USER_PROFILE_CACHE_TTL_MS) {
+        return cached.data;
+    }
 
-    if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
-    return data;
+    const pendingRequest = userProfilePromiseCache.get(firebaseUid);
+    if (pendingRequest) {
+        return pendingRequest;
+    }
+
+    const request = supabase
+        .from('user_profiles')
+        .select(USER_PROFILE_SELECT)
+        .eq('firebase_uid', firebaseUid)
+        .single()
+        .then(({ data, error }) => {
+            if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+            setCachedUserProfile(firebaseUid, data || null);
+            return data || null;
+        })
+        .finally(() => {
+            userProfilePromiseCache.delete(firebaseUid);
+        });
+
+    userProfilePromiseCache.set(firebaseUid, request);
+    return request;
 };
 
 // 모든 사용자 조회 (Admin용)
 export const getUsers = async (): Promise<UserProfile[]> => {
     const { data, error } = await supabase
         .from('user_profiles')
-        .select('*')
+        .select(USER_PROFILE_SELECT)
         .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -67,11 +129,15 @@ export const updateUserProfile = async (id: string, updates: Partial<UserProfile
         .single();
 
     if (error) throw error;
+    if (data.firebase_uid) {
+        setCachedUserProfile(data.firebase_uid, data);
+    }
     return data;
 };
 
 // 사용자 삭제
 export const deleteUserProfile = async (id: string): Promise<void> => {
+    invalidateCachedUserProfile();
     const { error } = await supabase
         .from('user_profiles')
         .delete()
@@ -84,12 +150,39 @@ export const deleteUserProfile = async (id: string): Promise<void> => {
 export const searchUsers = async (query: string): Promise<UserProfile[]> => {
     const { data, error } = await supabase
         .from('user_profiles')
-        .select('*')
+        .select(USER_PROFILE_SELECT)
         .or(`name.ilike.%${query}%,email.ilike.%${query}%,company_name.ilike.%${query}%`)
         .order('created_at', { ascending: false });
 
     if (error) throw error;
     return data || [];
+};
+
+export const getUsersPage = async (
+    page: number,
+    pageSize: number,
+    query?: string,
+): Promise<{ data: UserProfile[]; count: number }> => {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let request = supabase
+        .from('user_profiles')
+        .select(USER_PROFILE_SELECT, { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+    if (query?.trim()) {
+        request = request.or(`name.ilike.%${query}%,email.ilike.%${query}%,company_name.ilike.%${query}%`);
+    }
+
+    const { data, error, count } = await request;
+
+    if (error) throw error;
+    return {
+        data: data || [],
+        count: count || 0,
+    };
 };
 
 // 서버 API 기본 URL

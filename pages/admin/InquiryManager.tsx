@@ -29,10 +29,16 @@ export const InquiryManager: React.FC = () => {
         if (!answerText.trim()) return;
         setSaving(true);
         try {
-            await answerInquiry(id, answerText.trim());
+            const nextAnswer = answerText.trim();
+            const answeredAt = new Date().toISOString();
+            await answerInquiry(id, nextAnswer);
+            setInquiries(prev => prev.map(inquiry =>
+                inquiry.id === id
+                    ? { ...inquiry, answer: nextAnswer, status: 'answered', answered_at: answeredAt }
+                    : inquiry
+            ));
             setAnswerText('');
             setExpandedId(null);
-            await loadInquiries();
         } catch (error) {
             console.error('Failed to answer inquiry:', error);
             alert('답변 저장에 실패했습니다.');
@@ -45,7 +51,11 @@ export const InquiryManager: React.FC = () => {
         if (!confirm('이 문의를 삭제하시겠습니까?')) return;
         try {
             await deleteInquiry(id);
-            await loadInquiries();
+            setInquiries(prev => prev.filter(inquiry => inquiry.id !== id));
+            if (expandedId === id) {
+                setExpandedId(null);
+                setAnswerText('');
+            }
         } catch (error) {
             console.error('Failed to delete inquiry:', error);
             alert('삭제에 실패했습니다.');

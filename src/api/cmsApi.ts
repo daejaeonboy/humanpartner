@@ -1,6 +1,14 @@
 
 import { supabase } from '../lib/supabase';
 
+const QUICK_MENU_SELECT = 'id,name,icon,image_url,link,category,display_order,is_active,created_at';
+const TAB_MENU_SELECT = 'id,name,link,display_order,is_active,created_at';
+const NAV_MENU_SELECT = 'id,name,link,category,display_order,is_active,created_at';
+const BANNER_SELECT = 'id,title,subtitle,image_url,link,button_text,brand_text,banner_type,tab_id,display_order,is_active,created_at,target_product_code';
+const POPUP_SELECT = 'id,title,image_url,link,start_date,end_date,display_order,is_active,created_at,target_product_code';
+const ALLIANCE_CATEGORY_SELECT = 'id,name,display_order,is_active,created_at';
+const ALLIANCE_MEMBER_SELECT = 'id,name,category1,category2,address,phone,logo_url,display_order,is_active,created_at';
+
 // ==================== Quick Menu Items ====================
 export interface QuickMenuItem {
     id?: string;
@@ -17,7 +25,7 @@ export interface QuickMenuItem {
 export const getQuickMenuItems = async (): Promise<QuickMenuItem[]> => {
     const { data, error } = await supabase
         .from('quick_menu_items')
-        .select('*')
+        .select(QUICK_MENU_SELECT)
         .eq('is_active', true)
         .order('display_order', { ascending: true });
     if (error) throw error;
@@ -27,7 +35,7 @@ export const getQuickMenuItems = async (): Promise<QuickMenuItem[]> => {
 export const getAllQuickMenuItems = async (): Promise<QuickMenuItem[]> => {
     const { data, error } = await supabase
         .from('quick_menu_items')
-        .select('*')
+        .select(QUICK_MENU_SELECT)
         .order('display_order', { ascending: true });
     if (error) throw error;
     return data || [];
@@ -75,7 +83,7 @@ export interface TabMenuItem {
 export const getTabMenuItems = async (): Promise<TabMenuItem[]> => {
     const { data, error } = await supabase
         .from('tab_menu_items')
-        .select('*')
+        .select(TAB_MENU_SELECT)
         .eq('is_active', true)
         .order('display_order', { ascending: true });
     if (error) throw error;
@@ -85,7 +93,7 @@ export const getTabMenuItems = async (): Promise<TabMenuItem[]> => {
 export const getAllTabMenuItems = async (): Promise<TabMenuItem[]> => {
     const { data, error } = await supabase
         .from('tab_menu_items')
-        .select('*')
+        .select(TAB_MENU_SELECT)
         .order('display_order', { ascending: true });
     if (error) throw error;
     return data || [];
@@ -134,7 +142,7 @@ export interface NavMenuItem {
 export const getNavMenuItems = async (): Promise<NavMenuItem[]> => {
     const { data, error } = await supabase
         .from('nav_menu_items')
-        .select('*')
+        .select(NAV_MENU_SELECT)
         .eq('is_active', true)
         .order('display_order', { ascending: true });
     if (error) throw error;
@@ -144,7 +152,7 @@ export const getNavMenuItems = async (): Promise<NavMenuItem[]> => {
 export const getAllNavMenuItems = async (): Promise<NavMenuItem[]> => {
     const { data, error } = await supabase
         .from('nav_menu_items')
-        .select('*')
+        .select(NAV_MENU_SELECT)
         .order('display_order', { ascending: true });
     if (error) throw error;
     return data || [];
@@ -198,7 +206,7 @@ export interface Banner {
 export const getBanners = async (): Promise<Banner[]> => {
     const { data, error } = await supabase
         .from('banners')
-        .select('*')
+        .select(BANNER_SELECT)
         .eq('is_active', true)
         .order('display_order', { ascending: true });
     if (error) throw error;
@@ -208,7 +216,7 @@ export const getBanners = async (): Promise<Banner[]> => {
 export const getHeroBanners = async (): Promise<Banner[]> => {
     const { data, error } = await supabase
         .from('banners')
-        .select('*')
+        .select(BANNER_SELECT)
         .eq('is_active', true)
         .eq('banner_type', 'hero')
         .order('display_order', { ascending: true });
@@ -219,7 +227,7 @@ export const getHeroBanners = async (): Promise<Banner[]> => {
 export const getPromoBanners = async (): Promise<Banner[]> => {
     const { data, error } = await supabase
         .from('banners')
-        .select('*')
+        .select(BANNER_SELECT)
         .eq('is_active', true)
         .eq('banner_type', 'promo')
         .order('display_order', { ascending: true });
@@ -230,7 +238,7 @@ export const getPromoBanners = async (): Promise<Banner[]> => {
 export const getPromoBannersByTab = async (tabId: string): Promise<Banner[]> => {
     const { data, error } = await supabase
         .from('banners')
-        .select('*')
+        .select(BANNER_SELECT)
         .eq('is_active', true)
         .eq('banner_type', 'promo')
         .eq('tab_id', tabId)
@@ -242,7 +250,7 @@ export const getPromoBannersByTab = async (tabId: string): Promise<Banner[]> => 
 export const getAllBanners = async (): Promise<Banner[]> => {
     const { data, error } = await supabase
         .from('banners')
-        .select('*')
+        .select(BANNER_SELECT)
         .order('display_order', { ascending: true });
     if (error) throw error;
     return data || [];
@@ -292,10 +300,9 @@ export interface Popup {
 }
 
 export const getPopups = async (): Promise<Popup[]> => {
-    const now = new Date().toISOString();
     const { data, error } = await supabase
         .from('popups')
-        .select('*')
+        .select(POPUP_SELECT)
         .eq('is_active', true)
         // Filter by date range if fields exist
         // This logic handles nulls appropriately or assumes data is clean.
@@ -312,7 +319,7 @@ export const getPopups = async (): Promise<Popup[]> => {
 export const getAllPopups = async (): Promise<Popup[]> => {
     const { data, error } = await supabase
         .from('popups')
-        .select('*')
+        .select(POPUP_SELECT)
         .order('display_order', { ascending: true });
     if (error) throw error;
     return data || [];
@@ -379,7 +386,7 @@ const getAllianceCategoryOrderWeight = (name: string) => {
 export const getAllianceCategories = async (): Promise<AllianceCategory[]> => {
     const { data, error } = await supabase
         .from(ALLIANCE_CATEGORY_TABLE)
-        .select('*')
+        .select(ALLIANCE_CATEGORY_SELECT)
         .eq('is_active', true)
         .order('display_order', { ascending: true });
     if (error) throw error;
@@ -389,7 +396,7 @@ export const getAllianceCategories = async (): Promise<AllianceCategory[]> => {
 export const getAllAllianceCategories = async (): Promise<AllianceCategory[]> => {
     const { data, error } = await supabase
         .from(ALLIANCE_CATEGORY_TABLE)
-        .select('*')
+        .select(ALLIANCE_CATEGORY_SELECT)
         .order('display_order', { ascending: true });
     if (error) throw error;
     return data || [];
@@ -448,6 +455,18 @@ export interface AllianceMember {
     created_at?: string;
 }
 
+export interface AllianceMemberCategoryEntry {
+    category1?: string | null;
+}
+
+const getAllianceCategoryFilterValues = (category?: string) => {
+    const normalizedCategory = normalizeAllianceCategoryName(category);
+    if (!normalizedCategory) return [];
+    if (normalizedCategory === 'MICE 기획 · 운영분과') return ['MICE 기획 · 운영분과', 'MICE 기획분과'];
+    if (normalizedCategory === 'MICE 지원분과') return ['MICE 지원분과', '기타'];
+    return [normalizedCategory];
+};
+
 export const getAllianceCategoryNames = (
     categories: Pick<AllianceCategory, 'name' | 'display_order' | 'is_active'>[] = [],
     members: Array<{ category1?: string | null }> = []
@@ -492,17 +511,67 @@ export const getAllianceCategoryNames = (
 export const getAllianceMembers = async (): Promise<AllianceMember[]> => {
     const { data, error } = await supabase
         .from('alliance_members')
-        .select('*')
+        .select(ALLIANCE_MEMBER_SELECT)
         .eq('is_active', true)
         .order('display_order', { ascending: true });
     if (error) throw error;
     return data || [];
 };
 
+export const getAllianceMemberCategories = async (): Promise<AllianceMemberCategoryEntry[]> => {
+    const { data, error } = await supabase
+        .from('alliance_members')
+        .select('category1')
+        .eq('is_active', true);
+    if (error) throw error;
+    return data || [];
+};
+
+export const getAllianceMembersPage = async ({
+    page,
+    pageSize,
+    category,
+    searchTerm,
+}: {
+    page: number;
+    pageSize: number;
+    category?: string;
+    searchTerm?: string;
+}): Promise<{ data: AllianceMember[]; count: number }> => {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    const categoryValues = getAllianceCategoryFilterValues(category);
+
+    let request = supabase
+        .from('alliance_members')
+        .select(ALLIANCE_MEMBER_SELECT, { count: 'exact' })
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
+        .range(from, to);
+
+    if (categoryValues.length === 1) {
+        request = request.eq('category1', categoryValues[0]);
+    } else if (categoryValues.length > 1) {
+        request = request.in('category1', categoryValues);
+    }
+
+    const normalizedSearch = searchTerm?.trim();
+    if (normalizedSearch) {
+        request = request.ilike('name', `%${normalizedSearch}%`);
+    }
+
+    const { data, error, count } = await request;
+    if (error) throw error;
+    return {
+        data: data || [],
+        count: count || 0,
+    };
+};
+
 export const getAllAllianceMembers = async (): Promise<AllianceMember[]> => {
     const { data, error } = await supabase
         .from('alliance_members')
-        .select('*')
+        .select(ALLIANCE_MEMBER_SELECT)
         .order('display_order', { ascending: true });
     if (error) throw error;
     return data || [];

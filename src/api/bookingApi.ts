@@ -10,8 +10,14 @@ export interface Booking {
     total_price: number;
     status: 'pending' | 'confirmed' | 'cancelled';
     created_at?: string;
-    selected_options?: { name: string; quantity: number; price: number }[];
-    basic_components?: { name: string; quantity: number; model_name?: string }[];
+    selected_options?: {
+        name: string;
+        quantity: number;
+        price: number;
+        product_id?: string;
+        image_url?: string;
+    }[];
+    basic_components?: { name: string; quantity: number; model_name?: string; product_id?: string; image_url?: string }[];
     // Joined data
     products?: {
         name: string;
@@ -25,18 +31,30 @@ export interface Booking {
     };
 }
 
+const BOOKING_SELECT = `
+    id,
+    product_id,
+    user_id,
+    user_email,
+    start_date,
+    end_date,
+    total_price,
+    status,
+    created_at,
+    selected_options,
+    basic_components,
+    products (
+        name,
+        image_url
+    )
+`;
+
 // 모든 예약 조회 (Admin용) - 사용자 정보 포함
 export const getBookings = async (): Promise<Booking[]> => {
     // First get bookings with products
     const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
-        .select(`
-            *,
-            products (
-                name,
-                image_url
-            )
-        `)
+        .select(BOOKING_SELECT)
         .order('created_at', { ascending: false });
 
     if (bookingsError) throw bookingsError;
@@ -62,6 +80,46 @@ export const getBookings = async (): Promise<Booking[]> => {
     return bookings;
 };
 
+export const getBookingsPage = async (
+    page: number,
+    pageSize: number,
+): Promise<{ data: Booking[]; count: number }> => {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data: bookingsData, error: bookingsError, count } = await supabase
+        .from('bookings')
+        .select(BOOKING_SELECT, { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+    if (bookingsError) throw bookingsError;
+
+    const bookings = bookingsData || [];
+    const userIds = [...new Set(bookings.map((booking) => booking.user_id).filter(Boolean))];
+
+    if (userIds.length === 0) {
+        return { data: bookings, count: count || 0 };
+    }
+
+    const { data: profiles, error: profilesError } = await supabase
+        .from('user_profiles')
+        .select('firebase_uid, name, company_name, phone, business_number')
+        .in('firebase_uid', userIds);
+
+    if (profilesError) throw profilesError;
+
+    const profileMap = new Map(profiles?.map((profile) => [profile.firebase_uid, profile]) || []);
+
+    return {
+        data: bookings.map((booking) => ({
+            ...booking,
+            user_profiles: profileMap.get(booking.user_id) || null,
+        })),
+        count: count || 0,
+    };
+};
+
 // 예약 삭제
 export const deleteBooking = async (id: string): Promise<void> => {
     const { error } = await supabase
@@ -75,13 +133,7 @@ export const deleteBooking = async (id: string): Promise<void> => {
 export const getUserBookings = async (userId: string): Promise<Booking[]> => {
     const { data, error } = await supabase
         .from('bookings')
-        .select(`
-            *,
-            products (
-                name,
-                image_url
-            )
-        `)
+        .select(BOOKING_SELECT)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 

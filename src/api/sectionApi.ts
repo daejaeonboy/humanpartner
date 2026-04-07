@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import type { Product } from './productApi';
 
 export interface Section {
     id?: string;
@@ -16,11 +17,58 @@ export interface ProductSection {
     section_id: string;
 }
 
+type SectionProductJoin = {
+    section_id: string;
+    products: Product | null;
+};
+
+const SECTION_SELECT = `
+    id,
+    name,
+    display_order,
+    is_active,
+    created_at,
+    layout_mode
+`;
+
+const ACTIVE_SECTION_SELECT = `
+    id,
+    name,
+    display_order,
+    is_active,
+    created_at,
+    layout_mode,
+    section_categories (
+        categories (
+            id,
+            name
+        )
+    )
+`;
+
+const SECTION_PRODUCT_SELECT = `
+    section_id,
+    products (
+        id,
+        product_code,
+        name,
+        category,
+        price,
+        short_description,
+        description,
+        image_url,
+        stock,
+        discount_rate,
+        created_at,
+        product_type
+    )
+`;
+
 // 모든 섹션 조회
 export const getSections = async (): Promise<Section[]> => {
     const { data, error } = await supabase
         .from('sections')
-        .select('*')
+        .select(SECTION_SELECT)
         .order('display_order', { ascending: true });
 
     if (error) throw error;
@@ -32,15 +80,7 @@ export const getSections = async (): Promise<Section[]> => {
 export const getActiveSections = async (): Promise<Section[]> => {
     const { data, error } = await supabase
         .from('sections')
-        .select(`
-            *,
-            section_categories (
-                categories (
-                    id,
-                    name
-                )
-            )
-        `)
+        .select(ACTIVE_SECTION_SELECT)
         .eq('is_active', true)
         .order('display_order', { ascending: true });
 
@@ -130,21 +170,7 @@ export const getProductsBySection = async (sectionId: string): Promise<any[]> =>
     // Currently removing explicit 'display_order' select/order to prevent crashes if column is missing.
     const { data, error } = await supabase
         .from('product_sections')
-        .select(`
-            product_id,
-            products (
-                id,
-                name,
-                category,
-                price,
-                description,
-                image_url,
-                stock,
-                discount_rate,
-                rating,
-                review_count
-            )
-        `)
+        .select(SECTION_PRODUCT_SELECT)
         .eq('section_id', sectionId);
 
     if (error) throw error;
@@ -152,6 +178,32 @@ export const getProductsBySection = async (sectionId: string): Promise<any[]> =>
     // Sort in JS if needed, or if the DB returns insertion order. 
     // Without display_order column, we can't persist custom order.
     return data?.map(ps => ps.products).filter(Boolean) || [];
+};
+
+export const getProductsForSections = async (sectionIds: string[]): Promise<Record<string, Product[]>> => {
+    const validSectionIds = sectionIds.filter(Boolean);
+    if (validSectionIds.length === 0) {
+        return {};
+    }
+
+    const { data, error } = await supabase
+        .from('product_sections')
+        .select(SECTION_PRODUCT_SELECT)
+        .in('section_id', validSectionIds);
+
+    if (error) throw error;
+
+    return (data as SectionProductJoin[] | null)?.reduce<Record<string, Product[]>>((acc, row) => {
+        if (!acc[row.section_id]) {
+            acc[row.section_id] = [];
+        }
+
+        if (row.products) {
+            acc[row.section_id].push(row.products);
+        }
+
+        return acc;
+    }, {}) || {};
 };
 
 // 섹션 내 상품 순서 변경

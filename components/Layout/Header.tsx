@@ -1,54 +1,67 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Container } from "../ui/Container";
 import { NAV_LINKS, TOP_LINKS } from "../../constants";
-import { getActiveSections, Section } from "../../src/api/sectionApi";
-import { getAllNavMenuItems, NavMenuItem } from "../../src/api/cmsApi";
 import { useAuth } from "../../src/context/AuthContext";
+import { usePublicContent } from "../../src/context/PublicContentContext";
 import { FullMenu } from "./FullMenu";
 import {
   getNotifications,
+  getUnreadCount,
   markAsRead,
   markAllAsRead,
   Notification,
 } from "../../src/api/notificationApi";
 
 const BellIcon = ({ className }: { className?: string }) => (
-  <img src="/notifications.svg" alt="알림" className={className} />
+  <img src="/notifications.svg" alt="알림" className={className} decoding="async" />
 );
 
 const MenuIcon = ({ className }: { className?: string }) => (
-  <img src="/menu.svg" alt="메뉴" className={className} />
+  <img src="/menu.svg" alt="메뉴" className={className} decoding="async" />
 );
 
 const ProfileIcon = ({ className }: { className?: string }) => (
-  <img src="/person.svg" alt="프로필" className={className} />
+  <img src="/person.svg" alt="프로필" className={className} decoding="async" />
 );
 
 const NotificationDropdown = ({
   notifications,
   unreadCount,
+  loading,
+  onOpen,
   onMarkAllRead,
   onNotificationClick,
 }: {
   notifications: Notification[];
   unreadCount: number;
+  loading: boolean;
+  onOpen: () => void;
   onMarkAllRead: () => void;
   onNotificationClick: (n: Notification) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const toggleOpen = () => {
+    const next = !isOpen;
+    setIsOpen(next);
+
+    if (next) {
+      onOpen();
+    }
+  };
+
   return (
     <div className="relative z-50">
       <button
-        className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-slate-600 transition-colors rounded-lg md:rounded-full hover:bg-slate-100 ${isOpen ? "text-[#39B54A] bg-green-50" : ""}`}
-        onClick={() => setIsOpen(!isOpen)}
+        className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center text-slate-500 transition-colors rounded-full hover:bg-slate-100 ${isOpen ? "text-[#39B54A] bg-green-50" : ""}`}
+        onClick={toggleOpen}
       >
-        <BellIcon className="w-6 h-6 md:w-7 md:h-7" />
+        <BellIcon className="w-6 h-6 md:w-7 md:h-7 opacity-80" />
         {/* Badge - Only show if unreadCount > 0 */}
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#39B54A] rounded-full ring-1 ring-white"></span>
+          <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#39B54A] rounded-full ring-2 ring-white"></span>
         )}
       </button>
 
@@ -72,7 +85,12 @@ const NotificationDropdown = ({
               )}
             </div>
             <div className="max-h-[300px] overflow-y-auto">
-              {notifications.length > 0 ? (
+              {loading ? (
+                <div className="py-8 flex items-center justify-center text-gray-400 text-xs">
+                  <Search className="w-4 h-4 mr-2" />
+                  불러오는 중...
+                </div>
+              ) : notifications.length > 0 ? (
                 <div className="divide-y divide-gray-50">
                   {notifications.map((noti) => (
                     <button
@@ -117,67 +135,42 @@ const NotificationDropdown = ({
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
+  const { navMenuItems } = usePublicContent();
   const location = useLocation();
   const navigate = useNavigate();
-  const [navItems, setNavItems] = useState<Section[]>([]);
-  const [allMenuItems, setAllMenuItems] = useState<NavMenuItem[]>([]);
-  const [loadingNav, setLoadingNav] = useState(true);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showDesktopMenu, setShowDesktopMenu] = useState(false);
   // Removed showNotifications state as it is now inside NotificationDropdown
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
-  // Smart Sticky Header Logic
-  // Smart Sticky Header Logic
-  const lastScrollYRef = useRef(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY =
-        window.pageYOffset || document.documentElement.scrollTop;
-      const diff = currentScrollY - lastScrollYRef.current;
-
-      // 1. Top Zone Logic - Always show
-      if (currentScrollY < 120) {
-        setIsVisible(true);
-        lastScrollYRef.current = currentScrollY;
-        return;
-      }
-
-      // 2. Scroll Direction Logic
-      if (diff < -2) {
-        // Scrolling UP - Instant Reveal
-        setIsVisible(true);
-        lastScrollYRef.current = currentScrollY;
-      } else if (diff > 40) {
-        // Scrolling DOWN - Hide after threshold
-        setIsVisible(false);
-        lastScrollYRef.current = currentScrollY;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
 
   // Fetch notifications
   useEffect(() => {
     if (user) {
-      const fetchNotis = async () => {
-        const data = await getNotifications(user.uid);
-        setNotifications(data);
-        setUnreadCount(data.filter((n) => !n.is_read).length);
+      const fetchUnreadCount = async () => {
+        const count = await getUnreadCount(user.uid);
+        setUnreadCount(count);
       };
-      fetchNotis();
-      // Optional: Set up real-time subscription here
-      const interval = setInterval(fetchNotis, 30000); // Polling every 30s as simple fallback
-      return () => clearInterval(interval);
+      fetchUnreadCount();
     } else {
       setNotifications([]);
       setUnreadCount(0);
     }
-  }, [user, location.pathname]); // Re-fetch on navigation
+  }, [user, location.pathname]);
+
+  const loadNotificationList = async () => {
+    if (!user) return;
+
+    setLoadingNotifications(true);
+    try {
+      const data = await getNotifications(user.uid);
+      setNotifications(data);
+      setUnreadCount(data.filter((notification) => !notification.is_read).length);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
 
   const handleNotificationClick = async (noti: Notification) => {
     if (!noti.is_read) {
@@ -200,37 +193,16 @@ export const Header: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const loadNavItems = async () => {
-      try {
-        const [items, menuData] = await Promise.all([
-          getActiveSections(),
-          getAllNavMenuItems(),
-        ]);
-        setNavItems(items);
-        setAllMenuItems(menuData);
-      } catch (error) {
-        console.error("Failed to load sections:", error);
-        setNavItems([]);
-      } finally {
-        setLoadingNav(false);
-      }
-    };
-    loadNavItems();
-  }, []);
+  const secondaryNavItems = [
+    { to: '/alliance', label: 'MICE 회원사', active: location.pathname === '/alliance' },
+    { to: '/cases', label: '설치사례', active: location.pathname === '/cases' },
+    { to: '/notices', label: '공지사항', active: location.pathname === '/notices' },
+    { to: '/cs', label: '고객센터', active: location.pathname === '/cs' },
+  ];
 
   return (
     <header className="w-full bg-white">
-      {/* Spacer for Fixed Header (Prevents content jump) */}
-      <div className="h-[112px] md:h-[175px]"></div>
-
-      {/* Smart Reveal Header Container - SWITCHED TO FIXED */}
-      <div
-        className={`
-        fixed top-0 left-0 w-full z-40 transition-all duration-300 ease-in-out bg-white
-        ${isVisible ? "translate-y-0 shadow-none" : "-translate-y-full shadow-none"}
-      `}
-      >
+      <div className="bg-white">
         {/* Top Utility Links - Premium Subtle Style */}
         <div className="hidden md:block bg-[#F8F9FA] border-b border-gray-100 py-2">
           <Container>
@@ -241,6 +213,12 @@ export const Header: React.FC = () => {
                     {user.displayName || user.email}님 안녕하세요
                   </span>
                   <div className="w-px h-3 bg-gray-300 mx-1" />
+                  <Link
+                    to="/mypage"
+                    className="hover:text-gray-900 transition-colors"
+                  >
+                    마이페이지
+                  </Link>
                   <button
                     onClick={logout}
                     className="hover:text-gray-900 transition-colors"
@@ -290,9 +268,10 @@ export const Header: React.FC = () => {
                 className="flex-shrink-0 flex items-center gap-1.5 md:gap-2"
               >
                 <img
-                  src="/logo3.png"
+                  src="/Miceday_Logo.png"
                   alt="행사어때"
-                  className="h-6 md:h-8 object-contain"
+                  className="h-[24px] md:h-[28px] object-contain"
+                  decoding="async"
                 />
                 <span className="text-[0.8rem] text-gray-400 font-medium mt-0.5 whitespace-nowrap hidden sm:block tracking-[1px]">
                   | 대전 MICE 행사 통합운영 플랫폼
@@ -302,13 +281,13 @@ export const Header: React.FC = () => {
               <div className="hidden md:block flex-1" />
 
               {/* Right Aligned Area: Search + Actions */}
-              <div className="flex items-center gap-1 md:gap-6 justify-end">
+              <div className="flex items-center gap-1 md:gap-2 justify-end">
                 {/* Search Bar (Responsive for both Mobile and Desktop) */}
-                <div className="flex flex-1 md:flex-none relative group max-w-[200px] sm:max-w-[250px] md:max-w-none md:w-[280px]">
+                <div className="flex flex-1 md:flex-none relative group max-w-[200px] sm:max-w-[250px] md:max-w-none md:w-[320px]">
                   <input
                     type="text"
                     placeholder="무엇을 도와드릴까요?"
-                    className="w-full h-[44px] md:h-auto pl-4 md:pl-5 pr-10 md:pr-12 py-0 md:py-2.5 rounded-lg bg-[#F1F5F9] border border-slate-200 focus:border-[#39B54A] focus:ring-1 focus:ring-[#39B54A] focus:bg-white transition-all text-[14px] md:text-sm text-slate-700 placeholder-slate-400 text-ellipsis overflow-hidden whitespace-nowrap"
+                    className="w-full h-[38px] md:h-[42px] pl-4 md:pl-6 pr-10 md:pr-12 rounded-full bg-slate-100/60 border border-transparent focus:border-slate-200 focus:ring-2 focus:ring-[#39B54A]/10 focus:bg-white transition-all text-[13px] md:text-[14px] text-slate-600 placeholder-slate-400"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         const target = e.target as HTMLInputElement;
@@ -317,31 +296,33 @@ export const Header: React.FC = () => {
                       }
                     }}
                   />
-                  <Search className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 md:w-5 md:h-5" />
+                  <Search className="absolute right-3.5 md:right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 md:w-4.5 md:h-4.5" />
                 </div>
 
                 {/* Actions (Both Mobile & Desktop) */}
-                <div className="flex items-center gap-0 relative z-50">
+                <div className="flex items-center gap-0 md:gap-0.5 relative z-50">
                   <Link
                     to={user ? "/mypage" : "/login"}
-                    className="hidden md:flex w-10 h-10 md:w-12 md:h-12 items-center justify-center text-gray-800 transition-colors rounded-full hover:bg-gray-100"
+                    className="hidden md:flex w-10 h-10 md:w-11 md:h-11 items-center justify-center text-slate-500 transition-colors rounded-full hover:bg-slate-100"
                   >
-                    <ProfileIcon className="w-6 h-6 md:w-7 md:h-7" />
+                    <ProfileIcon className="w-6 h-6 md:w-7 md:h-7 opacity-80" />
                   </Link>
                   <div className="relative z-[60]">
                     <NotificationDropdown
                       notifications={notifications}
                       unreadCount={unreadCount}
+                      loading={loadingNotifications}
+                      onOpen={loadNotificationList}
                       onMarkAllRead={handleMarkAllRead}
                       onNotificationClick={handleNotificationClick}
                     />
                   </div>
                   {/* Mobile Menu Toggle Button */}
                   <button
-                    className="md:hidden w-10 h-10 flex items-center justify-center text-gray-800 hover:bg-gray-100 rounded-full"
+                    className="md:hidden w-10 h-10 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-full"
                     onClick={() => setShowMobileMenu(true)}
                   >
-                    <MenuIcon className="w-6 h-6" />
+                    <MenuIcon className="w-6 h-6 opacity-80" />
                   </button>
                 </div>
               </div>
@@ -353,7 +334,7 @@ export const Header: React.FC = () => {
         <div className="border-t border-b border-gray-100 relative bg-white z-40">
           <Container>
             <div className="relative flex justify-start w-full">
-              <nav className="flex items-stretch justify-between sm:justify-start sm:gap-6 md:gap-2 w-full md:w-auto overflow-x-auto no-scrollbar scroll-smooth snap-x md:-ml-4 px-0">
+              <nav className="flex items-stretch justify-between sm:justify-start sm:gap-0 md:gap-0 w-full md:w-auto overflow-x-auto no-scrollbar scroll-smooth snap-x md:-ml-4 px-0">
                 <div
                   className="hidden md:flex self-stretch"
                   onMouseEnter={() => setShowDesktopMenu(true)}
@@ -361,21 +342,25 @@ export const Header: React.FC = () => {
                 >
                   <button
                     onClick={() => navigate("/products")}
-                    className={`relative z-10 flex h-full items-center gap-2 whitespace-nowrap px-4 py-4 text-[15px] font-[550] transition-all after:pointer-events-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[4px] after:content-[''] ${showDesktopMenu ? "text-[#39B54A] after:bg-[#39B54A]" : "text-gray-900 after:bg-transparent hover:text-[#39B54A] hover:after:bg-[#39B54A]"}`}
+                    className={`group relative z-10 flex h-full items-center gap-2 whitespace-nowrap px-4 py-4 text-[15px] font-medium transition-all after:pointer-events-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[4px] after:content-[''] ${showDesktopMenu ? "text-[#39B54A] after:bg-[#39B54A]" : "text-slate-600 after:bg-transparent hover:text-[#39B54A] hover:after:bg-[#39B54A]"}`}
                   >
-                    <MenuIcon className="w-[18px] h-[18px]" /> 전체 서비스
+                    <MenuIcon className={`w-[24px] h-[24px] transition-colors ${showDesktopMenu ? "filter-green" : "opacity-70 group-hover:filter-green"}`} /> 전체 서비스
                   </button>
                 </div>
 
-                <Link
-                  to="/alliance"
-                  className={`relative z-10 inline-flex self-stretch items-center whitespace-nowrap px-0.5 py-4 text-[14px] font-[550] transition-all min-[357px]:text-[15px] min-[375px]:px-2 sm:px-4 after:pointer-events-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[4px] after:content-[''] ${location.pathname === '/alliance'
-                    ? 'text-[#39B54A] after:bg-[#39B54A]'
-                    : 'text-gray-900 after:bg-transparent hover:text-[#39B54A] hover:after:bg-[#39B54A]'
+                {secondaryNavItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`relative z-10 inline-flex self-stretch items-center whitespace-nowrap px-0.5 py-4 text-[14px] font-medium transition-all min-[357px]:text-[15px] min-[375px]:px-2 sm:px-4 after:pointer-events-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[4px] after:content-[''] ${
+                      item.active
+                        ? 'text-[#39B54A] after:bg-[#39B54A]'
+                        : 'text-slate-600 after:bg-transparent hover:text-[#39B54A] hover:after:bg-[#39B54A]'
                     }`}
-                >
-                  MICE 회원사
-                </Link>
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </nav>
               <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
             </div>
@@ -392,7 +377,7 @@ export const Header: React.FC = () => {
           >
             <FullMenu
               variant="desktop"
-              items={allMenuItems}
+              items={navMenuItems}
               onClose={() => setShowDesktopMenu(false)}
             />
           </div>
@@ -401,7 +386,11 @@ export const Header: React.FC = () => {
 
       {/* Mobile Full Menu Overlay */}
       {showMobileMenu && (
-        <FullMenu variant="mobile" onClose={() => setShowMobileMenu(false)} />
+        <FullMenu
+          variant="mobile"
+          items={navMenuItems}
+          onClose={() => setShowMobileMenu(false)}
+        />
       )}
     </header>
   );

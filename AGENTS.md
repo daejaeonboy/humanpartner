@@ -1,7 +1,3 @@
-# Human Partner Project
+# AGENTS.md
 
-This file serves as a context provider for the Codex CLI.
-
-## Project Description
-
-Human Partner is a B2B platform for office furniture rentals.
+Project instructions should be maintained in this file.

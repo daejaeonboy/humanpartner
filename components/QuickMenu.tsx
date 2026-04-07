@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Container } from './ui/Container';
-import {
-  getNavMenuItems,
-  getQuickMenuItems,
-  NavMenuItem,
-  QuickMenuItem,
-} from '../src/api/cmsApi';
+import { NavMenuItem, QuickMenuItem } from '../src/api/cmsApi';
+import { usePublicContent } from '../src/context/PublicContentContext';
 import {
   Hotel,
   Zap,
@@ -269,29 +265,11 @@ const resolveQuickMenuLink = (item: QuickMenuItem, navItems: NavMenuItem[]) => {
 };
 
 export const QuickMenu: React.FC = () => {
-  const [items, setItems] = useState<QuickMenuItem[]>([]);
-  const [navItems, setNavItems] = useState<NavMenuItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadItems = async () => {
-      try {
-        const [quickMenuItems, menuItems] = await Promise.all([
-          getQuickMenuItems(),
-          getNavMenuItems(),
-        ]);
-
-        setItems(quickMenuItems);
-        setNavItems(menuItems);
-      } catch (error) {
-        console.error('Failed to load quick menu items:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadItems();
-  }, []);
+  const {
+    loading,
+    navMenuItems: navItems,
+    quickMenuItems: items,
+  } = usePublicContent();
 
   if (loading) {
     return (
@@ -326,6 +304,7 @@ export const QuickMenu: React.FC = () => {
                           src={item.image_url}
                           alt={item.name}
                           className="w-full h-full object-contain p-0 md:p-4"
+                          decoding="async"
                         />
                       ) : (
                         getIcon(item.icon, iconColors[index % iconColors.length])

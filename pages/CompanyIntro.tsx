@@ -20,6 +20,7 @@ export const CompanyIntro: React.FC = () => {
                     src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80"
                     alt="Company Hero"
                     className="absolute inset-0 w-full h-full object-cover opacity-50"
+                    decoding="async"
                 />
                 <Container className="relative z-20 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold mb-6" style={{ lineHeight: 1.4 }}>
@@ -88,7 +89,7 @@ export const CompanyIntro: React.FC = () => {
                         {/* Service 1 */}
                         <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all group">
                             <div className="h-48 bg-gray-200 relative overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80" alt="Rental" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80" alt="Rental" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" decoding="async" />
                             </div>
                             <div className="p-6">
                                 <h3 className="text-xl font-bold mb-2 group-hover:text-[#39B54A] transition-colors">행사 장비 렌탈</h3>
@@ -101,7 +102,7 @@ export const CompanyIntro: React.FC = () => {
                         {/* Service 2 */}
                         <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all group">
                             <div className="h-48 bg-gray-200 relative overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80" alt="Planning" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80" alt="Planning" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" decoding="async" />
                             </div>
                             <div className="p-6">
                                 <h3 className="text-xl font-bold mb-2 group-hover:text-[#39B54A] transition-colors">공간 연출 및 기획</h3>
@@ -114,7 +115,7 @@ export const CompanyIntro: React.FC = () => {
                         {/* Service 3 */}
                         <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all group">
                             <div className="h-48 bg-gray-200 relative overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80" alt="Operation" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <img src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80" alt="Operation" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" decoding="async" />
                             </div>
                             <div className="p-6">
                                 <h3 className="text-xl font-bold mb-2 group-hover:text-[#39B54A] transition-colors">현장 운영 지원</h3>

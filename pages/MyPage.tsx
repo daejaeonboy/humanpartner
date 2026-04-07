@@ -2,40 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { Container } from '../components/ui/Container';
 import { Calendar, User, Clock, Loader2, CheckCircle, XCircle, AlertCircle, Package } from 'lucide-react';
 import { getUserBookings, Booking } from '../src/api/bookingApi';
-import { getProducts } from '../src/api/productApi';
 import { useAuth } from '../src/context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Seo } from '../components/seo/Seo';
 import { NOINDEX_ROBOTS } from '../src/seo';
+import {
+    applyComponentImageFallback,
+    resolveComponentImageUrl,
+} from '../src/utils/componentImage';
 
 export const MyPage: React.FC = () => {
     const { user, userProfile, logout } = useAuth();
     const navigate = useNavigate();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
-    const [imageMap, setImageMap] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        const fetchBookingsAndProducts = async () => {
+        const fetchBookings = async () => {
             if (!user) {
                 setLoading(false);
                 return;
             }
             try {
-                const [bookingData, productsData] = await Promise.all([
-                    getUserBookings(user.uid),
-                    getProducts()
-                ]);
-                
-                // Build a map of name -> image_url for fast lookup
-                const imgMap: Record<string, string> = {};
-                productsData.forEach(p => {
-                    if (p.image_url) {
-                        imgMap[p.name] = p.image_url;
-                    }
-                });
-                
-                setImageMap(imgMap);
+                const bookingData = await getUserBookings(user.uid);
                 setBookings(bookingData);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
@@ -43,7 +32,7 @@ export const MyPage: React.FC = () => {
                 setLoading(false);
             }
         };
-        fetchBookingsAndProducts();
+        fetchBookings();
     }, [user]);
 
     const getStatusBadge = (status: Booking['status']) => {
@@ -80,20 +69,6 @@ export const MyPage: React.FC = () => {
             day: 'numeric',
         });
     };
-    // Helper to get image for basic components and options
-    const getItemImage = (name: string) => {
-      if (name.includes("노트북") || name.includes("PC") || name.includes("모니터")) return "/comp-notebook.png"; 
-      if (name.includes("테이블") || name.includes("책상") || name.includes("데스크")) return "/comp-table.png";
-      if (name.includes("의자") || name.includes("소파")) return "/comp-chair.png";
-      if (name.includes("복합기") || name.includes("프린터")) return "/comp-printer.png";
-      if (name.includes("냉장고")) return "/comp-fridge.png";
-      if (name.includes("커피") || name.includes("머신")) return "/comp-coffee.png";
-      if (name.includes("간식") || name.includes("다과")) return "/comp-coffee.png";
-      if (name.includes("배너") || name.includes("현수막")) return "/comp-printer.png"; // Fallback
-      return null;
-    };
-
-
     if (!user) {
         return (
             <>
@@ -175,6 +150,8 @@ export const MyPage: React.FC = () => {
                                                     src={booking.products?.image_url || 'https://picsum.photos/seed/booking/800/600'}
                                                     alt={booking.products?.name || '상품'}
                                                     className="w-full h-full object-cover"
+                                                    loading="lazy"
+                                                    decoding="async"
                                                 />
                                                 <div className="absolute top-4 left-4">
                                                     {getStatusBadge(booking.status)}
@@ -218,6 +195,8 @@ export const MyPage: React.FC = () => {
                                                         src={booking.products?.image_url || 'https://picsum.photos/seed/booking/200/200'}
                                                         alt={booking.products?.name || '상품'}
                                                         className="w-full h-full object-cover"
+                                                        loading="lazy"
+                                                        decoding="async"
                                                     />
                                                 </div>
                                                 
@@ -270,15 +249,15 @@ export const MyPage: React.FC = () => {
                                                             <span className="text-sm text-gray-500 font-medium">총 {booking.basic_components.length}개 품목</span>
                                                         </div>
                                                         
-                                                        <div className="border-t-2 border-slate-900 pt-6">
-                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
+                                                                <div className="border-t-2 border-slate-900 pt-6">
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
                                                                 {booking.basic_components.map((comp, i) => {
-                                                                     const imageUrl = imageMap[comp.name] || getItemImage(comp.name);
+                                                                     const imageUrl = resolveComponentImageUrl(comp.name, comp.image_url);
                                                                      return (
                                                                         <div key={i} className="flex items-center gap-4 group">
                                                                             <div className="w-14 h-14 flex-shrink-0 rounded-lg bg-white flex items-center justify-center border border-gray-100 shadow-sm overflow-hidden relative">
                                                                                 {imageUrl ? (
-                                                                                    <img src={imageUrl} alt={comp.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement?.classList.add('fallback-icon'); }} />
+                                                                                    <img src={imageUrl} alt={comp.name} className="w-full h-full object-cover" loading="lazy" decoding="async" onError={(e) => { applyComponentImageFallback(e.currentTarget, comp.name); }} />
                                                                                 ) : (
                                                                                     <Package size={20} className="text-slate-400" />
                                                                                 )}
@@ -317,12 +296,12 @@ export const MyPage: React.FC = () => {
                                                         <div className="border-t-2 border-[#39B54A] pt-6">
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
                                                                 {booking.selected_options.map((opt, i) => {
-                                                                     const imageUrl = imageMap[opt.name] || getItemImage(opt.name);
+                                                                     const imageUrl = resolveComponentImageUrl(opt.name, opt.image_url);
                                                                      return (
                                                                          <div key={i} className="flex items-center gap-4 group">
                                                                             <div className="w-14 h-14 flex-shrink-0 rounded-lg bg-white flex items-center justify-center border border-gray-100 shadow-sm overflow-hidden relative">
                                                                                 {imageUrl ? (
-                                                                                    <img src={imageUrl} alt={opt.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement?.classList.add('fallback-icon'); }} />
+                                                                                    <img src={imageUrl} alt={opt.name} className="w-full h-full object-cover" loading="lazy" decoding="async" onError={(e) => { applyComponentImageFallback(e.currentTarget, opt.name); }} />
                                                                                 ) : (
                                                                                     <Package size={20} className="text-slate-400" />
                                                                                 )}

@@ -14,11 +14,13 @@ export interface CategoryTree extends Category {
     children?: CategoryTree[];
 }
 
+const CATEGORY_SELECT = 'id,name,display_order,parent_id,level,created_at';
+
 // 모든 카테고리 조회
 export const getCategories = async (): Promise<Category[]> => {
     const { data, error } = await supabase
         .from('categories')
-        .select('*')
+        .select(CATEGORY_SELECT)
         .order('level', { ascending: true })
         .order('display_order', { ascending: true });
 
@@ -30,7 +32,7 @@ export const getCategories = async (): Promise<Category[]> => {
 export const getCategoriesByLevel = async (level: number): Promise<Category[]> => {
     const { data, error } = await supabase
         .from('categories')
-        .select('*')
+        .select(CATEGORY_SELECT)
         .eq('level', level)
         .order('display_order', { ascending: true });
 
@@ -40,7 +42,7 @@ export const getCategoriesByLevel = async (level: number): Promise<Category[]> =
 
 // 부모 ID로 자식 카테고리 조회
 export const getCategoriesByParent = async (parentId: string | null): Promise<Category[]> => {
-    let query = supabase.from('categories').select('*');
+    let query = supabase.from('categories').select(CATEGORY_SELECT);
 
     if (parentId === null) {
         query = query.is('parent_id', null);

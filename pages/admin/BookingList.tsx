@@ -1,24 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Check, X, Loader2, Clock, Calendar, CheckCircle, XCircle, Trash2, Phone, Building2 } from 'lucide-react';
-import { getBookings, updateBookingStatus, deleteBooking, Booking } from '../../src/api/bookingApi';
+import { getBookingsPage, updateBookingStatus, deleteBooking, Booking } from '../../src/api/bookingApi';
 import { createNotification } from '../../src/api/notificationApi';
 
 export const BookingList = () => {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(25);
+    const [totalCount, setTotalCount] = useState(0);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
     useEffect(() => {
-        loadBookings();
-    }, []);
+        loadBookings(page);
+    }, [page, pageSize]);
 
-    const loadBookings = async () => {
+    const loadBookings = async (targetPage = page) => {
         try {
             setLoading(true);
-            const data = await getBookings();
+            const { data, count } = await getBookingsPage(targetPage, pageSize);
             setBookings(data);
+            setTotalCount(count);
         } catch (error) {
             console.error('Failed to load bookings:', error);
         } finally {
@@ -64,7 +68,12 @@ export const BookingList = () => {
         setDeletingId(id);
         try {
             await deleteBooking(id);
-            setBookings(bookings.filter(b => b.id !== id));
+            const nextPage = bookings.length === 1 && page > 1 ? page - 1 : page;
+            if (nextPage !== page) {
+                setPage(nextPage);
+            } else {
+                await loadBookings(nextPage);
+            }
             alert('예약이 삭제되었습니다.');
         } catch (error) {
             console.error('Failed to delete booking:', error);
@@ -109,6 +118,8 @@ export const BookingList = () => {
         });
     };
 
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -122,14 +133,28 @@ export const BookingList = () => {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800">예약 확인</h2>
-                    <p className="text-slate-500 text-sm mt-1">총 {bookings.length}건</p>
+                    <p className="text-slate-500 text-sm mt-1">총 {totalCount}건</p>
                 </div>
-                <button
-                    onClick={loadBookings}
-                    className="text-sm text-[#39B54A] hover:text-teal-700"
-                >
-                    새로고침
-                </button>
+                <div className="flex items-center gap-2">
+                    <select
+                        value={pageSize}
+                        onChange={(e) => {
+                            setPage(1);
+                            setPageSize(Number(e.target.value));
+                        }}
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    >
+                        {[25, 50, 100].map((size) => (
+                            <option key={size} value={size}>{size}</option>
+                        ))}
+                    </select>
+                    <button
+                        onClick={() => loadBookings(page)}
+                        className="text-sm text-[#39B54A] hover:text-teal-700"
+                    >
+                        새로고침
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -168,6 +193,8 @@ export const BookingList = () => {
                                                             src={booking.products.image_url}
                                                             alt={booking.products.name}
                                                             className="w-10 h-10 object-cover rounded-lg shadow-sm"
+                                                            loading="lazy"
+                                                            decoding="async"
                                                         />
                                                     )}
                                                     <span className="font-bold text-slate-800">
@@ -307,6 +334,31 @@ export const BookingList = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
+                <p className="text-sm text-slate-500">
+                    {totalCount === 0 ? '결과 없음' : `${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, totalCount)} / ${totalCount}`}
+                </p>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                        disabled={page === 1 || loading}
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 disabled:opacity-50"
+                    >
+                        이전
+                    </button>
+                    <span className="text-sm text-slate-500">
+                        {page} / {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                        disabled={page >= totalPages || loading}
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 disabled:opacity-50"
+                    >
+                        다음
+                    </button>
                 </div>
             </div>
         </div>

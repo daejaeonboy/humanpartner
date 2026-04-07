@@ -12,8 +12,6 @@ import {
   ArrowLeft,
   Package,
   Users,
-  MapPin,
-  UtensilsCrossed,
   ShoppingBag,
   FileText,
   MessageCircle,
@@ -28,12 +26,12 @@ import {
 
   ChevronDown
 } from "lucide-react";
-import { getProductById, getProductsByType, Product } from "../src/api/productApi";
-import { getActiveSections, Section } from "../src/api/sectionApi";
+import { getProductById, getProductsByIds, getProductsByNames, getProductsByType, Product } from "../src/api/productApi";
 import { createBooking, checkAvailability } from "../src/api/bookingApi";
-import { getAllNavMenuItems, NavMenuItem } from "../src/api/cmsApi";
+import { getCategories, Category } from "../src/api/categoryApi";
 import { createNotification } from "../src/api/notificationApi";
 import { useAuth } from "../src/context/AuthContext";
+import { usePublicContent } from "../src/context/PublicContentContext";
 import { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale/ko";
 
@@ -42,16 +40,134 @@ registerLocale("ko", ko);
 import "../src/styles/calendar.css";
 import { Seo } from "../components/seo/Seo";
 import { DEFAULT_OG_IMAGE, NOINDEX_ROBOTS, absoluteUrl } from "../src/seo";
+import {
+  applyComponentImageFallback,
+  resolveComponentImageUrl,
+} from "../src/utils/componentImage";
+import { sendBookingRequestNotificationEmail } from "../src/utils/email";
 
-// Helper to get image for basic components
-const getComponentComponentImage = (name: string) => {
-  if (name.includes("노트북")) return "/comp-notebook.png"; // User needs to upload this
-  if (name.includes("테이블")) return "/comp-table.png";
-  if (name.includes("의자")) return "/comp-chair.png";
-  if (name.includes("복합기") || name.includes("프린터")) return "/comp-printer.png";
-  if (name.includes("냉장고")) return "/comp-fridge.png";
-  if (name.includes("커피")) return "/comp-coffee.png";
+const ADDITIONAL_OPTION_GROUP_ORDER = [
+  "사무기기",
+  "가전/가구",
+  "IT 장비",
+  "영상/음향",
+  "기타 공사",
+] as const;
+
+const normalizeAdditionalGroupName = (value?: string | null) => {
+  const normalized = (value || "").replace(/\s+/g, "").toLowerCase();
+
+  if (normalized === "사무기기") return "사무기기";
+  if (normalized === "가전/가구" || normalized === "가전가구") return "가전/가구";
+  if (normalized === "it장비") return "IT 장비";
+  if (normalized === "영상/음향" || normalized === "영상음향") return "영상/음향";
+  if (normalized === "기타공사") return "기타 공사";
+
   return null;
+};
+
+const getAdditionalFallbackGroup = (item: Product) => {
+  const haystack = `${item.category || ""} ${item.name || ""}`;
+
+  if (/복합기|프린터|세단기|사무기기/i.test(haystack)) {
+    return "사무기기";
+  }
+
+  if (/공기청정기|냉장고|테이블|책상|의자|쇼파|소파|정수기|가전|가구/i.test(haystack)) {
+    return "가전/가구";
+  }
+
+  if (/노트북|데스크탑|모니터|키오스크|태블릿|pc|it장비|it 장비/i.test(haystack)) {
+    return "IT 장비";
+  }
+
+  if (/tv|스크린|프로젝터|빔|마이크|스피커|영상|음향/i.test(haystack)) {
+    return "영상/음향";
+  }
+
+  return "기타 공사";
+};
+
+const getAdditionalGroupName = (
+  item: Product,
+  categoryParentMap: Map<string, string>,
+) => {
+  const normalizedParentCategory = normalizeAdditionalGroupName(item._parent_category);
+  if (normalizedParentCategory) {
+    return normalizedParentCategory;
+  }
+
+  const configuredParentCategory = item.category
+    ? categoryParentMap.get(item.category)
+    : null;
+  const normalizedConfiguredParent = normalizeAdditionalGroupName(configuredParentCategory);
+  if (normalizedConfiguredParent) {
+    return normalizedConfiguredParent;
+  }
+
+  const normalizedCategory = normalizeAdditionalGroupName(item.category);
+  if (normalizedCategory) {
+    return normalizedCategory;
+  }
+
+  return getAdditionalFallbackGroup(item);
+};
+
+const getAdditionalCategoryMeta = (
+  item: Product,
+  menuItems: { name: string; category?: string | null; display_order: number }[],
+  categoryParentMap: Map<string, string>,
+) => {
+  const childName = item.category || "기타";
+  const matchedChildMenu = menuItems.find((menuItem) => menuItem.name === childName && menuItem.category);
+
+  if (matchedChildMenu?.category) {
+    const matchedParentMenu = menuItems.find(
+      (menuItem) => menuItem.name === matchedChildMenu.category && !menuItem.category,
+    );
+
+    return {
+      parentName: matchedChildMenu.category,
+      parentOrder: matchedParentMenu?.display_order ?? 999,
+      childName,
+      childOrder: matchedChildMenu.display_order,
+    };
+  }
+
+  const resolvedParentName = getAdditionalGroupName(item, categoryParentMap);
+  const resolvedParentOrder = ADDITIONAL_OPTION_GROUP_ORDER.indexOf(
+    resolvedParentName as (typeof ADDITIONAL_OPTION_GROUP_ORDER)[number],
+  );
+
+  return {
+    parentName: resolvedParentName,
+    parentOrder: resolvedParentOrder >= 0 ? resolvedParentOrder : 999,
+    childName,
+    childOrder: 999,
+  };
+};
+
+const getAdditionalParentGroups = (
+  items: Product[],
+  menuItems: { name: string; category?: string | null; display_order: number }[],
+  categoryParentMap: Map<string, string>,
+) => {
+  const groups = new Map<string, number>();
+
+  items.forEach((item) => {
+    const meta = getAdditionalCategoryMeta(item, menuItems, categoryParentMap);
+    const currentOrder = groups.get(meta.parentName);
+    if (currentOrder === undefined || meta.parentOrder < currentOrder) {
+      groups.set(meta.parentName, meta.parentOrder);
+    }
+  });
+
+  return Array.from(groups.entries())
+    .map(([name, display_order]) => ({ name, display_order }))
+    .sort((a, b) => {
+      if (a.display_order !== b.display_order) return a.display_order - b.display_order;
+      return a.name.localeCompare(b.name, "ko-KR");
+    });
 };
 
 // Sub-component for individual option items to handle local state and focus
@@ -97,7 +213,16 @@ const OptionItem = ({
       <div className="relative w-20 sm:w-24 aspect-[4/3] rounded-lg bg-white flex-shrink-0 overflow-hidden border border-gray-100">
         {imageUrl ? (
           <div className="absolute inset-[10%] flex items-center justify-center">
-            <img src={imageUrl} alt={item.name} className="w-full h-full object-contain" />
+            <img
+              src={imageUrl}
+              alt={item.name}
+              className="w-full h-full object-contain"
+              loading="lazy"
+              decoding="async"
+              onError={(e) =>
+                applyComponentImageFallback(e.currentTarget, item.name)
+              }
+            />
           </div>
         ) : (
           <div className="absolute inset-[10%] flex items-center justify-center">
@@ -111,11 +236,8 @@ const OptionItem = ({
         <h5 className="font-bold text-gray-900 text-sm sm:text-[15px] leading-snug line-clamp-1">
           {item.name}
         </h5>
-        <p className="mt-1 text-xs sm:text-sm text-gray-500 leading-relaxed line-clamp-2">
-          {item.short_description || item.description || item.model_name || "상세 설명 없음"}
-        </p>
         {item.price > 0 && (
-          <p className="text-sm font-bold text-[#39B54A] mt-0.5">
+          <p className="text-sm font-bold text-[#39B54A] mt-1">
             {item.price.toLocaleString()}원
           </p>
         )}
@@ -127,13 +249,13 @@ const OptionItem = ({
           <button
             onClick={() => onUpdate(isInCart ? 0 : 1)}
             className={`flex items-center gap-2 px-4 h-9 rounded-lg text-sm font-bold transition-all border
-              ${isInCart ? "bg-[#39B54A] text-white border-[#39B54A] shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
+              ${isInCart ? "bg-[#39B54A] text-white border-[#39B54A] shadow-sm" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
           >
             <Check size={16} /> {isInCart ? "추가완료" : "추가"}
           </button>
         ) : (
           <>
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-1 shadow-sm h-9">
+            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-1 shadow-[0_1px_3px_rgba(15,23,42,0.04)] h-9">
               <button
                 className="w-7 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded transition-colors"
                 onClick={() => onUpdate(Math.max(0, initialQty - 1))}
@@ -166,7 +288,7 @@ const OptionItem = ({
                 onClick={handleUpdate}
                 disabled={!isChanged}
                 className={`px-4 h-9 rounded-lg text-sm font-bold transition-all
-                  ${isChanged ? "bg-[#39B54A] text-white shadow-md" : "bg-gray-900 text-white"}`}
+                  ${isChanged ? "bg-[#39B54A] text-white shadow-sm" : "bg-gray-900 text-white"}`}
               >
                 {isChanged ? "수정" : <Check size={18} />}
               </button>
@@ -228,19 +350,12 @@ const OptionItem = ({
   );
 };
 
-const getParentMenus = (menuItems: NavMenuItem[]): NavMenuItem[] => {
-  return menuItems
-    .filter((m) => !m.category)
-    .sort((a, b) => a.display_order - b.display_order);
-};
-
-const getChildMenus = (parentName: string, menuItems: NavMenuItem[]): NavMenuItem[] => {
-  return menuItems
-    .filter((m) => m.category === parentName)
-    .sort((a, b) => a.display_order - b.display_order);
-};
-
-const getCategorizedGroups = (items: Product[], menuItems: NavMenuItem[], tabType?: string): { name: string, display_order: number }[] => {
+const getCategorizedGroups = (
+  items: Product[],
+  menuItems: { name: string; category?: string | null; display_order: number }[],
+  categoryParentMap: Map<string, string>,
+  tabType?: string,
+): { name: string, display_order: number }[] => {
   const groups = new Map<string, number>();
 
   items.forEach(item => {
@@ -249,15 +364,9 @@ const getCategorizedGroups = (items: Product[], menuItems: NavMenuItem[], tabTyp
     let order = 999;
 
     if (tabType === 'additional') {
-      const childMenu = menuItems.find(m => m.name === cat && m.category);
-      if (childMenu && childMenu.category) {
-        groupName = childMenu.category;
-        const parentMenu = menuItems.find(m => m.name === groupName && !m.category);
-        if (parentMenu) order = parentMenu.display_order;
-      } else {
-        const menu = menuItems.find(m => m.name === cat && !m.category);
-        if (menu) order = menu.display_order;
-      }
+      groupName = getAdditionalGroupName(item, categoryParentMap);
+      const groupIndex = ADDITIONAL_OPTION_GROUP_ORDER.indexOf(groupName as (typeof ADDITIONAL_OPTION_GROUP_ORDER)[number]);
+      order = groupIndex >= 0 ? groupIndex : 999;
     } else {
       const menu = menuItems.find(m => m.name === cat);
       order = menu ? menu.display_order : 999;
@@ -301,12 +410,24 @@ const getQuantityUnit = (item: Product) => {
 const formatQuantityLabel = (item: Product, quantity: number) =>
   `${quantity}${getQuantityUnit(item)}`;
 
+const getConfiguredOptionNames = (
+  items?: Array<{ name?: string | null }>,
+) =>
+  Array.from(
+    new Set(
+      (items || [])
+        .map((item) => item.name?.trim())
+        .filter((name): name is string => Boolean(name && name !== "__ALL__")),
+    ),
+  );
+
 const OptionListTypeA = ({
   items,
   selectedQty,
   setQty,
   componentProducts,
   menuItems,
+  categoryParentMap,
   tabType,
   selectionMode = 'quantity',
 }: {
@@ -314,26 +435,68 @@ const OptionListTypeA = ({
   selectedQty: { [key: string]: number };
   setQty: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
   componentProducts: Product[];
-  menuItems: NavMenuItem[];
+  menuItems: { name: string; category?: string | null; display_order: number }[];
+  categoryParentMap: Map<string, string>;
   tabType?: string;
   selectionMode?: 'quantity' | 'checkbox';
 }) => {
+  const additionalParentGroups = React.useMemo(
+    () => (
+      tabType === "additional"
+        ? getAdditionalParentGroups(items, menuItems, categoryParentMap)
+        : []
+    ),
+    [items, menuItems, categoryParentMap, tabType],
+  );
+  const [localActiveParentCategory, setLocalActiveParentCategory] = useState<string>("");
+
   // Use useMemo here to prevent recalculation
-  const optionGroups = React.useMemo(() => getCategorizedGroups(items, menuItems, tabType), [items, menuItems, tabType]);
+  const optionGroups = React.useMemo(
+    () => (
+      tabType === "additional"
+        ? []
+        : getCategorizedGroups(items, menuItems, categoryParentMap, tabType)
+    ),
+    [items, menuItems, categoryParentMap, tabType],
+  );
   const [localActiveCategory, setLocalActiveCategory] = useState<string>('');
 
   // Update local state if optionGroups changes
   useEffect(() => {
+    if (tabType === "additional") {
+      if (additionalParentGroups.length > 0) {
+        setLocalActiveParentCategory((prev) => {
+          if (prev && additionalParentGroups.some((group) => group.name === prev)) {
+            return prev;
+          }
+          return additionalParentGroups[0].name;
+        });
+      } else {
+        setLocalActiveParentCategory("");
+      }
+      return;
+    }
+
     if (optionGroups.length > 0) {
       setLocalActiveCategory(prev => {
         // IF previous category is still valid, keep it. Else set to first.
         if (prev && optionGroups.find(p => p.name === prev)) return prev;
         return optionGroups[0].name;
       });
+    } else {
+      setLocalActiveCategory("");
     }
-  }, [optionGroups]);
+  }, [additionalParentGroups, optionGroups, tabType]);
 
-  if (optionGroups.length === 0) {
+  if (tabType === "additional" && additionalParentGroups.length === 0) {
+    return (
+      <div className="py-12 text-center text-gray-400">
+        <p>해당 카테고리에 등록된 상품이 없습니다.</p>
+      </div>
+    );
+  }
+
+  if (tabType !== "additional" && optionGroups.length === 0) {
     return (
       <div className="py-12 text-center text-gray-400">
         <p>해당 카테고리에 등록된 상품이 없습니다.</p>
@@ -344,30 +507,37 @@ const OptionListTypeA = ({
   // Calculating display items based on active category
   let displayItems: Product[] = [];
 
-  if (localActiveCategory) {
+  if (tabType === 'additional' && localActiveParentCategory) {
+    displayItems = items.filter(
+      (item) => {
+        const meta = getAdditionalCategoryMeta(item, menuItems, categoryParentMap);
+        return meta.parentName === localActiveParentCategory;
+      },
+    );
+    displayItems.sort((a, b) => {
+      const metaA = getAdditionalCategoryMeta(a, menuItems, categoryParentMap);
+      const metaB = getAdditionalCategoryMeta(b, menuItems, categoryParentMap);
+      if (metaA.childOrder !== metaB.childOrder) return metaA.childOrder - metaB.childOrder;
+      if (metaA.childName !== metaB.childName) return metaA.childName.localeCompare(metaB.childName, 'ko-KR');
+      return a.name.localeCompare(b.name, 'ko-KR');
+    });
+  } else if (localActiveCategory) {
     if (tabType === 'additional') {
-      const childMenus = menuItems.filter((m) => m.category === localActiveCategory);
-      const childMenuNames = new Set(childMenus.map(m => m.name));
-      displayItems = items.filter(p => {
-        const cat = p.category || '기타';
-        return cat === localActiveCategory || childMenuNames.has(cat);
-      });
-
-      // Sort display items by the display_order of their category (child menu)
+      displayItems = items.filter(
+        (item) => {
+          const meta = getAdditionalCategoryMeta(item, menuItems, categoryParentMap);
+          if (meta.parentName !== localActiveParentCategory) {
+            return false;
+          }
+          return localActiveCategory ? meta.childName === localActiveCategory : true;
+        },
+      );
       displayItems.sort((a, b) => {
-        const catA = a.category || '기타';
-        const catB = b.category || '기타';
-        const menuA = childMenus.find(m => m.name === catA);
-        const menuB = childMenus.find(m => m.name === catB);
-        const orderA = menuA ? menuA.display_order : 999;
-        const orderB = menuB ? menuB.display_order : 999;
-
-        if (orderA !== orderB) return orderA - orderB;
-
-        // Final fallback: creation date (newest first)
-        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
-        return timeB - timeA;
+        const metaA = getAdditionalCategoryMeta(a, menuItems, categoryParentMap);
+        const metaB = getAdditionalCategoryMeta(b, menuItems, categoryParentMap);
+        if (metaA.childOrder !== metaB.childOrder) return metaA.childOrder - metaB.childOrder;
+        if (metaA.childName !== metaB.childName) return metaA.childName.localeCompare(metaB.childName, 'ko-KR');
+        return a.name.localeCompare(b.name, 'ko-KR');
       });
     } else {
       displayItems = items.filter(p => (p.category || '기타') === localActiveCategory);
@@ -382,30 +552,56 @@ const OptionListTypeA = ({
 
   return (
     <div>
-      {/* Horizontal Scrollable Chips */}
-      <div className="flex overflow-x-auto pb-4 gap-2 px-6 pt-6 border-b border-gray-50 no-scrollbar">
-        {optionGroups.map((group) => (
-          <button
-            key={group.name}
-            onClick={() => setLocalActiveCategory(group.name)}
-            className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border
-                     ${localActiveCategory === group.name
-                ? "bg-[#39B54A] text-white border-[#39B54A]"
-                : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
-          >
-            {group.name}
-          </button>
-        ))}
-      </div>
+      {tabType === "additional" ? (
+        <>
+          <div className="flex overflow-x-auto pb-4 gap-2 px-6 pt-6 border-b border-gray-50 no-scrollbar">
+            {additionalParentGroups.map((group) => (
+              <button
+                key={group.name}
+                onClick={() => setLocalActiveParentCategory(group.name)}
+                className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border
+                  ${localActiveParentCategory === group.name
+                    ? "bg-[#39B54A] text-white border-[#39B54A]"
+                    : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
+              >
+                {group.name}
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="flex overflow-x-auto pb-4 gap-2 px-6 pt-6 border-b border-gray-50 no-scrollbar">
+          {optionGroups.map((group) => (
+            <button
+              key={group.name}
+              onClick={() => setLocalActiveCategory(group.name)}
+              className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border
+                       ${localActiveCategory === group.name
+                  ? "bg-[#39B54A] text-white border-[#39B54A]"
+                  : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
+            >
+              {group.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* List Content */}
-      <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2">
+      <div className="max-h-[320px] overflow-y-auto custom-scrollbar p-2 sm:max-h-[400px]">
         {displayItems.length > 0 ? (
           <div className="divide-y divide-gray-50">
             {displayItems.map((item) => {
               const qty = selectedQty[item.id!] || 0;
-              // Use existing image logic
-              const imageUrl = item.image_url || getComponentComponentImage(item.name) || componentProducts.find(p => p.name === item.name)?.image_url;
+              const matchedProduct = componentProducts.find(
+                (componentProduct) =>
+                  componentProduct.id === item.id ||
+                  componentProduct.name === item.name,
+              );
+              const imageUrl = resolveComponentImageUrl(
+                item.name,
+                item.image_url,
+                matchedProduct?.image_url,
+              );
 
               return (
                 <OptionItem
@@ -433,6 +629,7 @@ export const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, userProfile } = useAuth();
+  const { navMenuItems: menuItems } = usePublicContent();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -450,15 +647,10 @@ export const ProductDetailPage: React.FC = () => {
   );
   const [activeTab, setActiveTab] = useState("detail");
   const [expectedPeople, setExpectedPeople] = useState<number | string>(1);
-
-
+  const [managedCategories, setManagedCategories] = useState<Category[]>([]);
 
   // Option Tab State (for the new tab UI)
-  const [activeOptionTab, setActiveOptionTab] = useState<
-    "cooperative" | "additional" | "place" | "food"
-  >("cooperative");
-
-
+  const [activeOptionTab, setActiveOptionTab] = useState<"cooperative" | "additional">("cooperative");
 
   // Quote Modal State
   const [showQuoteModal, setShowQuoteModal] = useState(false);
@@ -481,27 +673,80 @@ export const ProductDetailPage: React.FC = () => {
   // Global Options State
   const [globalCooperative, setGlobalCooperative] = useState<Product[]>([]);
   const [globalAdditional, setGlobalAdditional] = useState<Product[]>([]);
-  const [globalPlaces, setGlobalPlaces] = useState<Product[]>([]);
-  const [globalFoods, setGlobalFoods] = useState<Product[]>([]);
 
   // Component Products Lookup (for images)
   const [componentProducts, setComponentProducts] = useState<Product[]>([]);
+  const [loadedOptionTabs, setLoadedOptionTabs] = useState<
+    Record<"cooperative" | "additional", boolean>
+  >({
+    cooperative: false,
+    additional: false,
+  });
+  const [loadingOptionTabs, setLoadingOptionTabs] = useState<
+    Record<"cooperative" | "additional", boolean>
+  >({
+    cooperative: false,
+    additional: false,
+  });
+  const configuredOptionNames = React.useMemo(
+    () => ({
+      cooperative: getConfiguredOptionNames(product?.cooperative_components),
+      additional: getConfiguredOptionNames(product?.additional_components),
+    }),
+    [product],
+  );
+
+  const enabledOptionTabs = React.useMemo(
+    () => ({
+      cooperative: Boolean(product?.cooperative_components?.length),
+      additional: Boolean(product?.additional_components?.length),
+    }),
+    [product],
+  );
+  const additionalCategoryParentMap = React.useMemo(() => {
+    const byId = new Map(managedCategories.map((category) => [category.id, category]));
+    const mapping = new Map<string, string>();
+
+    managedCategories.forEach((category) => {
+      if (!category.parent_id) return;
+      const parent = byId.get(category.parent_id);
+      if (!parent) return;
+      mapping.set(category.name, parent.name);
+    });
+
+    return mapping;
+  }, [managedCategories]);
 
   useEffect(() => {
-    // Fetch products that might be used as components (essential/additional) to get their images
     const fetchComponentProducts = async () => {
+      if (!product?.basic_components?.length) {
+        setComponentProducts([]);
+        return;
+      }
+
       try {
-        const products = await getProductsByType('essential');
-        setComponentProducts(products);
+        const componentIds = product.basic_components
+          .map((component) => component.product_id)
+          .filter((value): value is string => Boolean(value));
+        const componentNames = product.basic_components.map((component) => component.name);
+
+        const [idProducts, nameProducts] = await Promise.all([
+          componentIds.length > 0 ? getProductsByIds(componentIds) : Promise.resolve([]),
+          getProductsByNames(componentNames),
+        ]);
+
+        setComponentProducts(
+          Array.from(
+            new Map([...idProducts, ...nameProducts].map((componentProduct) => [componentProduct.id, componentProduct])).values(),
+          ),
+        );
       } catch (err) {
         console.error("Failed to fetch component products", err);
       }
     };
-    fetchComponentProducts();
-  }, []);
 
-  // Menu Items for hierarchical selection
-  const [menuItems, setMenuItems] = useState<NavMenuItem[]>([]);
+    fetchComponentProducts();
+  }, [product]);
 
   // Selected Quantities (Key: Product ID)
   const [selectedCooperative, setSelectedCooperative] = useState<{
@@ -510,22 +755,6 @@ export const ProductDetailPage: React.FC = () => {
   const [selectedAdditional, setSelectedAdditional] = useState<{
     [key: string]: number;
   }>({});
-  const [selectedPlaces, setSelectedPlaces] = useState<{
-    [key: string]: number;
-  }>({});
-  const [selectedFoods, setSelectedFoods] = useState<{ [key: string]: number }>(
-    {},
-  );
-
-  // 계층형 네비게이션 상태
-  const [categoryPath, setCategoryPath] = useState<{
-    [sectionKey: string]: string[];
-  }>({});
-
-
-
-
-
 
   const onChange = (dates: [Date | null, Date | null]) => {
     let [start, end] = dates;
@@ -542,38 +771,110 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchProductAndOptions = async () => {
+    const fetchManagedCategories = async () => {
+      try {
+        const categories = await getCategories();
+        setManagedCategories(categories);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        setManagedCategories([]);
+      }
+    };
+
+    fetchManagedCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
       if (!id) return;
       try {
-        const [
-          productData,
-          cooperativeData,
-          additionalData,
-          placeData,
-          foodData,
-          menuItemsData,
-        ] = await Promise.all([
-          getProductById(id),
-          getProductsByType("cooperative"),
-          getProductsByType("additional"),
-          getProductsByType("place"),
-          getProductsByType("food"),
-          getAllNavMenuItems(),
-        ]);
+        setLoading(true);
+        const productData = await getProductById(id);
         setProduct(productData);
-        setGlobalCooperative(cooperativeData);
-        setGlobalAdditional(additionalData);
-        setGlobalPlaces(placeData);
-        setGlobalFoods(foodData);
-        setMenuItems(menuItemsData);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProductAndOptions();
+    fetchProduct();
   }, [id]);
+
+  useEffect(() => {
+    setGlobalCooperative([]);
+    setGlobalAdditional([]);
+    setLoadedOptionTabs({
+      cooperative: false,
+      additional: false,
+    });
+    setLoadingOptionTabs({
+      cooperative: false,
+      additional: false,
+    });
+    setSelectedCooperative({});
+    setSelectedAdditional({});
+  }, [id]);
+
+  useEffect(() => {
+    if (!product) return;
+
+    const availableTabs = [
+      enabledOptionTabs.cooperative ? "cooperative" : null,
+      enabledOptionTabs.additional ? "additional" : null,
+    ].filter(Boolean) as ("cooperative" | "additional")[];
+
+    if (availableTabs.length > 0 && !availableTabs.includes(activeOptionTab)) {
+      setActiveOptionTab(availableTabs[0]);
+    }
+  }, [activeOptionTab, enabledOptionTabs, product]);
+
+  useEffect(() => {
+    if (!product) {
+      return;
+    }
+
+    const nextLoadingState = {
+      cooperative: enabledOptionTabs.cooperative,
+      additional: enabledOptionTabs.additional,
+    };
+
+    setLoadingOptionTabs(nextLoadingState);
+
+    const fetchAllEnabledOptions = async () => {
+      try {
+        const [cooperativeProducts, additionalProducts] = await Promise.all([
+          enabledOptionTabs.cooperative
+            ? (configuredOptionNames.cooperative.length > 0
+                ? getProductsByNames(configuredOptionNames.cooperative)
+                : getProductsByType("cooperative", [], true))
+            : Promise.resolve([]),
+          enabledOptionTabs.additional
+            ? (configuredOptionNames.additional.length > 0
+                ? getProductsByNames(configuredOptionNames.additional)
+                : getProductsByType("additional", [], true))
+            : Promise.resolve([]),
+        ]);
+
+        setGlobalCooperative(cooperativeProducts);
+        setGlobalAdditional(additionalProducts);
+        setLoadedOptionTabs({
+          cooperative: enabledOptionTabs.cooperative,
+          additional: enabledOptionTabs.additional,
+        });
+      } catch (error) {
+        console.error("Failed to fetch option products:", error);
+        setGlobalCooperative([]);
+        setGlobalAdditional([]);
+      } finally {
+        setLoadingOptionTabs({
+          cooperative: false,
+          additional: false,
+        });
+      }
+    };
+
+    void fetchAllEnabledOptions();
+  }, [configuredOptionNames, enabledOptionTabs, product]);
 
   // 화면 진입 시 스크롤 최상단 이동 (From Colleague's Code)
   useEffect(() => {
@@ -598,16 +899,6 @@ export const ProductDetailPage: React.FC = () => {
         const item = globalAdditional.find((p) => p.id === key);
         if (item) total += (item.price || 0) * qty;
       });
-      Object.keys(selectedPlaces).forEach((key) => {
-        const qty = selectedPlaces[key];
-        const item = globalPlaces.find((p) => p.id === key);
-        if (item) total += (item.price || 0) * qty;
-      });
-      Object.keys(selectedFoods).forEach((key) => {
-        const qty = selectedFoods[key];
-        const item = globalFoods.find((p) => p.id === key);
-        if (item) total += (item.price || 0) * qty;
-      });
       setTotalPrice(total); // Fixed price regardless of days
       setAvailabilityError(null);
     }
@@ -617,12 +908,8 @@ export const ProductDetailPage: React.FC = () => {
     product,
     selectedCooperative,
     selectedAdditional,
-    selectedPlaces,
-    selectedFoods,
     globalCooperative,
     globalAdditional,
-    globalPlaces,
-    globalFoods,
   ]);
 
   const handleBooking = async () => {
@@ -659,6 +946,8 @@ export const ProductDetailPage: React.FC = () => {
         name: string;
         quantity: number;
         price: number;
+        product_id?: string;
+        image_url?: string;
       }[] = [];
 
       // Cooperative Items
@@ -670,6 +959,10 @@ export const ProductDetailPage: React.FC = () => {
             name: item.name,
             quantity: qty,
             price: item.price || 0,
+            product_id: item.id,
+            image_url:
+              item.image_url ||
+              componentProducts.find((productItem) => productItem.id === item.id || productItem.name === item.name)?.image_url,
           });
         }
       });
@@ -683,32 +976,10 @@ export const ProductDetailPage: React.FC = () => {
             name: item.name,
             quantity: qty,
             price: item.price || 0,
-          });
-        }
-      });
-
-      // Place Items
-      Object.keys(selectedPlaces).forEach((key) => {
-        const qty = selectedPlaces[key];
-        const item = globalPlaces.find((p) => p.id === key);
-        if (item && qty > 0) {
-          selectedOptions.push({
-            name: item.name,
-            quantity: qty,
-            price: item.price || 0,
-          });
-        }
-      });
-
-      // Food Items
-      Object.keys(selectedFoods).forEach((key) => {
-        const qty = selectedFoods[key];
-        const item = globalFoods.find((p) => p.id === key);
-        if (item && qty > 0) {
-          selectedOptions.push({
-            name: item.name,
-            quantity: qty,
-            price: item.price || 0,
+            product_id: item.id,
+            image_url:
+              item.image_url ||
+              componentProducts.find((productItem) => productItem.id === item.id || productItem.name === item.name)?.image_url,
           });
         }
       });
@@ -719,9 +990,10 @@ export const ProductDetailPage: React.FC = () => {
           name: comp.name,
           quantity: comp.quantity,
           model_name: comp.model_name,
+          product_id: comp.product_id,
         })) || [];
 
-      await createBooking({
+      const createdBooking = await createBooking({
         product_id: id,
         user_id: user.uid,
         user_email: user.email || undefined,
@@ -741,6 +1013,28 @@ export const ProductDetailPage: React.FC = () => {
         "info",
         "/mypage" // Link to mypage
       );
+
+      try {
+        const idToken = await user.getIdToken();
+        await sendBookingRequestNotificationEmail(
+          {
+            bookingId: createdBooking.id || "예약번호 미확인",
+            productName: product.name,
+            requesterName: userProfile?.manager_name || userProfile?.name || user.displayName || "예약자",
+            companyName: userProfile?.company_name || "",
+            phone: userProfile?.phone || "",
+            userEmail: user.email || userProfile?.email || "",
+            startDate: startDate.toISOString().split("T")[0],
+            endDate: endDate.toISOString().split("T")[0],
+            totalPrice: totalPrice,
+            basicComponents,
+            selectedOptions,
+          },
+          idToken,
+        );
+      } catch (emailError) {
+        console.error("Booking request notification email failed", emailError);
+      }
 
       setBookingModal({
         show: true,
@@ -777,28 +1071,6 @@ export const ProductDetailPage: React.FC = () => {
     Object.entries(selectedAdditional).forEach(([key, qty]) => {
       const quantity = qty as number;
       const item = globalAdditional.find((p) => p.id === key);
-      if (item && quantity > 0)
-        summary.push({
-          name: item.name,
-          qty: quantity,
-          subtotal: item.price * quantity,
-          quantityLabel: formatQuantityLabel(item, quantity),
-        });
-    });
-    Object.entries(selectedPlaces).forEach(([key, qty]) => {
-      const quantity = qty as number;
-      const item = globalPlaces.find((p) => p.id === key);
-      if (item && quantity > 0)
-        summary.push({
-          name: item.name,
-          qty: quantity,
-          subtotal: item.price * quantity,
-          quantityLabel: formatQuantityLabel(item, quantity),
-        });
-    });
-    Object.entries(selectedFoods).forEach(([key, qty]) => {
-      const quantity = qty as number;
-      const item = globalFoods.find((p) => p.id === key);
       if (item && quantity > 0)
         summary.push({
           name: item.name,
@@ -897,51 +1169,22 @@ export const ProductDetailPage: React.FC = () => {
     },
   };
 
-  const hasAdditionalOptions =
-    product.additional_components &&
-    product.additional_components.length > 0 &&
-    globalAdditional.length > 0;
-  const hasPlaceOptions =
-    product.place_components &&
-    product.place_components.length > 0 &&
-    globalPlaces.length > 0;
-  const hasFoodOptions =
-    product.food_components &&
-    product.food_components.length > 0 &&
-    globalFoods.length > 0;
-  const hasAnyOptions = true;
+  const hasAnyOptions = Object.values(enabledOptionTabs).some(Boolean);
 
   const optionTabs = [
     {
       id: "cooperative" as const,
       label: "부가 서비스",
       icon: Users,
-      show:
-        product?.cooperative_components &&
-        product.cooperative_components.length > 0 &&
-        globalCooperative.length > 0,
+      show: enabledOptionTabs.cooperative,
       count: Object.values(selectedCooperative).filter(qty => (qty as number) > 0).length,
     },
     {
       id: "additional" as const,
       label: "추가 구성",
       icon: Package,
-      show: true, // Always show
+      show: enabledOptionTabs.additional,
       count: Object.values(selectedAdditional).filter(qty => (qty as number) > 0).length,
-    },
-    {
-      id: "place" as const,
-      label: "장소 상품",
-      icon: MapPin,
-      show: false, // Hidden
-      count: Object.values(selectedPlaces).filter(qty => (qty as number) > 0).length,
-    },
-    {
-      id: "food" as const,
-      label: "음식 상품",
-      icon: UtensilsCrossed,
-      show: false, // Hidden
-      count: Object.values(selectedFoods).filter(qty => (qty as number) > 0).length,
     },
   ].filter((tab) => tab.show);
 
@@ -1008,7 +1251,7 @@ export const ProductDetailPage: React.FC = () => {
             {/* LEFT COLUMN */}
             <div className="lg:col-span-2 space-y-6">
               {/* Product Image */}
-              <div className="aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden shadow-lg">
+              <div className="aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
                 <img
                   src={
                     product.image_url ||
@@ -1016,11 +1259,13 @@ export const ProductDetailPage: React.FC = () => {
                   }
                   alt={product.name}
                   className="w-full h-full object-cover"
+                  decoding="async"
+                  fetchPriority="high"
                 />
               </div>
 
               {/* Product Info */}
-              <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="bg-white rounded-lg p-6 shadow-[0_4px_14px_rgba(15,23,42,0.04)]">
                 <span className="text-[#39B54A] font-bold text-sm mb-2 block">
                   {product.category}
                 </span>
@@ -1046,7 +1291,7 @@ export const ProductDetailPage: React.FC = () => {
               </div>
 
               {/* Calendar & Date Selection */}
-              <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="bg-white rounded-lg p-6 shadow-[0_4px_14px_rgba(15,23,42,0.04)]">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-bold text-gray-900 text-lg">
                     날짜 선택
@@ -1147,7 +1392,7 @@ export const ProductDetailPage: React.FC = () => {
               {/* Basic Configuration (Restored Box/Frame Style) */}
               {product.basic_components &&
                 product.basic_components.length > 0 && (
-                  <div className="bg-white rounded-lg p-5 mb-6 shadow-sm">
+                  <div className="bg-white rounded-lg p-5 mb-6 shadow-[0_4px_14px_rgba(15,23,42,0.04)]">
                     <button
                       onClick={() =>
                         setBasicComponentsExpanded(!basicComponentsExpanded)
@@ -1174,29 +1419,35 @@ export const ProductDetailPage: React.FC = () => {
                       <div className="space-y-0 mt-2">
                         {product.basic_components.map((item, idx) => {
                           const matchedProduct = componentProducts.find(
-                            (p) => p.name === item.name,
+                            (componentProduct) =>
+                              (item.product_id &&
+                                componentProduct.id === item.product_id) ||
+                              componentProduct.name === item.name,
                           );
-                          const imageUrl =
-                            item.image_url ||
-                            matchedProduct?.image_url ||
-                            getComponentComponentImage(item.name);
+                          const imageUrl = resolveComponentImageUrl(
+                            item.name,
+                            item.image_url,
+                            matchedProduct?.image_url,
+                          );
 
                           return (
                             <div
                               key={idx}
-                              className="flex items-center gap-3 sm:gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors border-b border-gray-50 last:border-0"
+                              className="flex items-center gap-3 sm:gap-4 px-0 py-4 sm:p-4 hover:bg-gray-50 rounded-lg transition-colors border-b border-gray-50 last:border-0"
                             >
-                              <div className="relative w-20 sm:w-24 aspect-[4/3] flex-shrink-0 rounded-lg bg-white border border-gray-100 shadow-sm overflow-hidden">
+                              <div className="relative w-20 sm:w-24 aspect-[4/3] flex-shrink-0 rounded-lg bg-white border border-gray-100 shadow-[0_1px_3px_rgba(15,23,42,0.03)] overflow-hidden">
                                 {imageUrl ? (
                                   <div className="absolute inset-[10%] flex items-center justify-center">
                                     <img
                                       src={imageUrl}
                                       alt={item.name}
                                       className="w-full h-full object-contain"
+                                      loading="lazy"
+                                      decoding="async"
                                       onError={(e) => {
-                                        e.currentTarget.style.display = "none";
-                                        e.currentTarget.parentElement?.classList.add(
-                                          "fallback-icon",
+                                        applyComponentImageFallback(
+                                          e.currentTarget,
+                                          item.name,
                                         );
                                       }}
                                     />
@@ -1229,7 +1480,7 @@ export const ProductDetailPage: React.FC = () => {
                                     </p>
                                   )}
                               </div>
-                              <span className="font-bold text-slate-700 bg-white border border-gray-100 px-3 py-1 rounded text-sm shadow-sm">
+                              <span className="font-bold text-slate-700 bg-white border border-gray-100 px-3 py-1 rounded text-sm shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
                                 {item.quantity}개
                               </span>
                             </div>
@@ -1248,10 +1499,7 @@ export const ProductDetailPage: React.FC = () => {
                     {optionTabs.map((tab) => (
                       <button
                         key={tab.id}
-                        onClick={() => {
-                          setActiveOptionTab(tab.id);
-                          setCategoryPath((prev) => ({ ...prev, [tab.id]: [] }));
-                        }}
+                        onClick={() => setActiveOptionTab(tab.id)}
                         className={`flex-1 py-4 font-bold text-sm transition-all relative
                                  ${activeOptionTab === tab.id
                             ? "text-[#39B54A]"
@@ -1270,26 +1518,35 @@ export const ProductDetailPage: React.FC = () => {
                   </div>
 
                   {/* Chip Filter & List Content */}
-                  <div className="bg-white rounded-b-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <div className="bg-white rounded-b-xl border border-gray-100 shadow-[0_4px_14px_rgba(15,23,42,0.04)] overflow-hidden">
                     {activeOptionTab === "cooperative" &&
-                      <OptionListTypeA items={globalCooperative} selectedQty={selectedCooperative} setQty={setSelectedCooperative} componentProducts={componentProducts} menuItems={menuItems} tabType="cooperative" selectionMode="checkbox" />}
+                      (loadingOptionTabs.cooperative ? (
+                        <div className="flex items-center justify-center py-12 text-slate-400">
+                          <Loader2 className="animate-spin mr-2" size={20} />
+                          옵션을 불러오는 중입니다.
+                        </div>
+                      ) : (
+                        <OptionListTypeA items={globalCooperative} selectedQty={selectedCooperative} setQty={setSelectedCooperative} componentProducts={componentProducts} menuItems={menuItems} categoryParentMap={additionalCategoryParentMap} tabType="cooperative" selectionMode="checkbox" />
+                      ))}
                     {activeOptionTab === "additional" &&
-                      <OptionListTypeA items={globalAdditional} selectedQty={selectedAdditional} setQty={setSelectedAdditional} componentProducts={componentProducts} menuItems={menuItems} tabType="additional" />}
-                    {activeOptionTab === "place" &&
-                      <OptionListTypeA items={globalPlaces} selectedQty={selectedPlaces} setQty={setSelectedPlaces} componentProducts={componentProducts} menuItems={menuItems} tabType="place" />}
-                    {activeOptionTab === "food" &&
-                      <OptionListTypeA items={globalFoods} selectedQty={selectedFoods} setQty={setSelectedFoods} componentProducts={componentProducts} menuItems={menuItems} tabType="food" />}
+                      (loadingOptionTabs.additional ? (
+                        <div className="flex items-center justify-center py-12 text-slate-400">
+                          <Loader2 className="animate-spin mr-2" size={20} />
+                          옵션을 불러오는 중입니다.
+                        </div>
+                      ) : (
+                        <OptionListTypeA items={globalAdditional} selectedQty={selectedAdditional} setQty={setSelectedAdditional} componentProducts={componentProducts} menuItems={menuItems} categoryParentMap={additionalCategoryParentMap} tabType="additional" />
+                      ))}
                   </div>
                 </div>
               )}
 
               {/* Tabbed Product Details (Restored Box Style) */}
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-10 border border-gray-100">
+              <div className="bg-white rounded-lg shadow-[0_4px_14px_rgba(15,23,42,0.04)] overflow-hidden mb-10 border border-gray-100">
                 <div className="flex border-b border-gray-200">
                   {[
                     { id: "detail", label: "상세정보" },
                     { id: "guide", label: "예약안내" },
-                    { id: "review", label: "예약후기" },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -1319,21 +1576,49 @@ export const ProductDetailPage: React.FC = () => {
                       </p>
                     ))}
                   {activeTab === "guide" && (
-                    <div className="space-y-4 text-gray-600">
-                      <p>
-                        상품 대여는 예약 확정 후 진행되며, 지정된 날짜와
-                        장소에서 수령 가능합니다.
-                      </p>
-                      <p>
-                        반납은 종료일 18:00까지 지정된 반납 장소로 반납해주셔야
-                        합니다.
-                      </p>
+                    <div className="space-y-6 text-[15px] leading-[1.6] tracking-[-0.025em] text-gray-600 sm:text-base">
+                      <div className="space-y-1.5">
+                        <p className="text-base font-semibold leading-[1.6] tracking-[-0.025em] text-gray-900 sm:text-[17px]">
+                          1. 예약 문의 접수
+                        </p>
+                        <p>
+                          행사 일정, 장소, 예상 인원, 필요 품목을 남겨주시면
+                          운영 목적에 맞는 기본 구성부터 먼저 확인해드립니다.
+                        </p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <p className="text-base font-semibold leading-[1.6] tracking-[-0.025em] text-gray-900 sm:text-[17px]">
+                          2. 현장 조건 확인 및 견적 확정
+                        </p>
+                        <p>
+                          전력, 동선, 설치 시간, 운송 조건 등을 검토한 뒤
+                          진행 가능한 구성과 최종 견적을 안내드립니다.
+                        </p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <p className="text-base font-semibold leading-[1.6] tracking-[-0.025em] text-gray-900 sm:text-[17px]">
+                          3. 설치 및 운영 진행
+                        </p>
+                        <p>
+                          확정된 일정에 맞춰 배송과 설치를 진행하며, 행사 종료 후
+                          철거와 회수까지 순차적으로 마무리합니다.
+                        </p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <p className="text-base font-semibold leading-[1.6] tracking-[-0.025em] text-gray-900 sm:text-[17px]">
+                          4. 변경 및 취소
+                        </p>
+                        <p>
+                          일정이나 수량 변경은 사전 협의가 필요하며, 준비 진행
+                          단계에 따라 추가 비용 또는 취소 비용이 발생할 수
+                          있습니다.
+                        </p>
+                      </div>
+                      <div className="pt-4 border-t border-gray-100 text-sm leading-[1.6] tracking-[-0.025em] text-gray-500">
+                        최종 비용은 행사 규모, 장소 조건, 운송 거리, 추가 옵션
+                        여부에 따라 달라질 수 있습니다.
+                      </div>
                     </div>
-                  )}
-                  {activeTab === "review" && (
-                    <p className="text-center text-gray-400 py-8">
-                      아직 등록된 후기가 없습니다.
-                    </p>
                   )}
                 </div>
               </div>
@@ -1342,7 +1627,7 @@ export const ProductDetailPage: React.FC = () => {
             {/* RIGHT COLUMN - Sticky Sidebar (Desktop Only) */}
             <div className="hidden lg:block">
               <div className="sticky top-24 space-y-4">
-                <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-100">
+                <div className="bg-white rounded-lg p-6 shadow-[0_4px_12px_rgba(15,23,42,0.04)] border border-gray-100">
                   <h3 className="font-bold text-lg text-gray-900 mb-2 flex items-center gap-2">
                     <ShoppingBag size={20} className="text-[#39B54A]" />
                     예약 요약
@@ -1412,7 +1697,7 @@ export const ProductDetailPage: React.FC = () => {
                   <button
                     onClick={handleBooking}
                     disabled={isBooking || product.stock === 0}
-                    className="w-full mt-6 bg-[#39B54A] text-white py-4 rounded-lg font-bold hover:bg-[#39B54A]/90 transition-all flex items-center justify-center gap-2 disabled:bg-gray-400 shadow-lg"
+                    className="w-full mt-6 bg-[#39B54A] text-white py-4 rounded-lg font-bold hover:bg-[#39B54A]/90 transition-all flex items-center justify-center gap-2 disabled:bg-gray-400 shadow-sm"
                   >
                     {isBooking ? (
                       <>
@@ -1424,25 +1709,9 @@ export const ProductDetailPage: React.FC = () => {
                       "견적 받기"
                     )}
                   </button>
-                  <p className="text-xs text-gray-400 text-center mt-3">
-                    예약 확정 후 알림톡이 발송됩니다.
-                  </p>
-
-                  {/* Payment Notice */}
-                  <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">💳</span>
-                      <p className="text-sm font-bold text-gray-800">
-                        법인카드 결제 및 세금계산서 발행 가능
-                      </p>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1 ml-7">
-                      기업 행정 처리를 위한 모든 서류를 지원합니다.
-                    </p>
-                  </div>
 
                   {/* Quote Button */}
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mt-3">
                     <button
                       onClick={() => setShowQuoteModal(true)}
                       className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-[#39B54A] text-[#39B54A] font-semibold hover:bg-green-50 transition-all"
@@ -1450,6 +1719,9 @@ export const ProductDetailPage: React.FC = () => {
                       <FileText size={18} />
                       견적서 다운로드 (PDF)
                     </button>
+                    <p className="text-xs text-gray-400 text-center mt-3">
+                      예약 후 알림톡이 발송됩니다.
+                    </p>
                   </div>
 
                   {/* Certification Badges */}
@@ -1465,6 +1737,8 @@ export const ProductDetailPage: React.FC = () => {
                             src="/cert-disabled.jpg"
                             alt="장애인등록기업"
                             className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
                         <div>
@@ -1484,6 +1758,8 @@ export const ProductDetailPage: React.FC = () => {
                             src="/cert-mice.jpg"
                             alt="대전 MICE 전문기업"
                             className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
                         <div>
@@ -1506,7 +1782,7 @@ export const ProductDetailPage: React.FC = () => {
 
       {/* Mobile Floating Bar - Expandable Version (Solution 2) */}
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50 lg:hidden transition-all duration-300 ${mobileBarExpanded ? "max-h-[80vh]" : "max-h-[140px]"}`}
+        className={`fixed bottom-0 left-0 right-0 overflow-hidden rounded-t-[24px] bg-white border-t border-gray-200 shadow-[0_-10px_24px_rgba(15,23,42,0.10)] z-50 lg:hidden transition-all duration-300 ${mobileBarExpanded ? "max-h-[80vh]" : "max-h-[140px]"}`}
       >
         {/* Expand Toggle Button */}
         <button
@@ -1575,29 +1851,6 @@ export const ProductDetailPage: React.FC = () => {
                 </div>
               </div>
             )}
-
-            {/* Payment Notice */}
-            {/* Payment Notice */}
-            <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">💳</span>
-                <p className="text-sm font-bold text-gray-800">
-                  법인카드 결제 및 세금계산서 발행 가능
-                </p>
-              </div>
-              <p className="text-xs text-gray-500 mt-1 ml-7">
-                기업 행정 처리를 위한 모든 서류를 지원합니다.
-              </p>
-            </div>
-
-            {/* Quote Button */}
-            <button
-              onClick={() => setShowQuoteModal(true)}
-              className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-blue-500 text-blue-600 font-semibold hover:bg-blue-50 transition-all"
-            >
-              <FileText size={18} />
-              견적서 다운로드 (PDF)
-            </button>
           </div>
         )}
 
@@ -1606,14 +1859,14 @@ export const ProductDetailPage: React.FC = () => {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs text-gray-500">예상 견적 비용</p>
-              <p className="text-xl font-bold text-[#39B54A]">
+              <p className="text-xl font-bold text-slate-900">
                 {totalPrice.toLocaleString()}원
               </p>
             </div>
             <button
               onClick={handleBooking}
               disabled={isBooking || product.stock === 0}
-              className="flex-1 max-w-[200px] bg-slate-900 text-white py-3 rounded-lg font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 disabled:bg-gray-400"
+              className="flex-1 max-w-[200px] bg-[#39B54A] text-white py-3 rounded-lg font-bold hover:bg-[#2F9A3F] transition-all flex items-center justify-center gap-2 disabled:bg-gray-400"
             >
               {isBooking ? (
                 <Loader2 className="animate-spin" size={18} />
@@ -1635,7 +1888,7 @@ export const ProductDetailPage: React.FC = () => {
           onClick={() => setShowQuoteModal(false)}
         >
           <div
-            className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-[0_16px_36px_rgba(15,23,42,0.12)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -1653,7 +1906,7 @@ export const ProductDetailPage: React.FC = () => {
 
             {/* Quote Content (for PDF capture) */}
             <div className="w-full overflow-x-auto bg-gray-100 p-2 sm:p-4 rounded-b-2xl">
-              <div ref={quoteRef} className="min-w-[650px] mx-auto bg-white shadow-sm ring-1 ring-gray-200">
+              <div ref={quoteRef} className="min-w-[650px] mx-auto bg-white shadow-[0_2px_10px_rgba(15,23,42,0.05)] ring-1 ring-gray-200">
                 <div
                   className="p-8 bg-white"
                   style={{ fontFamily: "Malgun Gothic, sans-serif" }}
@@ -2008,7 +2261,7 @@ export const ProductDetailPage: React.FC = () => {
                       유성구 지족로 282번길 17
                     </p>
                     <p className="text-gray-500 mt-1">
-                      Tel. 010-4074-6967 | Email. micepartner@micepartner.co.kr
+                      Tel. 010-4074-6967 | Email. hm_solution@naver.com
                     </p>
                   </div>
                 </div>
@@ -2062,7 +2315,7 @@ export const ProductDetailPage: React.FC = () => {
         }}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
-            className="relative bg-white rounded-lg shadow-2xl w-full max-w-[360px] p-8 text-center animate-in fade-in zoom-in-95 duration-200"
+            className="relative bg-white rounded-lg shadow-[0_16px_36px_rgba(15,23,42,0.12)] w-full max-w-[360px] p-8 text-center animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-5">
@@ -2090,7 +2343,7 @@ export const ProductDetailPage: React.FC = () => {
                 setBookingModal(prev => ({ ...prev, show: false }));
                 bookingModal.onClose?.();
               }}
-              className="w-full py-3 bg-[#39B54A] text-white font-bold rounded-lg hover:bg-[#2F9A3F] transition-colors shadow-sm"
+              className="w-full py-3 bg-[#39B54A] text-white font-bold rounded-lg hover:bg-[#2F9A3F] transition-colors shadow-[0_1px_3px_rgba(15,23,42,0.06)]"
             >
               확인
             </button>

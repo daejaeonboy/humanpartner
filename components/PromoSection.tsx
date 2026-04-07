@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Container } from './ui/Container';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Banner, getPromoBannersByTab, getTabMenuItems, TabMenuItem } from '../src/api/cmsApi';
-import { getProducts, Product } from '../src/api/productApi';
+import { Product, getProductsByIdentifiers } from '../src/api/productApi';
+import { usePublicContent } from '../src/context/PublicContentContext';
 
 const stripHtml = (value?: string) => {
   if (!value) return '';
@@ -25,37 +26,18 @@ const buildProductLookup = (products: Product[]) => {
 };
 
 export const PromoSection: React.FC = () => {
-  const [tabs, setTabs] = useState<TabMenuItem[]>([]);
+  const { loading: loadingPublicContent, tabMenuItems: tabs } = usePublicContent();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [productLookup, setProductLookup] = useState<Record<string, Product>>({});
-  const [loading, setLoading] = useState(true);
   const [loadingBanners, setLoadingBanners] = useState(false);
   const resolvedPromoBanners = banners.filter((item) => Boolean(item.target_product_code));
 
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const [tabData, productData] = await Promise.all([
-          getTabMenuItems(),
-          getProducts()
-        ]);
-
-        setTabs(tabData);
-        setProductLookup(buildProductLookup(productData));
-
-        if (tabData.length > 0 && tabData[0].id) {
-          setActiveTabId(tabData[0].id);
-        }
-      } catch (error) {
-        console.error('Failed to load promo section data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialData();
-  }, []);
+    if (tabs.length > 0 && !activeTabId) {
+      setActiveTabId(tabs[0].id || null);
+    }
+  }, [activeTabId, tabs]);
 
   useEffect(() => {
     if (!activeTabId) return;
@@ -65,9 +47,21 @@ export const PromoSection: React.FC = () => {
       try {
         const bannerData = await getPromoBannersByTab(activeTabId);
         setBanners(bannerData);
+
+        const identifiers = bannerData
+          .map((banner) => banner.target_product_code)
+          .filter((value): value is string => Boolean(value));
+
+        if (identifiers.length > 0) {
+          const products = await getProductsByIdentifiers(identifiers);
+          setProductLookup(buildProductLookup(products));
+        } else {
+          setProductLookup({});
+        }
       } catch (error) {
         console.error('Failed to load banners:', error);
         setBanners([]);
+        setProductLookup({});
       } finally {
         setLoadingBanners(false);
       }
@@ -92,7 +86,7 @@ export const PromoSection: React.FC = () => {
     sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   };
 
-  if (loading) {
+  if (loadingPublicContent) {
     return (
       <div className="pb-16 bg-white flex items-center justify-center py-12">
         <Loader2 className="animate-spin text-[#39B54A]" size={32} />

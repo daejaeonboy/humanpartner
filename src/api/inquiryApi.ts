@@ -16,12 +16,13 @@ export interface Inquiry {
 }
 
 const TABLE_NAME = 'inquiries';
+const INQUIRY_SELECT = 'id,user_id,user_name,user_email,company_name,category,title,content,status,answer,created_at,answered_at';
 
 // 내 문의 목록 조회
 export const getMyInquiries = async (userId: string): Promise<Inquiry[]> => {
     const { data, error } = await supabase
         .from(TABLE_NAME)
-        .select('*')
+        .select(INQUIRY_SELECT)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
@@ -45,7 +46,7 @@ export const addInquiry = async (inquiry: Omit<Inquiry, 'id' | 'created_at' | 's
 export const getAllInquiries = async (): Promise<Inquiry[]> => {
     const { data, error } = await supabase
         .from(TABLE_NAME)
-        .select('*')
+        .select(INQUIRY_SELECT)
         .order('created_at', { ascending: false });
 
     if (error) throw error;

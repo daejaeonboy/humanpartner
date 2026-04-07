@@ -13,7 +13,7 @@ import {
     getAllAllianceCategories, addAllianceCategory, updateAllianceCategory, deleteAllianceCategory,
     AllianceMember, AllianceCategory, DEFAULT_ALLIANCE_CATEGORY_NAMES, normalizeAllianceCategoryName, getAllianceCategoryNames
 } from '../../src/api/cmsApi';
-import { getProducts, Product } from '../../src/api/productApi';
+import { getBasicProducts, Product } from '../../src/api/productApi';
 import { uploadImage } from '../../src/api/storageApi';
 
 type TabType = 'quickmenu' | 'tabmenu' | 'banners' | 'popups' | 'alliance';
@@ -46,13 +46,13 @@ export const CMSManager: React.FC = () => {
     const [editingAllianceCategoryName, setEditingAllianceCategoryName] = useState('');
 
     useEffect(() => {
-        loadData();
-    }, []);
-
-    useEffect(() => {
         if (activeTab !== 'alliance') {
             setAllianceCategoryFilter('전체');
         }
+    }, [activeTab]);
+
+    useEffect(() => {
+        void loadActiveTabData(activeTab);
     }, [activeTab]);
 
     useEffect(() => {
@@ -98,45 +98,62 @@ export const CMSManager: React.FC = () => {
         ? findProductByKey(formData.target_product_code)
         : null;
 
+    const getUploadFolder = (tab: TabType) => {
+        if (tab === 'quickmenu') return 'quick-menu';
+        if (tab === 'banners') return 'banners';
+        if (tab === 'popups') return 'popups';
+        if (tab === 'alliance') return 'alliance-logos';
+        return 'products';
+    };
+
     const getAllianceCategoryOptions = () => {
         const categories = getAllianceCategoryNames(allianceCategories, allianceMembers);
         return categories.length > 0 ? categories : [...DEFAULT_ALLIANCE_CATEGORY_NAMES];
     };
 
-    const loadData = async () => {
+    const loadActiveTabData = async (tab: TabType, force = false) => {
+        if (!force) {
+            if (tab === 'quickmenu' && quickMenuItems.length > 0) return;
+            if (tab === 'tabmenu' && tabMenuItems.length > 0) return;
+            if (tab === 'banners' && banners.length > 0 && products.length > 0) return;
+            if (tab === 'popups' && popups.length > 0) return;
+            if (tab === 'alliance' && allianceMembers.length > 0 && allianceCategories.length > 0) return;
+        }
+
         setLoading(true);
         try {
-            // Fetch individually to handle errors gracefully (e.g. if popups table doesn't exist yet)
-            const quickMenuPromise = getAllQuickMenuItems().catch(e => { console.error("CMS Load Error (QuickMenu):", e); return []; });
-            const tabMenuPromise = getAllTabMenuItems().catch(e => { console.error("CMS Load Error (TabMenu):", e); return []; });
-            const bannerPromise = getAllBanners().catch(e => { console.error("CMS Load Error (Banners):", e); return []; });
-            const popupPromise = getAllPopups().catch(e => { console.error("CMS Load Error (Popups):", e); return []; });
-            const allianceCategoryPromise = getAllAllianceCategories().catch(e => { console.error("CMS Load Error (Alliance Categories):", e); return []; });
-            const alliancePromise = getAllAllianceMembers().catch(e => { console.error("CMS Load Error (Alliance):", e); return []; });
-            const productsPromise = getProducts().catch(e => { console.error("CMS Load Error (Products):", e); return []; });
-
-            const [quickMenu, tabMenu, bannerData, popupData, allianceCategoryData, allianceData, productsData] = await Promise.all([
-                quickMenuPromise,
-                tabMenuPromise,
-                bannerPromise,
-                popupPromise,
-                allianceCategoryPromise,
-                alliancePromise,
-                productsPromise
-            ]);
-
-            setQuickMenuItems(quickMenu);
-            setTabMenuItems(tabMenu);
-            setBanners(bannerData);
-            setPopups(popupData);
-            setAllianceCategories(allianceCategoryData);
-            setAllianceMembers(allianceData);
-            setProducts(productsData);
+            if (tab === 'quickmenu') {
+                setQuickMenuItems(await getAllQuickMenuItems());
+            } else if (tab === 'tabmenu') {
+                setTabMenuItems(await getAllTabMenuItems());
+            } else if (tab === 'banners') {
+                const [bannerData, productsData, tabMenuData] = await Promise.all([
+                    getAllBanners(),
+                    getBasicProducts(),
+                    tabMenuItems.length > 0 ? Promise.resolve(tabMenuItems) : getAllTabMenuItems(),
+                ]);
+                setBanners(bannerData);
+                setProducts(productsData);
+                setTabMenuItems(tabMenuData);
+            } else if (tab === 'popups') {
+                setPopups(await getAllPopups());
+            } else if (tab === 'alliance') {
+                const [allianceCategoryData, allianceData] = await Promise.all([
+                    getAllAllianceCategories(),
+                    getAllAllianceMembers(),
+                ]);
+                setAllianceCategories(allianceCategoryData);
+                setAllianceMembers(allianceData);
+            }
         } catch (error) {
             console.error('Failed to load CMS data:', error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const refreshActiveTab = async () => {
+        await loadActiveTabData(activeTab, true);
     };
 
     const openAddModal = () => {
@@ -171,7 +188,7 @@ export const CMSManager: React.FC = () => {
         }
         setUploading(true);
         try {
-            const imageUrl = await uploadImage(file);
+            const imageUrl = await uploadImage(file, getUploadFolder(activeTab));
             if (activeTab === 'alliance') {
                 setFormData({ ...formData, logo_url: imageUrl });
             } else {
@@ -250,7 +267,7 @@ export const CMSManager: React.FC = () => {
                     await addAllianceMember(formData);
                 }
             }
-            await loadData();
+            await refreshActiveTab();
             setShowModal(false);
         } catch (error: any) {
             console.error('Save failed:', error);
@@ -275,7 +292,7 @@ export const CMSManager: React.FC = () => {
             } else if (activeTab === 'alliance') {
                 await deleteAllianceMember(id);
             }
-            await loadData();
+            await refreshActiveTab();
         } catch (error) {
             console.error('Delete failed:', error);
             alert('삭제에 실패했습니다.');
@@ -295,7 +312,7 @@ export const CMSManager: React.FC = () => {
             } else if (activeTab === 'alliance') {
                 await updateAllianceMember(item.id, { is_active: !item.is_active });
             }
-            await loadData();
+            await refreshActiveTab();
         } catch (error) {
             console.error('Toggle failed:', error);
         }
@@ -317,7 +334,7 @@ export const CMSManager: React.FC = () => {
                 is_active: true,
             });
             setNewAllianceCategoryName('');
-            await loadData();
+            await loadActiveTabData('alliance', true);
         } catch (error: any) {
             console.error('Alliance category add failed:', error);
             alert(`카테고리 추가에 실패했습니다.\n\n오류 내용: ${error.message || JSON.stringify(error)}`);
@@ -356,7 +373,7 @@ export const CMSManager: React.FC = () => {
 
             setEditingAllianceCategoryId(null);
             setEditingAllianceCategoryName('');
-            await loadData();
+            await loadActiveTabData('alliance', true);
         } catch (error: any) {
             console.error('Alliance category update failed:', error);
             alert(`카테고리 수정에 실패했습니다.\n\n오류 내용: ${error.message || JSON.stringify(error)}`);
@@ -384,7 +401,7 @@ export const CMSManager: React.FC = () => {
         setAllianceCategorySaving(true);
         try {
             await deleteAllianceCategory(id);
-            await loadData();
+            await loadActiveTabData('alliance', true);
         } catch (error: any) {
             console.error('Alliance category delete failed:', error);
             alert(`카테고리 삭제에 실패했습니다.\n\n오류 내용: ${error.message || JSON.stringify(error)}`);
@@ -509,11 +526,11 @@ export const CMSManager: React.FC = () => {
                                 <GripVertical size={20} className="text-slate-300 cursor-grab" />
 
                                 {((activeTab === 'banners' || activeTab === 'popups') && item.image_url) && (
-                                    <img src={item.image_url} alt={item.title} className="w-20 h-12 object-cover rounded" />
+                                    <img src={item.image_url} alt={item.title} className="w-20 h-12 object-cover rounded" loading="lazy" decoding="async" />
                                 )}
                                 {(activeTab === 'alliance' && item.logo_url) && (
                                     <div className="w-20 h-12 bg-gray-100 flex items-center justify-center rounded-lg">
-                                        <img src={item.logo_url} alt={item.name} className="max-w-full max-h-full object-contain mix-blend-multiply" />
+                                        <img src={item.logo_url} alt={item.name} className="max-w-full max-h-full object-contain mix-blend-multiply" loading="lazy" decoding="async" />
                                     </div>
                                 )}
 
@@ -670,7 +687,7 @@ export const CMSManager: React.FC = () => {
                                             </div>
                                             {formData.image_url && (
                                                 <div className="relative w-16 h-16 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
-                                                    <img src={formData.image_url} alt="Icon Preview" className="w-full h-full object-contain" />
+                                                    <img src={formData.image_url} alt="Icon Preview" className="w-full h-full object-contain" decoding="async" />
                                                 </div>
                                             )}
                                         </div>
@@ -803,7 +820,7 @@ export const CMSManager: React.FC = () => {
                                         />
                                         {formData.image_url ? (
                                             <div className="relative">
-                                                <img src={formData.image_url} alt="Banner" className="w-full h-32 object-cover rounded-lg" />
+                                                <img src={formData.image_url} alt="Banner" className="w-full h-32 object-cover rounded-lg" decoding="async" />
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, image_url: '' })}
@@ -876,6 +893,8 @@ export const CMSManager: React.FC = () => {
                                                                 src={selectedPromoProduct.image_url}
                                                                 alt={selectedPromoProduct.name}
                                                                 className="h-full w-full object-cover"
+                                                                loading="lazy"
+                                                                decoding="async"
                                                             />
                                                         ) : (
                                                             <div className="flex h-full w-full items-center justify-center text-[11px] text-slate-500">
@@ -922,7 +941,7 @@ export const CMSManager: React.FC = () => {
                                         />
                                         {formData.image_url ? (
                                             <div className="relative">
-                                                <img src={formData.image_url} alt="Popup" className="w-full h-auto object-contain rounded-lg max-h-[200px]" />
+                                                <img src={formData.image_url} alt="Popup" className="w-full h-auto object-contain rounded-lg max-h-[200px]" decoding="async" />
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, image_url: '' })}
@@ -1079,7 +1098,7 @@ export const CMSManager: React.FC = () => {
                                         />
                                         {formData.logo_url ? (
                                             <div className="relative border border-gray-200 rounded-lg p-4 bg-gray-50 flex justify-center">
-                                                <img src={formData.logo_url} alt="Logo" className="h-20 object-contain mix-blend-multiply" />
+                                                <img src={formData.logo_url} alt="Logo" className="h-20 object-contain mix-blend-multiply" decoding="async" />
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, logo_url: '' })}

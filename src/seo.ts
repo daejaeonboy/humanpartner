@@ -3,13 +3,13 @@ export const SITE_NAME = '행사어때';
 export const SITE_TITLE = '행사어때 | 대전 MICE 행사 통합운영 플랫폼';
 export const SITE_DESCRIPTION =
   '행사어때는 대전·충청권 MICE 행사에 필요한 기획, 장비 렌탈, 공간 연출, 운영 지원을 한 번에 제공하는 행사 통합운영 플랫폼입니다.';
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/logo3.png`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/Miceday_Logo.png`;
 export const INDEX_ROBOTS =
   'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
 export const NOINDEX_ROBOTS = 'noindex,follow';
 
 export const ORGANIZATION = {
-  legalName: 'micepartner',
+  legalName: SITE_NAME,
   alternateName: SITE_NAME,
   representative: '이기섭',
   businessNumber: '305-30-85537',

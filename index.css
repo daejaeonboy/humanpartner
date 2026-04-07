@@ -44,6 +44,9 @@
   .animate-swipe-hint {
     animation: swipe-hint 1.5s ease-in-out infinite;
   }
+  .filter-green {
+    filter: invert(58%) sepia(63%) saturate(445%) hue-rotate(78deg) brightness(94%) contrast(88%);
+  }
 }
 
 @layer base {

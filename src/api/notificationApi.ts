@@ -11,11 +11,13 @@ export interface Notification {
   link_url?: string; // Optional link to navigate to (e.g., /mypage)
 }
 
+const NOTIFICATION_SELECT = 'id,user_id,title,message,type,is_read,created_at,link_url';
+
 // Fetch unread notifications (or all, with limit)
 export const getNotifications = async (userId: string, limit = 20) => {
   const { data, error } = await supabase
     .from('notifications')
-    .select('*')
+    .select(NOTIFICATION_SELECT)
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(limit);

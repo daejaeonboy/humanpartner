@@ -11,11 +11,13 @@ export interface FAQ {
 }
 
 const TABLE_NAME = 'faqs';
+const FAQ_SELECT = 'id,category,question,answer,display_order,created_at,updated_at';
+const FAQ_CATEGORY_SELECT = 'id,name,display_order,created_at';
 
 export const getFAQs = async (): Promise<FAQ[]> => {
     const { data, error } = await supabase
         .from(TABLE_NAME)
-        .select('*')
+        .select(FAQ_SELECT)
         .order('display_order', { ascending: true });
 
     if (error) throw error;
@@ -68,7 +70,7 @@ const CATEGORY_TABLE = 'faq_categories';
 export const getFAQCategories = async (): Promise<FAQCategory[]> => {
     const { data, error } = await supabase
         .from(CATEGORY_TABLE)
-        .select('*')
+        .select(FAQ_CATEGORY_SELECT)
         .order('display_order', { ascending: true });
 
     if (error) throw error;

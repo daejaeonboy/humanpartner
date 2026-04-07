@@ -44,7 +44,7 @@ export const CSCenter: React.FC = () => {
     });
 
     return (
-        <div className="pb-20 pt-10 bg-white min-h-screen">
+        <div className="pb-20 bg-white min-h-screen">
             <Seo
                 title="고객센터 | 행사어때"
                 description="행사어때 고객센터입니다. 자주 묻는 질문, 전화 상담, 채팅 상담 안내를 확인할 수 있습니다."
@@ -53,9 +53,11 @@ export const CSCenter: React.FC = () => {
 
             <Container>
                 {/* Header Section */}
-                <div className="mb-8">
-                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">고객센터</h1>
-                    <p className="text-slate-500 font-medium">어려움이나 궁금한 점이 있으신가요?</p>
+                <div className="py-10 md:py-16 text-left">
+                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">고객센터</h1>
+                    <p className="text-gray-500 whitespace-pre-line text-[14px] md:text-[15px] leading-relaxed break-keep">
+                        어려움이나 궁금한 점이 있으신가요?
+                    </p>
                 </div>
 
                 {/* CS Info Card */}
@@ -95,9 +97,9 @@ export const CSCenter: React.FC = () => {
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
                                 className={`
-                                    whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-bold transition-all
+                                    whitespace-nowrap px-4 py-2.5 rounded-lg text-sm font-bold transition-all
                                     ${activeCategory === cat
-                                        ? 'bg-[#39B54A] text-white shadow-md shadow-[#39B54A]/20'
+                                        ? 'bg-[#39B54A] text-white'
                                         : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                     }
                                 `}

@@ -4,11 +4,12 @@ import { Seo } from '../components/seo/Seo';
 import { QuickMenu } from '../components/QuickMenu';
 import { PromoSection } from '../components/PromoSection';
 import { ProductSection } from '../components/ProductSection';
-import { getProducts, Product } from '../src/api/productApi';
-import { getActiveSections, getProductsBySection, Section } from '../src/api/sectionApi';
+import { getBasicProducts, Product } from '../src/api/productApi';
+import { getProductsForSections, Section } from '../src/api/sectionApi';
 import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PopupManager } from '../components/Layout/PopupManager';
+import { usePublicContent } from '../src/context/PublicContentContext';
 import { DEFAULT_OG_IMAGE, ORGANIZATION, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '../src/seo';
 
 interface SectionWithProducts {
@@ -17,32 +18,35 @@ interface SectionWithProducts {
 }
 
 export const MainPage: React.FC = () => {
+    const { activeSections, loading: publicContentLoading } = usePublicContent();
     const [sectionsWithProducts, setSectionsWithProducts] = useState<SectionWithProducts[]>([]);
     const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
+            if (publicContentLoading) {
+                return;
+            }
+
             try {
-                const [sections, products] = await Promise.all([
-                    getActiveSections(),
-                    getProducts(),
-                ]);
+                if (activeSections.length > 0) {
+                    const sectionProductsMap = await getProductsForSections(
+                        activeSections.map((section) => section.id!).filter(Boolean),
+                    );
 
-                setAllProducts(products);
+                    const sectionsData: SectionWithProducts[] = activeSections.map((section) => ({
+                        section,
+                        products: sectionProductsMap[section.id!] || [],
+                    }));
 
-                // Fetch products for each section
-                const sectionsData: SectionWithProducts[] = await Promise.all(
-                    sections.map(async (section) => {
-                        const sectionProducts = await getProductsBySection(section.id!);
-                        return {
-                            section,
-                            products: sectionProducts
-                        };
-                    })
-                );
-
-                setSectionsWithProducts(sectionsData);
+                    setSectionsWithProducts(sectionsData);
+                    setAllProducts([]);
+                } else {
+                    const products = await getBasicProducts();
+                    setAllProducts(products);
+                    setSectionsWithProducts([]);
+                }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             } finally {
@@ -50,7 +54,7 @@ export const MainPage: React.FC = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [activeSections, publicContentLoading]);
 
     // Helper to format products for ProductSection
     const formatProducts = (products: any[]) => {

@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Search, Eye, Trash2, Loader2, X, Building2, Phone, Mail, Calendar, CheckCircle, XCircle, UserCheck, UserX, FileText, Edit2, Save, KeyRound, MapPin } from 'lucide-react';
-import { getUsers, deleteUserProfile, searchUsers, updateUserProfile, UserProfile, updateFirebaseEmail, updateFirebasePassword } from '../../src/api/userApi';
+import { deleteUserProfile, getUsersPage, updateUserProfile, UserProfile, updateFirebaseEmail, updateFirebasePassword } from '../../src/api/userApi';
 
 export const UserManager = () => {
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [appliedQuery, setAppliedQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(25);
+    const [totalCount, setTotalCount] = useState(0);
     const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
     const [deleting, setDeleting] = useState<string | null>(null);
     const [approving, setApproving] = useState<string | null>(null);
@@ -16,14 +20,15 @@ export const UserManager = () => {
     const [changingPassword, setChangingPassword] = useState(false);
 
     useEffect(() => {
-        loadUsers();
-    }, []);
+        loadUsers(page, appliedQuery);
+    }, [page, pageSize, appliedQuery]);
 
-    const loadUsers = async () => {
+    const loadUsers = async (targetPage = page, query = appliedQuery) => {
         try {
             setLoading(true);
-            const data = await getUsers();
+            const { data, count } = await getUsersPage(targetPage, pageSize, query);
             setUsers(data);
+            setTotalCount(count);
         } catch (error) {
             console.error('Failed to load users:', error);
         } finally {
@@ -32,19 +37,8 @@ export const UserManager = () => {
     };
 
     const handleSearch = async () => {
-        if (!searchQuery.trim()) {
-            loadUsers();
-            return;
-        }
-        try {
-            setLoading(true);
-            const data = await searchUsers(searchQuery);
-            setUsers(data);
-        } catch (error) {
-            console.error('Search failed:', error);
-        } finally {
-            setLoading(false);
-        }
+        setPage(1);
+        setAppliedQuery(searchQuery.trim());
     };
 
     const handleApproval = async (id: string, approve: boolean) => {
@@ -90,7 +84,12 @@ export const UserManager = () => {
         setDeleting(id);
         try {
             await deleteUserProfile(id);
-            setUsers(users.filter(u => u.id !== id));
+            const nextPage = users.length === 1 && page > 1 ? page - 1 : page;
+            if (nextPage !== page) {
+                setPage(nextPage);
+            } else {
+                await loadUsers(nextPage, appliedQuery);
+            }
             if (selectedUser?.id === id) setSelectedUser(null);
         } catch (error) {
             console.error('Failed to delete user:', error);
@@ -168,6 +167,8 @@ export const UserManager = () => {
         }
     };
 
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
     const formatDate = (dateString?: string) => {
         if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString('ko-KR', {
@@ -194,8 +195,23 @@ export const UserManager = () => {
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800">회원 관리</h2>
                     <p className="text-slate-500 text-sm mt-1">
-                        총 {users.length}명 (승인됨: {approvedCount}, 대기중: {pendingCount})
+                        총 {totalCount}명 (현재 페이지 승인됨: {approvedCount}, 대기중: {pendingCount})
                     </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-500">페이지 크기</span>
+                    <select
+                        value={pageSize}
+                        onChange={(e) => {
+                            setPage(1);
+                            setPageSize(Number(e.target.value));
+                        }}
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    >
+                        {[25, 50, 100].map((size) => (
+                            <option key={size} value={size}>{size}</option>
+                        ))}
+                    </select>
                 </div>
             </div>
 
@@ -217,7 +233,7 @@ export const UserManager = () => {
                         검색
                     </button>
                     {searchQuery && (
-                        <button onClick={() => { setSearchQuery(''); loadUsers(); }} className="px-4 py-2.5 border border-slate-200 rounded-lg hover:bg-slate-50">
+                        <button onClick={() => { setSearchQuery(''); setAppliedQuery(''); setPage(1); }} className="px-4 py-2.5 border border-slate-200 rounded-lg hover:bg-slate-50">
                             초기화
                         </button>
                     )}
@@ -321,6 +337,31 @@ export const UserManager = () => {
                         )}
                     </tbody>
                 </table>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
+                <p className="text-sm text-slate-500">
+                    {totalCount === 0 ? '결과 없음' : `${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, totalCount)} / ${totalCount}`}
+                </p>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                        disabled={page === 1 || loading}
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 disabled:opacity-50"
+                    >
+                        이전
+                    </button>
+                    <span className="text-sm text-slate-500">
+                        {page} / {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                        disabled={page >= totalPages || loading}
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 disabled:opacity-50"
+                    >
+                        다음
+                    </button>
+                </div>
             </div>
 
             {/* User Detail/Edit Modal */}

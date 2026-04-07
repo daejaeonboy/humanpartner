@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Save, Loader2, Upload, Image as ImageIcon, Grid3X3, Bold, Italic, Underline, Copy } from 'lucide-react';
-import { getProducts, addProduct, updateProduct, deleteProduct, Product } from '../../src/api/productApi';
+import { getProductById, getProductSummaries, addProduct, updateProduct, deleteProduct, Product } from '../../src/api/productApi';
 import { getSections, getProductSections, setProductSections, Section } from '../../src/api/sectionApi';
 import { getAllNavMenuItems, NavMenuItem } from '../../src/api/cmsApi';
 import { uploadImage } from '../../src/api/storageApi';
@@ -110,7 +110,7 @@ export const ProductManager = () => {
     const loadData = async () => {
         try {
             setLoading(true);
-            const [p, s, m] = await Promise.all([getProducts(), getSections(), getAllNavMenuItems()]);
+            const [p, s, m] = await Promise.all([getProductSummaries(), getSections(), getAllNavMenuItems()]);
             setProducts(p); setSections(s); setMenuItems(m);
             setSelectedProductIds(prev => prev.filter(id => p.some(product => product.id === id)));
         } catch (error) { console.error(error); } finally { setLoading(false); }
@@ -131,24 +131,30 @@ export const ProductManager = () => {
     const [selectedParentCategory, setSelectedParentCategory] = useState('');
 
     const handleEdit = async (product: Product) => {
-        setEditingProduct(product);
+        const productDetail = await getProductById(product.id!);
+        if (!productDetail) {
+            alert('상품 상세 정보를 불러오지 못했습니다.');
+            return;
+        }
+
+        setEditingProduct(productDetail);
         setFormData({
             ...formData,
-            name: product.name, category: product.category, price: product.price,
-            description: product.description || '', short_description: product.short_description || '',
-            image_url: product.image_url || '',
-            stock: product.stock, discount_rate: product.discount_rate || 0,
-            product_type: product.product_type || 'basic',
-            basic_components: product.basic_components || [],
-            additional_components: product.additional_components || [],
-            cooperative_components: product.cooperative_components || [],
-            place_components: product.place_components || [],
-            food_components: product.food_components || [],
+            name: productDetail.name, category: productDetail.category, price: productDetail.price,
+            description: productDetail.description || '', short_description: productDetail.short_description || '',
+            image_url: productDetail.image_url || '',
+            stock: productDetail.stock, discount_rate: productDetail.discount_rate || 0,
+            product_type: productDetail.product_type || 'basic',
+            basic_components: productDetail.basic_components || [],
+            additional_components: productDetail.additional_components || [],
+            cooperative_components: productDetail.cooperative_components || [],
+            place_components: productDetail.place_components || [],
+            food_components: productDetail.food_components || [],
         });
-        setUseCooperative((product.cooperative_components || []).length > 0);
-        setUseAdditional((product.additional_components || []).length > 0);
-        setUsePlace((product.place_components || []).length > 0);
-        setUseFood((product.food_components || []).length > 0);
+        setUseCooperative((productDetail.cooperative_components || []).length > 0);
+        setUseAdditional((productDetail.additional_components || []).length > 0);
+        setUsePlace((productDetail.place_components || []).length > 0);
+        setUseFood((productDetail.food_components || []).length > 0);
 
         // Derive Parent Category from the product's category (which is a Child Name)
         // Find the menu item that matches key=product.category
@@ -156,7 +162,7 @@ export const ProductManager = () => {
         // Since 'menuItems' might not be fully loaded if we came straight here, ensuring we look it up.
         // We can assume menuItems is updated since we loadData on mount.
 
-        const childItem = menuItems.find(i => i.name === product.category);
+        const childItem = menuItems.find(i => i.name === productDetail.category);
         if (childItem && childItem.category) {
             setSelectedParentCategory(childItem.category);
         } else {
@@ -164,7 +170,7 @@ export const ProductManager = () => {
             setSelectedParentCategory('');
         }
 
-        const s = await getProductSections(product.id!);
+        const s = await getProductSections(productDetail.id!);
         setSelectedSections(s);
         setShowForm(true);
     };
@@ -214,22 +220,27 @@ export const ProductManager = () => {
 
         setDuplicatingId(product.id);
         try {
+            const productDetail = await getProductById(product.id);
+            if (!productDetail) {
+                throw new Error('상품 상세 정보를 불러오지 못했습니다.');
+            }
+
             const sectionIds = await getProductSections(product.id);
             const duplicatedProduct = await addProduct({
-                name: product.name,
-                category: product.category || '',
-                price: product.price,
-                description: product.description || '',
-                short_description: product.short_description || '',
-                image_url: product.image_url || '',
-                stock: product.stock ?? 99999,
-                discount_rate: product.discount_rate || 0,
-                product_type: product.product_type || 'basic',
-                basic_components: sanitizeComponents(cloneComponents(product.basic_components)),
-                additional_components: sanitizeComponents(cloneComponents(product.additional_components)),
-                cooperative_components: sanitizeComponents(cloneComponents(product.cooperative_components)),
-                place_components: sanitizeComponents(cloneComponents(product.place_components)),
-                food_components: sanitizeComponents(cloneComponents(product.food_components)),
+                name: productDetail.name,
+                category: productDetail.category || '',
+                price: productDetail.price,
+                description: productDetail.description || '',
+                short_description: productDetail.short_description || '',
+                image_url: productDetail.image_url || '',
+                stock: productDetail.stock ?? 99999,
+                discount_rate: productDetail.discount_rate || 0,
+                product_type: productDetail.product_type || 'basic',
+                basic_components: sanitizeComponents(cloneComponents(productDetail.basic_components)),
+                additional_components: sanitizeComponents(cloneComponents(productDetail.additional_components)),
+                cooperative_components: sanitizeComponents(cloneComponents(productDetail.cooperative_components)),
+                place_components: sanitizeComponents(cloneComponents(productDetail.place_components)),
+                food_components: sanitizeComponents(cloneComponents(productDetail.food_components)),
             });
 
             await setProductSections(duplicatedProduct.id!, sectionIds);
@@ -322,7 +333,7 @@ export const ProductManager = () => {
         if (!file) return;
         setUploading(true);
         try {
-            const url = await uploadImage(file);
+            const url = await uploadImage(file, 'products');
             setFormData({ ...formData, image_url: url });
         } catch (error) { alert('업로드 실패'); } finally { setUploading(false); }
     };
@@ -595,10 +606,10 @@ export const ProductManager = () => {
                                 <div className="space-y-4">
                                     <label className="block text-sm font-bold text-slate-700">대표 이미지</label>
                                     <div onClick={() => fileInputRef.current?.click()} className="w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all overflow-hidden relative border-slate-300">
-                                        {formData.image_url ? <img src={formData.image_url} className="w-full h-full object-cover" /> : <div className="text-center text-slate-400"><Upload size={40} className="mx-auto mb-2" /><span className="text-sm">클릭하여 업로드</span></div>}
+                                        {formData.image_url ? <img src={formData.image_url} className="w-full h-full object-cover" decoding="async" /> : <div className="text-center text-slate-400"><Upload size={40} className="mx-auto mb-2" /><span className="text-sm">클릭하여 업로드</span></div>}
                                         {uploading && <div className="absolute inset-0 bg-white/80 flex items-center justify-center"><Loader2 className="animate-spin text-[#39B54A]" /></div>}
                                     </div>
-                                    <input type="file" ref={fileInputRef} className="hidden" onChange={handleImageUpload} />
+                                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                                     <input type="url" placeholder="또는 이미지 URL 입력" value={formData.image_url} onChange={(e) => setFormData({ ...formData, image_url: e.target.value })} className="w-full px-4 py-2 text-sm border rounded-lg outline-none" />
                                 </div>
                             </div>
@@ -629,7 +640,10 @@ export const ProductManager = () => {
                                                 <div key={idx} className="flex gap-2 items-center bg-white p-2.5 rounded-lg border shadow-sm">
                                                     <select value={item.name} onChange={(e) => {
                                                         const val = e.target.value; const matched = products.find(p => p.name === val);
-                                                        const n = [...formData.basic_components]; n[idx].name = val;
+                                                        const n = [...formData.basic_components];
+                                                        n[idx].name = val;
+                                                        n[idx].product_id = matched?.id;
+                                                        n[idx].model_name = matched?.product_code || n[idx].model_name;
                                                         setFormData({ ...formData, basic_components: n });
                                                     }} className="flex-1 text-sm border-slate-200 rounded-md focus:ring-1 focus:ring-blue-400">
                                                         <option value="">옵션 선택 (등록된 품목)</option>
@@ -725,7 +739,7 @@ export const ProductManager = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
-                                            {p.image_url ? <img src={p.image_url} className="w-12 h-12 object-cover rounded-lg shadow-sm" /> : <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center text-slate-300"><ImageIcon size={20} /></div>}
+                                            {p.image_url ? <img src={p.image_url} className="w-12 h-12 object-cover rounded-lg shadow-sm" loading="lazy" decoding="async" /> : <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center text-slate-300"><ImageIcon size={20} /></div>}
                                             <div className="font-bold text-slate-800">{p.name}</div>
                                         </div>
                                     </td>

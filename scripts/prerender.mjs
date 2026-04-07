@@ -9,13 +9,13 @@ const SITE_NAME = '행사어때';
 const SITE_TITLE = '행사어때 | 대전 MICE 행사 통합운영 플랫폼';
 const SITE_DESCRIPTION =
   '행사어때는 대전·충청권 MICE 행사에 필요한 기획, 장비 렌탈, 공간 연출, 운영 지원을 한 번에 제공하는 행사 통합운영 플랫폼입니다.';
-const DEFAULT_OG_IMAGE = `${SITE_URL}/logo3.png`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/Miceday_Logo.png`;
 const INDEX_ROBOTS =
   'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
 const NOINDEX_ROBOTS = 'noindex,follow';
 
 const ORGANIZATION = {
-  legalName: 'micepartner',
+  legalName: SITE_NAME,
   representative: '이기섭',
   phone: '1800-1985',
   officePhone: '010-4074-6967',
@@ -106,6 +106,20 @@ const staticRoutes = [
     title: '대전·충청 MICE 얼라이언스 회원사 소개 | 행사어때',
     description: '대전·충청 MICE 얼라이언스(DCMA) 회원사 소개와 안내를 확인할 수 있습니다.',
     canonical: '/alliance',
+    robots: INDEX_ROBOTS,
+  },
+  {
+    route: '/cases',
+    title: '설치사례 | 행사어때',
+    description: '행사어때 설치사례 페이지입니다. 현장 설치 및 운영 사례를 확인할 수 있습니다.',
+    canonical: '/cases',
+    robots: INDEX_ROBOTS,
+  },
+  {
+    route: '/notices',
+    title: '공지사항 | 행사어때',
+    description: '행사어때 공지사항 페이지입니다. 서비스 공지와 운영 소식을 확인할 수 있습니다.',
+    canonical: '/notices',
     robots: INDEX_ROBOTS,
   },
   {

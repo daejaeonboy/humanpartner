@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "postbuild": "node scripts/prerender.mjs",
+    "optimize:images": "node scripts/optimize-existing-images.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "sharp": "^0.34.5",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

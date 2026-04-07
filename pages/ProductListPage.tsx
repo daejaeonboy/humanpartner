@@ -3,12 +3,13 @@ import { Container } from '../components/ui/Container';
 import { Loader2 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Seo } from '../components/seo/Seo';
-import { getProducts, Product } from '../src/api/productApi';
+import { getBasicProducts, getBasicProductsByCategories, Product } from '../src/api/productApi';
 import { getProductsBySection } from '../src/api/sectionApi';
-import { getAllNavMenuItems } from '../src/api/cmsApi';
+import { usePublicContent } from '../src/context/PublicContentContext';
 
 export const ProductListPage: React.FC = () => {
     const [searchParams] = useSearchParams();
+    const { loading: loadingPublicContent, navMenuItems } = usePublicContent();
     const urlCategory = searchParams.get('category');
     const sectionId = searchParams.get('sectionId');
     const urlTitle = searchParams.get('title');
@@ -25,27 +26,17 @@ export const ProductListPage: React.FC = () => {
 
     useEffect(() => {
         const fetchProducts = async () => {
+            if (loadingPublicContent) {
+                return;
+            }
+
             setLoading(true);
             try {
-                const [productData, navItems] = await Promise.all([
-                    sectionId ? getProductsBySection(sectionId) : getProducts(),
-                    getAllNavMenuItems()
-                ]);
-
-                // Filter basic products
-                const basicProducts = productData.filter(p =>
-                    p.product_type === 'basic' ||
-                    (!p.product_type && !((p.category || '').includes('추가')) && !((p.category || '').includes('장소')) && !((p.category || '').includes('음식')))
-                );
-                setProducts(basicProducts);
-
-                // Build Category Maps
                 const pMap: Record<string, string[]> = {};
                 const cMap: Record<string, string> = {};
 
-                navItems.forEach(item => {
+                navMenuItems.forEach(item => {
                     if (item.category && item.name) {
-                        // item.category is Parent, item.name is Child
                         if (!pMap[item.category]) pMap[item.category] = [];
                         pMap[item.category].push(item.name);
                         cMap[item.name] = item.category;
@@ -55,8 +46,30 @@ export const ProductListPage: React.FC = () => {
                 setParentToChildMap(pMap);
                 setChildToParentMap(cMap);
 
+                let fetchCategories: string[] = [];
+
+                if (urlCategory) {
+                    if (pMap[urlCategory]) {
+                        fetchCategories = [urlCategory, ...pMap[urlCategory]];
+                    } else if (cMap[urlCategory]) {
+                        fetchCategories = [urlCategory];
+                    } else if (urlCategory.includes(',')) {
+                        fetchCategories = urlCategory.split(',');
+                    } else {
+                        fetchCategories = [urlCategory];
+                    }
+                }
+
+                const productData = sectionId
+                    ? await getProductsBySection(sectionId)
+                    : fetchCategories.length > 0
+                        ? await getBasicProductsByCategories(fetchCategories)
+                        : await getBasicProducts();
+
+                setProducts(productData);
+
                 // Extract unique categories from actual products for fallback
-                const uniqueCategories = ['전체', ...new Set(basicProducts.map(p => p.category).filter(Boolean) as string[])];
+                const uniqueCategories = ['전체', ...new Set(productData.map(p => p.category).filter(Boolean) as string[])];
 
                 // Determine Group & Active Category
                 let targetGroup: string | null = null;
@@ -108,7 +121,7 @@ export const ProductListPage: React.FC = () => {
         };
 
         fetchProducts();
-    }, [urlCategory, sectionId]);
+    }, [loadingPublicContent, navMenuItems, urlCategory, sectionId]);
 
     // Enhanced Filter Logic
     const filteredProducts = products.filter(p => {
@@ -151,20 +164,21 @@ export const ProductListPage: React.FC = () => {
                 canonical={canonicalPath}
             />
             <Container>
-                <div className="mb-8">
+                <div className="mb-6 md:mb-8">
                     {/* Title Logic: Use Current Group Name if available, otherwise URL Title or Active Category */}
-                    <h1 className="text-3xl font-bold text-gray-900">
+                    <h1 className="text-[24px] md:text-3xl font-bold text-slate-900 tracking-[-0.02em]">
                         {pageTitle}
                     </h1>
                 </div>
 
                 {/* Category Filter */}
-                <div className="flex flex-wrap gap-4 mb-8 md:mb-10">
+                <div className="mb-8 md:mb-10 -mx-1 px-1 overflow-x-auto md:overflow-visible scrollbar-hide">
+                    <div className="inline-flex min-w-full gap-3 md:flex md:min-w-0 md:flex-wrap md:gap-4">
                     {displayedCategories.map((cat, idx) => (
                         <button
                             key={`${cat}-${idx}`}
                             onClick={() => setActiveCategory(cat)}
-                            className={`h-[40px] min-w-[100px] px-4 rounded-lg text-[14px] md:text-[15px] font-semibold transition-all border
+                            className={`h-[40px] min-w-[96px] shrink-0 px-4 rounded-xl text-[14px] md:text-[15px] font-semibold transition-all border
                                 ${activeCategory === cat
                                     ? 'bg-[#39B54A] text-white border-[#39B54A] shadow-sm'
                                     : 'bg-white text-slate-600 border-slate-200 hover:border-[#39B54A] hover:text-[#39B54A]'
@@ -173,6 +187,7 @@ export const ProductListPage: React.FC = () => {
                             {cat}
                         </button>
                     ))}
+                    </div>
                 </div>
 
                 {/* Product Grid */}
@@ -185,14 +200,16 @@ export const ProductListPage: React.FC = () => {
                         등록된 상품이 없습니다. <Link to="/admin/products" className="text-[#39B54A] underline">Admin에서 상품 추가</Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 gap-y-8 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
                         {filteredProducts.map((product) => (
                             <Link to={`/products/${product.id}`} key={product.id} className="group cursor-pointer">
-                                <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 mb-4 rounded-lg">
+                                <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 mb-4 rounded-xl shadow-sm">
                                     <img
                                         src={product.image_url || 'https://picsum.photos/seed/product/400/500'}
                                         alt={product.name}
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                                     {product.stock === 0 && (
@@ -202,16 +219,16 @@ export const ProductListPage: React.FC = () => {
                                     )}
                                 </div>
 
-                                <div className="space-y-1">
-                                    <h3 className="font-bold text-gray-900 line-clamp-1">{product.name}</h3>
+                                <div className="space-y-1.5 px-1">
+                                    <h3 className="text-[16px] font-bold text-slate-800 line-clamp-2 leading-tight group-hover:text-[#39B54A] transition-colors">{product.name}</h3>
 
-                                    <div className="flex items-baseline gap-2">
+                                    <div className="flex items-center gap-2">
                                         {product.discount_rate && product.discount_rate > 0 && (
-                                            <span className="text-[#39B54A] font-bold text-lg leading-none">
+                                            <span className="text-[#39B54A] font-bold text-[18px]">
                                                 {product.discount_rate}%
                                             </span>
                                         )}
-                                        <span className="font-bold text-lg">
+                                        <span className="font-medium text-[18px] text-slate-900">
                                             {product.price?.toLocaleString()}원
                                         </span>
                                     </div>

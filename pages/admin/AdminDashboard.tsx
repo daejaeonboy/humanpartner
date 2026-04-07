@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Package, CalendarCheck, LayoutDashboard, ArrowLeft, Layers, Tag, Settings, Users, LogOut, User, Menu, HelpCircle, MessageSquare } from 'lucide-react';
+import { Package, CalendarCheck, LayoutDashboard, ArrowLeft, Layers, Settings, Users, LogOut, User, Menu, HelpCircle, MessageSquare, Images, Megaphone, Mail } from 'lucide-react';
 import { useAuth } from '../../src/context/AuthContext';
 
 export const AdminDashboard = () => {
@@ -19,13 +19,15 @@ export const AdminDashboard = () => {
         { path: '/admin', label: '대시보드', icon: LayoutDashboard, exact: true },
         { path: '/admin/cms', label: 'CMS 관리', icon: Settings },
         { path: '/admin/sections', label: '섹션 관리', icon: Layers },
-        // Category management removed as per request
         { path: '/admin/products', label: '상품 관리', icon: Package },
         { path: '/admin/bookings', label: '예약 확인', icon: CalendarCheck },
         { path: '/admin/users', label: '회원 관리', icon: Users },
         { path: '/admin/menus', label: '전체 메뉴 관리', icon: Menu },
+        { path: '/admin/cases', label: '설치사례 관리', icon: Images },
+        { path: '/admin/notices', label: '공지사항 관리', icon: Megaphone },
         { path: '/admin/faqs', label: 'FAQ 관리', icon: HelpCircle },
         { path: '/admin/inquiries', label: '1:1 문의 관리', icon: MessageSquare },
+        { path: '/admin/booking-email', label: '견적 메일 설정', icon: Mail },
     ];
 
     const isActive = (path: string, exact?: boolean) => {
@@ -134,6 +136,36 @@ export const AdminDashboard = () => {
                                 </Link>
 
                                 <Link
+                                    to="/admin/cases"
+                                    className="group bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-[#39B54A]/30"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-4 bg-gradient-to-br from-[#39B54A]/10 to-[#39B54A]/5 rounded-lg group-hover:from-[#39B54A] group-hover:to-[#74D07E] transition-all duration-300">
+                                            <Images className="text-[#39B54A] group-hover:text-white transition-colors" size={28} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-slate-800 group-hover:text-[#39B54A] transition-colors">설치사례 관리</h3>
+                                            <p className="text-slate-500 text-sm">설치사례 게시물 등록 및 편집</p>
+                                        </div>
+                                    </div>
+                                </Link>
+
+                                <Link
+                                    to="/admin/notices"
+                                    className="group bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-[#39B54A]/30"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-4 bg-gradient-to-br from-[#39B54A]/10 to-[#39B54A]/5 rounded-lg group-hover:from-[#39B54A] group-hover:to-[#74D07E] transition-all duration-300">
+                                            <Megaphone className="text-[#39B54A] group-hover:text-white transition-colors" size={28} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-slate-800 group-hover:text-[#39B54A] transition-colors">공지사항 관리</h3>
+                                            <p className="text-slate-500 text-sm">공지 게시물 등록 및 노출 관리</p>
+                                        </div>
+                                    </div>
+                                </Link>
+
+                                <Link
                                     to="/admin/products"
                                     className="group bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-[#39B54A]/30"
                                 >
@@ -219,6 +251,21 @@ export const AdminDashboard = () => {
                                         <div>
                                             <h3 className="font-bold text-lg text-slate-800 group-hover:text-[#39B54A] transition-colors">1:1 문의 관리</h3>
                                             <p className="text-slate-500 text-sm">고객 1:1 문의 확인 및 답변</p>
+                                        </div>
+                                    </div>
+                                </Link>
+
+                                <Link
+                                    to="/admin/booking-email"
+                                    className="group bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-[#39B54A]/30"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-4 bg-gradient-to-br from-[#39B54A]/10 to-[#39B54A]/5 rounded-lg group-hover:from-[#39B54A] group-hover:to-[#74D07E] transition-all duration-300">
+                                            <Mail className="text-[#39B54A] group-hover:text-white transition-colors" size={28} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-slate-800 group-hover:text-[#39B54A] transition-colors">견적 메일 설정</h3>
+                                            <p className="text-slate-500 text-sm">예약 메일 수신 주소 및 발송 상태 관리</p>
                                         </div>
                                     </div>
                                 </Link>

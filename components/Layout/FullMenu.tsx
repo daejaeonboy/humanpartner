@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { X, ChevronRight, Phone, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { NavMenuItem, getAllNavMenuItems } from '../../src/api/cmsApi';
+import { NavMenuItem } from '../../src/api/cmsApi';
 import { Container } from '../ui/Container';
 import { useAuth } from '../../src/context/AuthContext';
+import { usePublicContent } from '../../src/context/PublicContentContext';
 
 interface FullMenuProps {
     onClose: () => void;
@@ -12,29 +13,12 @@ interface FullMenuProps {
 }
 
 export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile', items }) => {
-    const [menuItems, setMenuItems] = useState<NavMenuItem[]>([]);
-    const [loading, setLoading] = useState(true);
     const { user, userProfile, logout } = useAuth();
+    const { navMenuItems, loading: loadingPublicContent } = usePublicContent();
+    const menuItems = items ?? navMenuItems;
+    const loading = !items && loadingPublicContent;
 
     useEffect(() => {
-        if (items) {
-            setMenuItems(items);
-            setLoading(false);
-            return;
-        }
-
-        const loadMenu = async () => {
-            try {
-                const data = await getAllNavMenuItems();
-                setMenuItems(data);
-            } catch (error) {
-                console.error('Failed to load menu:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadMenu();
-
         // Prevent body scroll only for mobile overlay
         if (variant === 'mobile') {
             document.body.style.overflow = 'hidden';
@@ -42,7 +26,7 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
                 document.body.style.overflow = 'unset';
             };
         }
-    }, [variant, items]);
+    }, [variant]);
 
     // Grouping: Parent (items with no category or unique category names) -> Children
     const groups = React.useMemo(() => {
@@ -142,50 +126,39 @@ export const FullMenu: React.FC<FullMenuProps> = ({ onClose, variant = 'mobile',
             >
                 {/* Header - Only for Mobile */}
                 {variant === 'mobile' && (
-                    <>
-                        <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-white sticky top-0 z-10">
-                            <img src="/logo3.png" alt="행사어때" className="h-6 object-contain" />
-                            <button onClick={onClose} className="p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                <X size={24} className="text-slate-800" />
-                            </button>
-                        </div>
-
-                        {/* Login/Signup OR Profile Card */}
-                        <div className="px-5 py-6 bg-slate-50">
-                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center">
-                                {user ? (
-                                    <>
-                                        <div className="mb-4">
-                                            <div className="w-16 h-16 bg-[#39B54A]/10 text-[#39B54A] rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-xl">
-                                                {userProfile?.name?.[0] || user.email?.[0]?.toUpperCase() || 'U'}
-                                            </div>
-                                            <h3 className="font-bold text-lg text-slate-800 mb-1">
-                                                {userProfile?.name || '사용자'}님, 안녕하세요!
-                                            </h3>
-                                            <p className="text-xs text-slate-500">행사어때와 함께<br />멋진 행사를 기획해보세요.</p>
-                                        </div>
-                                        <div className="flex gap-3">
-                                            <Link to="/mypage" onClick={onClose} className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-700 font-bold text-sm hover:bg-[#39B54A]/10 hover:text-[#39B54A] transition-all text-center">마이페이지</Link>
-                                            <Link to="/cs" onClick={onClose} className="flex-1 py-3 rounded-lg border border-slate-200 text-slate-500 font-bold text-sm hover:bg-[#39B54A]/5 hover:border-[#39B54A]/30 hover:text-[#39B54A] transition-all text-center">고객센터</Link>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <h3 className="font-bold text-lg text-slate-800 mb-1">환영합니다!</h3>
-                                        <p className="text-sm text-slate-500 mb-4">로그인하고 더 많은 혜택을 받아보세요.</p>
-                                        <div className="flex gap-3">
-                                            <Link to="/login" onClick={onClose} className="flex-1 py-3 rounded-lg bg-[#39B54A] text-white font-bold text-sm hover:bg-[#2F9A3F] transition-colors text-center">로그인</Link>
-                                            <Link to="/signup" onClick={onClose} className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-700 font-bold text-sm hover:bg-slate-200 transition-colors text-center">회원가입</Link>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </>
+                    <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-white sticky top-0 z-10">
+                        <img src="/Miceday_Logo.png" alt="행사어때" className="h-6 object-contain" decoding="async" />
+                        <button onClick={onClose} className="p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <X size={24} className="text-slate-800" />
+                        </button>
+                    </div>
                 )}
 
                 {/* Content */}
                 <div className={`flex-1 overflow-y-auto ${variant === 'mobile' ? '' : 'p-8'}`}>
+                    {variant === 'mobile' && (
+                        <div className="px-5 py-6 border-b border-gray-100 mb-2">
+                            {user ? (
+                                <div className="flex flex-col gap-4">
+                                    <h3 className="font-bold text-slate-800 text-xl leading-tight">
+                                        {userProfile?.name || '사용자'}님, 안녕하세요!
+                                    </h3>
+                                    <div className="flex gap-2">
+                                        <Link to="/mypage" onClick={onClose} className="flex-1 py-2 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs hover:bg-[#39B54A]/10 hover:text-[#39B54A] transition-all text-center">마이페이지</Link>
+                                        <Link to="/cs" onClick={onClose} className="flex-1 py-2 rounded-lg border border-slate-200 text-slate-500 font-bold text-xs hover:bg-[#39B54A]/5 hover:border-[#39B54A]/30 hover:text-[#39B54A] transition-all text-center">고객센터</Link>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-3">
+                                    <h3 className="font-bold text-slate-800 text-xl">환영합니다!</h3>
+                                    <div className="flex gap-2">
+                                        <Link to="/login" onClick={onClose} className="flex-1 py-2.5 rounded-lg bg-[#39B54A] text-white font-bold text-xs hover:bg-[#2F9A3F] transition-colors text-center">로그인</Link>
+                                        <Link to="/signup" onClick={onClose} className="flex-1 py-2.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition-colors text-center">회원가입</Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                     <Container className={variant === 'mobile' ? '!px-5 !w-full !max-w-none' : ''}>
                         <div className={`${variant === 'mobile' ? 'space-y-2 pb-10' : 'grid grid-cols-1 md:grid-cols-4 gap-8'}`}>
                             {groups.map((group, idx) => (

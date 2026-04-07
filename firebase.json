@@ -22,7 +22,22 @@
             "**/.*",
             "**/node_modules/**"
         ],
+        "headers": [
+            {
+                "regex": "^/products(?:/.*)?/?$",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "public,max-age=0,must-revalidate"
+                    }
+                ]
+            }
+        ],
         "rewrites": [
+            {
+                "source": "/api/email/booking-request",
+                "function": "sendBookingRequestNotification"
+            },
             {
                 "source": "/api/email/verify",
                 "function": "sendEmailVerification"

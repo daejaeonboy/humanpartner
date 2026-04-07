@@ -390,7 +390,7 @@ export const SectionManager: React.FC = () => {
                                                 </button>
                                             </div>
                                             <div className="w-12 h-12 bg-slate-100 rounded overflow-hidden flex-shrink-0">
-                                                <img src={product.image_url || 'https://via.placeholder.com/50'} alt="" className="w-full h-full object-cover" />
+                                                <img src={product.image_url || 'https://via.placeholder.com/50'} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h4 className="font-medium text-slate-800 truncate">{product.name}</h4>

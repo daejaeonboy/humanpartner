@@ -32,8 +32,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const profile = await getUserProfileByFirebaseUid(firebaseUser.uid);
             
-            // 승인되지 않은 사용자 로그아웃 처리
-            if (profile && !profile.is_approved) {
+            // 승인되지 않은 일반 사용자만 자동 로그아웃 처리
+            if (profile && !profile.is_admin && !profile.is_approved) {
                 await signOut(auth);
                 setUser(null);
                 setUserProfile(null);

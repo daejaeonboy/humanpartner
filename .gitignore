@@ -31,7 +31,11 @@ Thumbs.db
 
 # Firebase
 .firebase/
-firebase-debug.log
+firebase-debug*.log
+
+# Local agent temp files
+.agent/*.log
+.agent/*.html
 
 # Testing
 coverage/
