@@ -3,6 +3,7 @@ import { Popup } from '../../src/api/cmsApi';
 import { X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePublicContent } from '../../src/context/PublicContentContext';
+import { getResponsiveImageProps } from '../../src/utils/responsiveImage';
 
 export const PopupManager: React.FC = () => {
     const { loading: loadingPublicContent, popups: popupItems } = usePublicContent();
@@ -53,6 +54,18 @@ export const PopupManager: React.FC = () => {
             {/* Desktop: Draggable or Fixed positions. For simplicity, we center them or stack them with slight offset */}
 
             {popups.map((popup, index) => (
+                (() => {
+                    const imageProps = getResponsiveImageProps(
+                        popup.image_url || 'https://via.placeholder.com/400x400?text=Popup',
+                        {
+                            widths: [400, 600, 800],
+                            sizes: '(max-width: 640px) 90vw, 400px',
+                            quality: 82,
+                            resize: 'contain',
+                        },
+                    );
+
+                    return (
                 <div
                     key={popup.id}
                     className="pointer-events-auto fixed bg-white shadow-2xl rounded-lg overflow-hidden flex flex-col border border-slate-200"
@@ -79,9 +92,10 @@ export const PopupManager: React.FC = () => {
                                     onClick={() => closePopup(popup.id!)}
                                 >
                                     <img
-                                        src={popup.image_url || 'https://via.placeholder.com/400x400?text=Popup'}
+                                        {...imageProps}
                                         alt={popup.title}
                                         className="w-full h-auto object-contain"
+                                        loading={index === 0 ? 'eager' : 'lazy'}
                                         decoding="async"
                                     />
                                 </a>
@@ -92,18 +106,20 @@ export const PopupManager: React.FC = () => {
                                     onClick={() => closePopup(popup.id!)}
                                 >
                                     <img
-                                        src={popup.image_url || 'https://via.placeholder.com/400x400?text=Popup'}
+                                        {...imageProps}
                                         alt={popup.title}
                                         className="w-full h-auto object-contain"
+                                        loading={index === 0 ? 'eager' : 'lazy'}
                                         decoding="async"
                                     />
                                 </Link>
                             )
                         ) : (
                             <img
-                                src={popup.image_url || 'https://via.placeholder.com/400x400?text=Popup'}
+                                {...imageProps}
                                 alt={popup.title}
                                 className="w-full h-auto object-contain"
+                                loading={index === 0 ? 'eager' : 'lazy'}
                                 decoding="async"
                             />
                         )}
@@ -125,6 +141,8 @@ export const PopupManager: React.FC = () => {
                         </button>
                     </div>
                 </div>
+                    );
+                })()
             ))}
         </div>
     );

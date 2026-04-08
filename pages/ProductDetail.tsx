@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container } from "../components/ui/Container";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import {
   Loader2,
   AlertCircle,
@@ -32,12 +30,7 @@ import { getCategories, Category } from "../src/api/categoryApi";
 import { createNotification } from "../src/api/notificationApi";
 import { useAuth } from "../src/context/AuthContext";
 import { usePublicContent } from "../src/context/PublicContentContext";
-import { registerLocale } from "react-datepicker";
-import { ko } from "date-fns/locale/ko";
-
-registerLocale("ko", ko);
-
-import "../src/styles/calendar.css";
+import { DeferredDateRangePicker } from "../components/product/DeferredDateRangePicker";
 import { Seo } from "../components/seo/Seo";
 import { DEFAULT_OG_IMAGE, NOINDEX_ROBOTS, absoluteUrl } from "../src/seo";
 import {
@@ -45,6 +38,7 @@ import {
   resolveComponentImageUrl,
 } from "../src/utils/componentImage";
 import { sendBookingRequestNotificationEmail } from "../src/utils/email";
+import { getResponsiveImageProps } from "../src/utils/responsiveImage";
 
 const ADDITIONAL_OPTION_GROUP_ORDER = [
   "사무기기",
@@ -206,6 +200,12 @@ const OptionItem = ({
 
   const isInCart = initialQty > 0;
   const isChanged = localQty !== initialQty;
+  const imageProps = getResponsiveImageProps(imageUrl, {
+    widths: [120, 180, 240],
+    sizes: '96px',
+    quality: 82,
+    resize: 'contain',
+  });
 
   return (
     <div className="flex items-center gap-3 sm:gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors border-b border-gray-50 last:border-0 relative">
@@ -214,7 +214,7 @@ const OptionItem = ({
         {imageUrl ? (
           <div className="absolute inset-[10%] flex items-center justify-center">
             <img
-              src={imageUrl}
+              {...imageProps}
               alt={item.name}
               className="w-full h-full object-contain"
               loading="lazy"
@@ -1113,6 +1113,15 @@ export const ProductDetailPage: React.FC = () => {
     product.description ||
     `${product.name} 렌탈 서비스입니다. 행사어때에서 대전 MICE 행사에 필요한 상품을 확인해보세요.`;
   const productImage = absoluteUrl(product.image_url || DEFAULT_OG_IMAGE);
+  const productHeroImageProps = getResponsiveImageProps(
+    product.image_url || "https://picsum.photos/seed/product/800/600",
+    {
+      widths: [640, 960, 1280, 1600],
+      sizes: '(max-width: 1024px) 100vw, 66vw',
+      quality: 86,
+      resize: 'cover',
+    },
+  );
   const currentCategoryItem = menuItems.find((m) => m.name === product.category);
   const parentCategoryName = currentCategoryItem?.category || null;
   const breadcrumbItems = [
@@ -1253,10 +1262,7 @@ export const ProductDetailPage: React.FC = () => {
               {/* Product Image */}
               <div className="aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
                 <img
-                  src={
-                    product.image_url ||
-                    "https://picsum.photos/seed/product/800/600"
-                  }
+                  {...productHeroImageProps}
                   alt={product.name}
                   className="w-full h-full object-cover"
                   decoding="async"
@@ -1311,13 +1317,11 @@ export const ProductDetailPage: React.FC = () => {
                   </button>
                 </div>
                 <div className="custom-calendar-wrapper">
-                  <DatePicker
+                  <DeferredDateRangePicker
                     selected={startDate}
                     onChange={onChange}
                     startDate={startDate}
                     endDate={endDate}
-                    selectsRange
-                    inline
                     minDate={new Date()}
                     monthsShown={1}
                     dateFormat="yyyy.MM.dd"
@@ -1429,6 +1433,12 @@ export const ProductDetailPage: React.FC = () => {
                             item.image_url,
                             matchedProduct?.image_url,
                           );
+                          const imageProps = getResponsiveImageProps(imageUrl, {
+                            widths: [120, 180, 240],
+                            sizes: '96px',
+                            quality: 82,
+                            resize: 'contain',
+                          });
 
                           return (
                             <div
@@ -1439,7 +1449,7 @@ export const ProductDetailPage: React.FC = () => {
                                 {imageUrl ? (
                                   <div className="absolute inset-[10%] flex items-center justify-center">
                                     <img
-                                      src={imageUrl}
+                                      {...imageProps}
                                       alt={item.name}
                                       className="w-full h-full object-contain"
                                       loading="lazy"
@@ -1565,7 +1575,7 @@ export const ProductDetailPage: React.FC = () => {
                   {activeTab === "detail" &&
                     (product.description ? (
                       <div
-                        className="prose prose-slate max-w-none w-full [&>p]:m-0 [&>img]:w-full [&>img]:m-0"
+                        className="prose prose-slate max-w-none w-full [&>p]:m-0 [&_img]:m-0 [&_img]:h-auto [&_img]:max-w-full"
                         dangerouslySetInnerHTML={{
                           __html: product.description.replace(/\n/g, "<br/>"),
                         }}
@@ -2270,27 +2280,16 @@ export const ProductDetailPage: React.FC = () => {
 
             {/* Modal Actions */}
             <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50">
-                <button
-                  onClick={async () => {
-                    if (quoteRef.current) {
-                      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-                        import("html2canvas"),
-                        import("jspdf"),
-                      ]);
-                      const canvas = await html2canvas(quoteRef.current, {
-                        scale: 2,
-                        backgroundColor: "#ffffff",
-                    });
-                    const imgData = canvas.toDataURL("image/png");
-                    const pdf = new jsPDF("p", "mm", "a4");
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-                    pdf.save(
-                      `견적서_${product.name}_${new Date().toLocaleDateString("ko-KR").replace(/\. /g, "-").replace(".", "")}.pdf`,
-                    );
-                  }
-                }}
+	                <button
+	                  onClick={async () => {
+	                    if (quoteRef.current) {
+	                      const { exportElementToPdf } = await import("../src/utils/pdfExport");
+	                      await exportElementToPdf(
+	                        quoteRef.current,
+	                      `견적서_${product.name}_${new Date().toLocaleDateString("ko-KR").replace(/\. /g, "-").replace(".", "")}.pdf`,
+	                      );
+	                  }
+	                }}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all"
               >
                 <Download size={18} />

@@ -2,10 +2,31 @@ import { supabase } from '../lib/supabase';
 
 const BUCKET_NAME = 'Humanpartner';
 const RAW_UPLOAD_MIME_TYPES = new Set(['application/pdf', 'image/svg+xml', 'image/gif']);
-const DEFAULT_IMAGE_CONFIG = { maxDimension: 1600, quality: 0.82, outputMimeType: 'image/webp' } as const;
-const IMAGE_CONFIG_BY_FOLDER: Record<string, { maxDimension: number; quality: number; outputMimeType: string }> = {
+
+type ImageConfig = {
+    maxDimension?: number;
+    maxWidth?: number;
+    maxHeight?: number;
+    skipOptimizationWhenHeightExceeds?: number;
+    quality: number;
+    outputMimeType: string;
+};
+
+const DEFAULT_IMAGE_CONFIG: ImageConfig = {
+    maxDimension: 1600,
+    quality: 0.82,
+    outputMimeType: 'image/webp',
+};
+
+const IMAGE_CONFIG_BY_FOLDER: Record<string, ImageConfig> = {
     products: { maxDimension: 1600, quality: 0.82, outputMimeType: 'image/webp' },
-    'description-images': { maxDimension: 1600, quality: 0.82, outputMimeType: 'image/webp' },
+    // 상세 본문 이미지는 세로로 긴 경우가 많아서 longest-edge 축소를 쓰면 폭이 심하게 무너진다.
+    'description-images': {
+        maxWidth: 2000,
+        skipOptimizationWhenHeightExceeds: 16383,
+        quality: 0.92,
+        outputMimeType: 'image/webp',
+    },
     banners: { maxDimension: 1920, quality: 0.82, outputMimeType: 'image/webp' },
     popups: { maxDimension: 1920, quality: 0.82, outputMimeType: 'image/webp' },
     notices: { maxDimension: 1920, quality: 0.82, outputMimeType: 'image/webp' },
@@ -25,6 +46,33 @@ const shouldOptimizeImage = (file: File) =>
     file.type.startsWith('image/') && !RAW_UPLOAD_MIME_TYPES.has(file.type);
 
 const getImageConfig = (folder: string) => IMAGE_CONFIG_BY_FOLDER[folder] || DEFAULT_IMAGE_CONFIG;
+
+const getTargetDimensions = (
+    width: number,
+    height: number,
+    { maxDimension, maxWidth, maxHeight }: ImageConfig,
+) => {
+    const scales = [1];
+
+    if (maxDimension && Math.max(width, height) > maxDimension) {
+        scales.push(maxDimension / Math.max(width, height));
+    }
+
+    if (maxWidth && width > maxWidth) {
+        scales.push(maxWidth / width);
+    }
+
+    if (maxHeight && height > maxHeight) {
+        scales.push(maxHeight / height);
+    }
+
+    const scale = Math.min(...scales);
+
+    return {
+        targetWidth: Math.max(1, Math.round(width * scale)),
+        targetHeight: Math.max(1, Math.round(height * scale)),
+    };
+};
 
 const replaceFileExtension = (fileName: string, extension: string) => {
     const dotIndex = fileName.lastIndexOf('.');
@@ -57,12 +105,19 @@ const optimizeImageFile = async (file: File, folder: string): Promise<File> => {
         return file;
     }
 
-    const { maxDimension, quality, outputMimeType } = getImageConfig(folder);
+    const config = getImageConfig(folder);
+    const { quality, outputMimeType, skipOptimizationWhenHeightExceeds } = config;
     const image = await loadImageElement(file);
-    const longestEdge = Math.max(image.naturalWidth, image.naturalHeight);
-    const scale = longestEdge > maxDimension ? maxDimension / longestEdge : 1;
-    const targetWidth = Math.max(1, Math.round(image.naturalWidth * scale));
-    const targetHeight = Math.max(1, Math.round(image.naturalHeight * scale));
+    const { targetWidth, targetHeight } = getTargetDimensions(
+        image.naturalWidth,
+        image.naturalHeight,
+        config,
+    );
+
+    if (skipOptimizationWhenHeightExceeds && targetHeight > skipOptimizationWhenHeightExceeds) {
+        return file;
+    }
+
     const canvas = document.createElement('canvas');
 
     canvas.width = targetWidth;

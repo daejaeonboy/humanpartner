@@ -5,6 +5,7 @@ import { Container } from '../components/ui/Container';
 import { Loader2, Search } from 'lucide-react';
 import { Seo } from '../components/seo/Seo';
 import { NOINDEX_ROBOTS } from '../src/seo';
+import { getResponsiveImageProps } from '../src/utils/responsiveImage';
 
 export const ProductSearchResult: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -87,42 +88,55 @@ export const ProductSearchResult: React.FC = () => {
                 {!loading && products.length > 0 && (
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                         {products.map((product) => (
-                            <Link
-                                key={product.id}
-                                to={`/products/${product.id}`}
-                                className="group block bg-white border border-slate-100 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-                            >
-                                <div className="aspect-[16/10] relative overflow-hidden bg-slate-100">
-                                    {product.image_url ? (
-                                        <img
-                                            src={product.image_url}
-                                            alt={product.name}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                            loading="lazy"
-                                            decoding="async"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
-                                            <span>No Image</span>
-                                        </div>
-                                    )}
+                            (() => {
+                                const imageProps = product.image_url
+                                    ? getResponsiveImageProps(product.image_url, {
+                                        widths: [320, 480, 640, 960],
+                                        sizes: '(max-width: 1024px) 50vw, 25vw',
+                                        quality: 82,
+                                        resize: 'cover',
+                                    })
+                                    : null;
+
+                                return (
+                                <Link
+                                    key={product.id}
+                                    to={`/products/${product.id}`}
+                                    className="group block bg-white border border-slate-100 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                                >
+                                    <div className="aspect-[16/10] relative overflow-hidden bg-slate-100">
+                                        {product.image_url ? (
+                                            <img
+                                                {...imageProps}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                                <span>No Image</span>
+                                            </div>
+                                        )}
                                     {/* Overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="font-bold text-slate-800 mb-1 truncate group-hover:text-[#39B54A] transition-colors">
-                                        {product.name}
-                                    </h3>
-                                    <p className="text-xs text-slate-500 mb-2 line-clamp-1 h-4">
-                                        {product.short_description || ''}
-                                    </p>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-lg font-extrabold text-[#39B54A]">
-                                            {product.price?.toLocaleString()}<span className="text-xs font-medium ml-0.5">원</span>
-                                        </span>
                                     </div>
-                                </div>
-                            </Link>
+                                    <div className="p-4">
+                                        <h3 className="font-bold text-slate-800 mb-1 truncate group-hover:text-[#39B54A] transition-colors">
+                                            {product.name}
+                                        </h3>
+                                        <p className="text-xs text-slate-500 mb-2 line-clamp-1 h-4">
+                                            {product.short_description || ''}
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-lg font-extrabold text-[#39B54A]">
+                                                {product.price?.toLocaleString()}<span className="text-xs font-medium ml-0.5">원</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
+                                );
+                            })()
                         ))}
                     </div>
                 )}

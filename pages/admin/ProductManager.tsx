@@ -44,7 +44,10 @@ const SimpleEditor = ({ initialValue, onChange }: { initialValue: string, onChan
                 setUploading(true);
                 try {
                     const url = await uploadImage(file, 'description-images');
-                    execCmd('insertImage', url);
+                    execCmd(
+                        'insertHTML',
+                        `<p><img src="${url}" alt="" style="max-width:100%;height:auto;border-radius:12px;" /></p>`,
+                    );
                 } catch (error) {
                     alert('이미지 업로드 실패');
                 } finally {

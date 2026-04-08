@@ -2,39 +2,85 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Container } from './ui/Container';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { Banner, getPromoBannersByTab, getTabMenuItems, TabMenuItem } from '../src/api/cmsApi';
-import { Product, getProductsByIdentifiers } from '../src/api/productApi';
+import { NavMenuItem, TabMenuItem } from '../src/api/cmsApi';
+import { Product, getBasicProductsByCategories } from '../src/api/productApi';
 import { usePublicContent } from '../src/context/PublicContentContext';
+import { getResponsiveImageProps } from '../src/utils/responsiveImage';
 
 const stripHtml = (value?: string) => {
   if (!value) return '';
   return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 };
 
-const buildProductLookup = (products: Product[]) => {
-  return products.reduce<Record<string, Product>>((acc, product) => {
-    if (product.id) {
-      acc[product.id] = product;
-    }
+const PROMO_PRODUCT_LIMIT = 6;
 
-    if (product.product_code) {
-      acc[product.product_code] = product;
-    }
+const getLinkCategoryParam = (link?: string | null) => {
+  if (!link) return '';
 
-    return acc;
-  }, {});
+  const [, rawQuery = ''] = link.split('?');
+  const params = new URLSearchParams(rawQuery);
+  return params.get('category') || '';
+};
+
+const matchCategoriesFromCandidate = (candidate: string, navItems: NavMenuItem[]) => {
+  if (!candidate) {
+    return null;
+  }
+
+  const parentItems = navItems.filter((item) => !item.category);
+  const childItems = navItems.filter((item) => item.category);
+
+  const matchedParent = parentItems.find((item) => item.name === candidate);
+  if (matchedParent) {
+    return [
+      matchedParent.name,
+      ...childItems
+        .filter((item) => item.category === matchedParent.name)
+        .map((item) => item.name),
+    ];
+  }
+
+  const matchedChild = childItems.find((item) => item.name === candidate);
+  if (matchedChild) {
+    return [matchedChild.name];
+  }
+
+  return null;
+};
+
+const resolveTabCategories = (tab: TabMenuItem, navItems: NavMenuItem[]) => {
+  const candidates = [getLinkCategoryParam(tab.link), tab.name].filter(Boolean);
+
+  for (const candidate of candidates) {
+    const resolved = matchCategoriesFromCandidate(candidate, navItems);
+    if (resolved) {
+      return resolved;
+    }
+  }
+
+  return candidates[0] ? [candidates[0]] : [];
+};
+
+const buildProductLink = (product: Product) => {
+  if (product.id) {
+    return `/products/${product.id}`;
+  }
+
+  if (product.product_code) {
+    return `/p/${product.product_code}`;
+  }
+
+  return '/products';
 };
 
 export const PromoSection: React.FC = () => {
-  const { loading: loadingPublicContent, tabMenuItems: tabs } = usePublicContent();
-  const [banners, setBanners] = useState<Banner[]>([]);
+  const { loading: loadingPublicContent, navMenuItems, tabMenuItems: tabs } = usePublicContent();
+  const [products, setProducts] = useState<Product[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
-  const [productLookup, setProductLookup] = useState<Record<string, Product>>({});
-  const [loadingBanners, setLoadingBanners] = useState(false);
-  const resolvedPromoBanners = banners.filter((item) => Boolean(item.target_product_code));
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
   useEffect(() => {
-    if (tabs.length > 0 && !activeTabId) {
+    if (tabs.length > 0 && (!activeTabId || !tabs.some((tab) => tab.id === activeTabId))) {
       setActiveTabId(tabs[0].id || null);
     }
   }, [activeTabId, tabs]);
@@ -42,33 +88,31 @@ export const PromoSection: React.FC = () => {
   useEffect(() => {
     if (!activeTabId) return;
 
-    const loadBanners = async () => {
-      setLoadingBanners(true);
+    const activeTab = tabs.find((tab) => tab.id === activeTabId);
+    if (!activeTab) return;
+
+    const categories = resolveTabCategories(activeTab, navMenuItems);
+
+    const loadProducts = async () => {
+      setLoadingProducts(true);
       try {
-        const bannerData = await getPromoBannersByTab(activeTabId);
-        setBanners(bannerData);
-
-        const identifiers = bannerData
-          .map((banner) => banner.target_product_code)
-          .filter((value): value is string => Boolean(value));
-
-        if (identifiers.length > 0) {
-          const products = await getProductsByIdentifiers(identifiers);
-          setProductLookup(buildProductLookup(products));
-        } else {
-          setProductLookup({});
+        if (categories.length === 0) {
+          setProducts([]);
+          return;
         }
+
+        const productData = await getBasicProductsByCategories(categories);
+        setProducts(productData.slice(0, PROMO_PRODUCT_LIMIT));
       } catch (error) {
-        console.error('Failed to load banners:', error);
-        setBanners([]);
-        setProductLookup({});
+        console.error('Failed to load promo products:', error);
+        setProducts([]);
       } finally {
-        setLoadingBanners(false);
+        setLoadingProducts(false);
       }
     };
 
-    loadBanners();
-  }, [activeTabId]);
+    loadProducts();
+  }, [activeTabId, navMenuItems, tabs]);
 
   const sliderRef = React.useRef<HTMLDivElement>(null);
 
@@ -131,15 +175,15 @@ export const PromoSection: React.FC = () => {
           ))}
         </div>
 
-        {loadingBanners ? (
+        {loadingProducts ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="animate-spin text-[#39B54A]" size={32} />
           </div>
-        ) : resolvedPromoBanners.length === 0 ? (
+        ) : products.length === 0 ? (
           <div className="text-center py-16 text-slate-400">
-            연결된 프로모션 카드가 없습니다.
+            연결된 최신 상품이 없습니다.
             <br />
-            <span className="text-sm">관리자 CMS에서 탭과 상품을 연결해 주세요.</span>
+            <span className="text-sm">선택한 카테고리에 노출 가능한 상품을 먼저 등록해 주세요.</span>
           </div>
         ) : (
           <div className="relative group/slider">
@@ -164,37 +208,42 @@ export const PromoSection: React.FC = () => {
               className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide [&::-webkit-scrollbar]:hidden"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {resolvedPromoBanners.map((item) => {
-                const linkedProduct = item.target_product_code
-                  ? productLookup[item.target_product_code]
-                  : undefined;
-                const title = linkedProduct?.name || item.title;
-                const subtitle = linkedProduct?.short_description?.trim()
-                  || stripHtml(linkedProduct?.description)
-                  || item.subtitle;
-                const imageUrl = linkedProduct?.image_url || item.image_url;
-                const buttonText = item.button_text || (linkedProduct ? '상품 보기' : '바로가기');
-                const linkTo = linkedProduct?.id
-                  ? `/products/${linkedProduct.id}`
-                  : item.target_product_code
-                    ? `/p/${item.target_product_code}`
-                    : item.link || '/';
+              {products.map((product, index) => {
+                const title = product.name;
+                const subtitle = product.short_description?.trim()
+                  || stripHtml(product.description)
+                  || '행사 운영에 필요한 구성과 장비를 확인해보세요.';
+                const imageUrl = product.image_url;
+                const imageProps = getResponsiveImageProps(imageUrl, {
+                  widths: [480, 640, 960, 1280],
+                  sizes: '(max-width: 768px) 290px, 48vw',
+                  quality: 84,
+                  resize: 'cover',
+                });
+                const buttonText = '상품 보기';
+                const linkTo = buildProductLink(product);
                 const isExternal = linkTo.startsWith('http');
 
                 const bannerContent = (
                   <>
-                    <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
-                      style={{ backgroundImage: `url(${imageUrl})` }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                    <div className="absolute inset-0 overflow-hidden">
+                      <img
+                        {...imageProps}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                        loading={index < 2 ? 'eager' : 'lazy'}
+                        fetchPriority={index === 0 ? 'high' : 'auto'}
+                        decoding="async"
+                        aria-hidden="true"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/18 to-transparent"></div>
                     </div>
 
                     <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white z-10 pointer-events-none">
-                      <h3 className="text-xl md:text-2xl font-bold whitespace-pre-line mb-1.5 text-white tracking-[-0.03em] leading-tight">
+                      <h3 className="text-xl md:text-2xl font-bold whitespace-pre-line mb-1.5 text-white tracking-[-0.03em] leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]">
                         {title}
                       </h3>
-                      <p className="text-[13px] md:text-sm opacity-90 mb-4 text-slate-100 font-medium">
+                      <p className="text-[13px] md:text-sm opacity-95 mb-4 text-slate-100 font-medium drop-shadow-[0_1px_6px_rgba(0,0,0,0.35)]">
                         {subtitle}
                       </p>
 
@@ -211,7 +260,7 @@ export const PromoSection: React.FC = () => {
                 if (isExternal) {
                   return (
                     <a
-                      key={item.id}
+                      key={product.id || product.product_code || `${title}-${index}`}
                       href={linkTo}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -224,7 +273,7 @@ export const PromoSection: React.FC = () => {
 
                 return (
                   <Link
-                    key={item.id}
+                    key={product.id || product.product_code || `${title}-${index}`}
                     to={linkTo}
                     className={linkWrapperClass}
                   >

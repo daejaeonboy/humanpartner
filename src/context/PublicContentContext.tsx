@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Banner,
   NavMenuItem,
@@ -42,19 +43,35 @@ const EMPTY_SNAPSHOT: PublicContentSnapshot = {
   tabMenuItems: [],
 };
 
+const SHELL_ONLY_SNAPSHOT: PublicContentSnapshot = {
+  ...EMPTY_SNAPSHOT,
+};
+
 const PublicContentContext = createContext<PublicContentValue>({
   ...EMPTY_SNAPSHOT,
   loading: true,
   refresh: async () => {},
 });
 
-let cachedSnapshot: PublicContentSnapshot | null = null;
-let cachedAt = 0;
-let pendingSnapshotPromise: Promise<PublicContentSnapshot> | null = null;
+let cachedHomeSnapshot: PublicContentSnapshot | null = null;
+let cachedHomeAt = 0;
+let pendingHomeSnapshotPromise: Promise<PublicContentSnapshot> | null = null;
+let cachedShellSnapshot: PublicContentSnapshot | null = null;
+let cachedShellAt = 0;
+let pendingShellSnapshotPromise: Promise<PublicContentSnapshot> | null = null;
 
 const PUBLIC_CONTENT_TTL_MS = 60_000;
 
-const fetchPublicContent = async (): Promise<PublicContentSnapshot> => {
+const fetchShellContent = async (): Promise<PublicContentSnapshot> => {
+  const navMenuItems = await getAllNavMenuItems();
+
+  return {
+    ...SHELL_ONLY_SNAPSHOT,
+    navMenuItems,
+  };
+};
+
+const fetchHomeContent = async (): Promise<PublicContentSnapshot> => {
   const [activeSections, heroBanners, navMenuItems, popups, quickMenuItems, tabMenuItems] =
     await Promise.all([
       getActiveSections(),
@@ -75,49 +92,105 @@ const fetchPublicContent = async (): Promise<PublicContentSnapshot> => {
   };
 };
 
-const getCachedPublicContent = async (force = false) => {
+const getCachedShellContent = async (force = false) => {
   const now = Date.now();
-  const isFresh = !force && cachedSnapshot && now - cachedAt < PUBLIC_CONTENT_TTL_MS;
+  const canReuseHomeSnapshot =
+    !force && cachedHomeSnapshot && now - cachedHomeAt < PUBLIC_CONTENT_TTL_MS;
+  const isFresh = !force && cachedShellSnapshot && now - cachedShellAt < PUBLIC_CONTENT_TTL_MS;
 
-  if (isFresh && cachedSnapshot) {
-    return cachedSnapshot;
+  if (canReuseHomeSnapshot && cachedHomeSnapshot) {
+    return cachedHomeSnapshot;
   }
 
-  if (!force && pendingSnapshotPromise) {
-    return pendingSnapshotPromise;
+  if (isFresh && cachedShellSnapshot) {
+    return cachedShellSnapshot;
   }
 
-  pendingSnapshotPromise = fetchPublicContent()
+  if (!force && pendingShellSnapshotPromise) {
+    return pendingShellSnapshotPromise;
+  }
+
+  pendingShellSnapshotPromise = fetchShellContent()
     .then((snapshot) => {
-      cachedSnapshot = snapshot;
-      cachedAt = Date.now();
+      cachedShellSnapshot = snapshot;
+      cachedShellAt = Date.now();
       return snapshot;
     })
     .finally(() => {
-      pendingSnapshotPromise = null;
+      pendingShellSnapshotPromise = null;
     });
 
-  return pendingSnapshotPromise;
+  return pendingShellSnapshotPromise;
+};
+
+const getCachedHomeContent = async (force = false) => {
+  const now = Date.now();
+  const isFresh = !force && cachedHomeSnapshot && now - cachedHomeAt < PUBLIC_CONTENT_TTL_MS;
+
+  if (isFresh && cachedHomeSnapshot) {
+    return cachedHomeSnapshot;
+  }
+
+  if (!force && pendingHomeSnapshotPromise) {
+    return pendingHomeSnapshotPromise;
+  }
+
+  pendingHomeSnapshotPromise = fetchHomeContent()
+    .then((snapshot) => {
+      cachedHomeSnapshot = snapshot;
+      cachedHomeAt = Date.now();
+      cachedShellSnapshot = {
+        ...SHELL_ONLY_SNAPSHOT,
+        navMenuItems: snapshot.navMenuItems,
+      };
+      cachedShellAt = cachedHomeAt;
+      return snapshot;
+    })
+    .finally(() => {
+      pendingHomeSnapshotPromise = null;
+    });
+
+  return pendingHomeSnapshotPromise;
 };
 
 export const PublicContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [snapshot, setSnapshot] = useState<PublicContentSnapshot>(cachedSnapshot || EMPTY_SNAPSHOT);
-  const [loading, setLoading] = useState(!cachedSnapshot);
+  const location = useLocation();
+  const isHomeRoute = location.pathname === '/';
+  const initialSnapshot = isHomeRoute
+    ? cachedHomeSnapshot || cachedShellSnapshot || EMPTY_SNAPSHOT
+    : cachedShellSnapshot || cachedHomeSnapshot || EMPTY_SNAPSHOT;
+
+  const [snapshot, setSnapshot] = useState<PublicContentSnapshot>(initialSnapshot);
+  const [loading, setLoading] = useState(!initialSnapshot.navMenuItems.length);
 
   const load = async (force = false) => {
-    if (!force && cachedSnapshot) {
-      setSnapshot(cachedSnapshot);
-      setLoading(false);
-      return;
+    if (!force) {
+      if (isHomeRoute && cachedHomeSnapshot) {
+        setSnapshot(cachedHomeSnapshot);
+        setLoading(false);
+        return;
+      }
+
+      if (!isHomeRoute && (cachedShellSnapshot || cachedHomeSnapshot)) {
+        setSnapshot(cachedShellSnapshot || cachedHomeSnapshot || EMPTY_SNAPSHOT);
+        setLoading(false);
+        return;
+      }
+
+      if (isHomeRoute && cachedShellSnapshot) {
+        setSnapshot(cachedShellSnapshot);
+      }
     }
 
     setLoading(true);
     try {
-      const nextSnapshot = await getCachedPublicContent(force);
+      const nextSnapshot = isHomeRoute
+        ? await getCachedHomeContent(force)
+        : await getCachedShellContent(force);
       setSnapshot(nextSnapshot);
     } catch (error) {
       console.error('Failed to load public content:', error);
-      if (!cachedSnapshot) {
+      if (!cachedHomeSnapshot && !cachedShellSnapshot) {
         setSnapshot(EMPTY_SNAPSHOT);
       }
     } finally {
@@ -126,12 +199,14 @@ export const PublicContentProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    load();
-  }, []);
+    void load();
+  }, [isHomeRoute]);
 
   useEffect(() => {
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && Date.now() - cachedAt >= PUBLIC_CONTENT_TTL_MS) {
+      const lastCachedAt = isHomeRoute ? cachedHomeAt : Math.max(cachedShellAt, cachedHomeAt);
+
+      if (document.visibilityState === 'visible' && Date.now() - lastCachedAt >= PUBLIC_CONTENT_TTL_MS) {
         void load(true);
       }
     };
@@ -143,7 +218,7 @@ export const PublicContentProvider: React.FC<{ children: React.ReactNode }> = ({
       window.removeEventListener('focus', handleVisibility);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, []);
+  }, [isHomeRoute]);
 
   const value = useMemo(
     () => ({

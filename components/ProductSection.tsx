@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Container } from './ui/Container';
 import { ProductItem } from '../types';
+import { getResponsiveImageProps } from '../src/utils/responsiveImage';
 
 interface ProductSectionProps {
   title: string;
@@ -10,6 +11,7 @@ interface ProductSectionProps {
   products: ProductItem[];
   variant?: 'gray' | 'white';
   layoutMode?: string; // Additional prop
+  sectionId?: string;
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = ({
@@ -17,7 +19,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   categories,
   products,
   variant = 'white',
-  layoutMode = 'grid-4' // Default
+  layoutMode = 'grid-4', // Default
+  sectionId,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState(categories[0]);
@@ -66,6 +69,36 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       break;
   }
 
+  const productCardSizes = (() => {
+    switch (layoutMode) {
+      case 'grid-5':
+        return '(max-width: 768px) 140px, 20vw';
+      case 'grid-3':
+        return '(max-width: 768px) 220px, 33vw';
+      case 'grid-2':
+        return '(max-width: 768px) 300px, 48vw';
+      case 'grid-4':
+      default:
+        return '(max-width: 768px) 180px, 25vw';
+    }
+  })();
+
+  const viewAllHref = (() => {
+    const params = new URLSearchParams();
+
+    if (sectionId) {
+      params.set('sectionId', sectionId);
+      params.set('title', title);
+    }
+
+    if (activeCategory !== '전체') {
+      params.set('category', activeCategory);
+    }
+
+    const queryString = params.toString();
+    return queryString ? `/products?${queryString}` : '/products';
+  })();
+
   return (
     <div className={`py-12 md:py-20 ${variant === 'gray' ? 'bg-slate-50' : 'bg-white'}`}>
       <Container>
@@ -74,7 +107,12 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           <div>
             <h2 className="text-[24px] md:text-[28px] font-semibold text-slate-900 tracking-tight">{title}</h2>
           </div>
-          <button className="text-sm font-semibold text-slate-400 hover:text-[#39B54A] transition-colors hidden md:block">전체보기</button>
+          <Link
+            to={viewAllHref}
+            className="text-sm font-semibold text-slate-400 hover:text-[#39B54A] transition-colors hidden md:block"
+          >
+            전체보기
+          </Link>
         </div>
 
         {/* Filter Pills */}
@@ -119,42 +157,53 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             style={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {filteredProducts.map((product) => (
-              <Link
-                key={product.id}
-                to={`/products/${product.id}`}
-                className={`flex-none ${cardWidthClass} group/card cursor-pointer block`}
-                style={{ scrollSnapAlign: 'start' }}
-              >
-                <div className={`relative ${aspectRatioClass} overflow-hidden rounded-lg bg-slate-100 mb-4 shadow-sm border border-slate-100`}>
-                  <img
-                    src={product.imageUrl}
-                    alt={product.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
-                    loading="lazy"
-                    decoding="async"
-                  />
+              (() => {
+                const imageProps = getResponsiveImageProps(product.imageUrl, {
+                  widths: [320, 480, 640, 960],
+                  sizes: productCardSizes,
+                  quality: 82,
+                  resize: 'cover',
+                });
+
+                return (
+                  <Link
+                    key={product.id}
+                    to={`/products/${product.id}`}
+                    className={`flex-none ${cardWidthClass} group/card cursor-pointer block`}
+                    style={{ scrollSnapAlign: 'start' }}
+                  >
+                    <div className={`relative ${aspectRatioClass} overflow-hidden rounded-lg bg-slate-100 mb-4 shadow-sm border border-slate-100`}>
+                      <img
+                        {...imageProps}
+                        alt={product.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
+                        loading="lazy"
+                        decoding="async"
+                      />
                   {/* Premium Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-5">
-                    <button className="w-full px-5 py-2 bg-white text-slate-900 text-xs font-bold rounded-lg shadow-xl translate-y-4 group-hover/card:translate-y-0 transition-transform duration-500 text-center">
-                      상품보기
-                    </button>
-                  </div>
-                </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-5">
+                        <button className="w-full px-5 py-2 bg-white text-slate-900 text-xs font-bold rounded-lg shadow-xl translate-y-4 group-hover/card:translate-y-0 transition-transform duration-500 text-center">
+                          상품보기
+                        </button>
+                      </div>
+                    </div>
 
-                <div className="space-y-1">
-                  <h3 className="font-bold text-[16px] text-slate-800 truncate group-hover/card:text-[#39B54A] transition-colors">{product.title}</h3>
+                    <div className="space-y-1">
+                      <h3 className="font-bold text-[16px] text-slate-800 truncate group-hover/card:text-[#39B54A] transition-colors">{product.title}</h3>
 
-                  <div className="flex items-center gap-2 mt-1">
-                    {product.discountRate && (
-                      <span className="text-[#39B54A] font-bold text-[18px]">{product.discountRate}%</span>
-                    )}
-                    <span className="font-medium text-[18px] text-slate-900">
-                      {product.price?.toLocaleString()}<span className="text-[18px] font-medium ml-0.5">원</span>
-                    </span>
-                  </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        {product.discountRate && (
+                          <span className="text-[#39B54A] font-bold text-[18px]">{product.discountRate}%</span>
+                        )}
+                        <span className="font-medium text-[18px] text-slate-900">
+                          {product.price?.toLocaleString()}<span className="text-[18px] font-medium ml-0.5">원</span>
+                        </span>
+                      </div>
 
-                </div>
-              </Link>
+                    </div>
+                  </Link>
+                );
+              })()
             ))}
           </div>
         </div>

@@ -18,6 +18,71 @@ import { uploadImage } from '../../src/api/storageApi';
 
 type TabType = 'quickmenu' | 'tabmenu' | 'banners' | 'popups' | 'alliance';
 
+type TabMenuCategoryOption = {
+    value: string;
+    label: string;
+    link: string;
+};
+
+const appendTitleParam = (link: string, title: string) => {
+    if (!link || link.includes('title=')) {
+        return link;
+    }
+
+    const separator = link.includes('?') ? '&' : '?';
+    return `${link}${separator}title=${encodeURIComponent(title)}`;
+};
+
+const buildParentRoute = (parent: NavMenuItem, navItems: NavMenuItem[]) => {
+    const hasChildren = navItems.some((item) => item.category === parent.name);
+
+    if (!hasChildren && parent.link && parent.link !== '#') {
+        return appendTitleParam(parent.link, parent.name);
+    }
+
+    return `/products?category=${encodeURIComponent(parent.name)}&title=${encodeURIComponent(parent.name)}`;
+};
+
+const buildTabMenuCategoryOptions = (navItems: NavMenuItem[]): TabMenuCategoryOption[] =>
+    navItems
+        .filter((item) => !item.category)
+        .sort((a, b) => a.display_order - b.display_order)
+        .filter((parent) => {
+            const hasChildren = navItems.some((item) => item.category === parent.name);
+            return hasChildren || Boolean(parent.link?.startsWith('/products'));
+        })
+        .map((parent) => ({
+            value: parent.id || parent.name,
+            label: parent.name,
+            link: buildParentRoute(parent, navItems),
+        }));
+
+const normalizeTabMenuLink = (link?: string | null) => {
+    if (!link) return '';
+
+    const [path, rawQuery = ''] = link.split('?');
+    const params = new URLSearchParams(rawQuery);
+    params.delete('title');
+    const nextQuery = params.toString();
+
+    return nextQuery ? `${path}?${nextQuery}` : path;
+};
+
+const resolveTabMenuCategoryKey = (
+    item: Partial<TabMenuItem>,
+    options: TabMenuCategoryOption[],
+) => {
+    const normalizedLink = normalizeTabMenuLink(item.link);
+    const byLink = options.find((option) => normalizeTabMenuLink(option.link) === normalizedLink);
+
+    if (byLink) {
+        return byLink.value;
+    }
+
+    const byName = options.find((option) => option.label === item.name);
+    return byName?.value || '';
+};
+
 export const CMSManager: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('quickmenu');
     const [allianceCategoryFilter, setAllianceCategoryFilter] = useState('전체');
@@ -32,6 +97,7 @@ export const CMSManager: React.FC = () => {
     // Data states
     const [quickMenuItems, setQuickMenuItems] = useState<QuickMenuItem[]>([]);
     const [tabMenuItems, setTabMenuItems] = useState<TabMenuItem[]>([]);
+    const [navMenuItems, setNavMenuItems] = useState<NavMenuItem[]>([]);
     const [banners, setBanners] = useState<Banner[]>([]);
     const [popups, setPopups] = useState<Popup[]>([]);
     const [allianceMembers, setAllianceMembers] = useState<AllianceMember[]>([]);
@@ -62,41 +128,13 @@ export const CMSManager: React.FC = () => {
         }
     }, [allianceCategories, allianceMembers, allianceCategoryFilter]);
 
-    const promoProducts = products.filter((product) => product.product_type === 'basic' || !product.product_type);
-
-    const findProductByKey = (key?: string | null) => {
-        if (!key) return null;
-        return products.find((product) => product.product_code === key || product.id === key) || null;
-    };
+    const tabMenuCategoryOptions = React.useMemo(
+        () => buildTabMenuCategoryOptions(navMenuItems),
+        [navMenuItems],
+    );
 
     const getProductRoutingKey = (product: Product) => product.product_code || product.id || '';
-
-    const applyLinkedProductToBanner = (productKey: string) => {
-        const selectedProduct = findProductByKey(productKey);
-
-        setFormData((prev: any) => {
-            if (!selectedProduct) {
-                return {
-                    ...prev,
-                    target_product_code: '',
-                };
-            }
-
-            return {
-                ...prev,
-                target_product_code: productKey,
-                title: selectedProduct.name,
-                subtitle: selectedProduct.short_description || prev.subtitle || '',
-                image_url: selectedProduct.image_url || prev.image_url || '',
-                link: `/p/${getProductRoutingKey(selectedProduct)}`,
-                button_text: prev.button_text || '상품 보기',
-            };
-        });
-    };
-
-    const selectedPromoProduct = formData.banner_type === 'promo'
-        ? findProductByKey(formData.target_product_code)
-        : null;
+    const heroBanners = banners.filter((banner) => banner.banner_type === 'hero');
 
     const getUploadFolder = (tab: TabType) => {
         if (tab === 'quickmenu') return 'quick-menu';
@@ -114,8 +152,8 @@ export const CMSManager: React.FC = () => {
     const loadActiveTabData = async (tab: TabType, force = false) => {
         if (!force) {
             if (tab === 'quickmenu' && quickMenuItems.length > 0) return;
-            if (tab === 'tabmenu' && tabMenuItems.length > 0) return;
-            if (tab === 'banners' && banners.length > 0 && products.length > 0) return;
+            if (tab === 'tabmenu' && tabMenuItems.length > 0 && navMenuItems.length > 0) return;
+            if (tab === 'banners' && banners.length > 0) return;
             if (tab === 'popups' && popups.length > 0) return;
             if (tab === 'alliance' && allianceMembers.length > 0 && allianceCategories.length > 0) return;
         }
@@ -125,18 +163,26 @@ export const CMSManager: React.FC = () => {
             if (tab === 'quickmenu') {
                 setQuickMenuItems(await getAllQuickMenuItems());
             } else if (tab === 'tabmenu') {
-                setTabMenuItems(await getAllTabMenuItems());
+                const [tabMenuData, navMenuData] = await Promise.all([
+                    getAllTabMenuItems(),
+                    navMenuItems.length > 0 ? Promise.resolve(navMenuItems) : getAllNavMenuItems(),
+                ]);
+                setTabMenuItems(tabMenuData);
+                setNavMenuItems(navMenuData);
             } else if (tab === 'banners') {
-                const [bannerData, productsData, tabMenuData] = await Promise.all([
+                const [bannerData, tabMenuData] = await Promise.all([
                     getAllBanners(),
-                    getBasicProducts(),
                     tabMenuItems.length > 0 ? Promise.resolve(tabMenuItems) : getAllTabMenuItems(),
                 ]);
                 setBanners(bannerData);
-                setProducts(productsData);
                 setTabMenuItems(tabMenuData);
             } else if (tab === 'popups') {
-                setPopups(await getAllPopups());
+                const [popupData, productsData] = await Promise.all([
+                    getAllPopups(),
+                    products.length > 0 ? Promise.resolve(products) : getBasicProducts(),
+                ]);
+                setPopups(popupData);
+                setProducts(productsData);
             } else if (tab === 'alliance') {
                 const [allianceCategoryData, allianceData] = await Promise.all([
                     getAllAllianceCategories(),
@@ -161,9 +207,9 @@ export const CMSManager: React.FC = () => {
         if (activeTab === 'quickmenu') {
             setFormData({ name: '', link: '/', display_order: quickMenuItems.length + 1, is_active: true });
         } else if (activeTab === 'tabmenu') {
-            setFormData({ name: '', link: '/', display_order: tabMenuItems.length + 1, is_active: true });
+            setFormData({ name: '', link: '', selected_menu_key: '', display_order: tabMenuItems.length + 1, is_active: true });
         } else if (activeTab === 'banners') {
-            setFormData({ title: '', subtitle: '', image_url: '', link: '/', button_text: '바로가기', banner_type: 'hero', display_order: banners.length + 1, is_active: true, target_product_code: '' });
+            setFormData({ title: '', subtitle: '', image_url: '', link: '/', button_text: '바로가기', brand_text: '', banner_type: 'hero', display_order: heroBanners.length + 1, is_active: true });
         } else if (activeTab === 'popups') {
             setFormData({ title: '', image_url: '', link: '/', start_date: '', end_date: '', display_order: popups.length + 1, is_active: true });
         } else if (activeTab === 'alliance') {
@@ -175,8 +221,26 @@ export const CMSManager: React.FC = () => {
 
     const openEditModal = (item: any) => {
         setEditingItem(item);
-        setFormData({ ...item });
+        if (activeTab === 'tabmenu') {
+            setFormData({
+                ...item,
+                selected_menu_key: resolveTabMenuCategoryKey(item, tabMenuCategoryOptions),
+            });
+        } else {
+            setFormData({ ...item });
+        }
         setShowModal(true);
+    };
+
+    const applySelectedCategoryToTabMenu = (selectedKey: string) => {
+        const selectedOption = tabMenuCategoryOptions.find((option) => option.value === selectedKey);
+
+        setFormData((prev: any) => ({
+            ...prev,
+            selected_menu_key: selectedKey,
+            name: selectedOption ? selectedOption.label : prev.name,
+            link: selectedOption ? selectedOption.link : prev.link,
+        }));
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -213,34 +277,24 @@ export const CMSManager: React.FC = () => {
                     await addQuickMenuItem(formData);
                 }
             } else if (activeTab === 'tabmenu') {
+                const { selected_menu_key, ...tabMenuPayload } = formData;
+
+                if (!selected_menu_key) {
+                    throw new Error('탭 메뉴에 연결할 실제 메뉴 카테고리를 선택해 주세요.');
+                }
+
                 if (editingItem) {
-                    await updateTabMenuItem(editingItem.id, formData);
+                    await updateTabMenuItem(editingItem.id, tabMenuPayload);
                 } else {
-                    await addTabMenuItem(formData);
+                    await addTabMenuItem(tabMenuPayload);
                 }
             } else if (activeTab === 'banners') {
-                let bannerPayload = { ...formData };
-
-                if (bannerPayload.banner_type === 'promo') {
-                    const selectedProduct = findProductByKey(bannerPayload.target_product_code);
-
-                    if (!bannerPayload.tab_id) {
-                        throw new Error('프로모션 탭을 선택해 주세요.');
-                    }
-
-                    if (!selectedProduct) {
-                        throw new Error('프로모션에 노출할 상품을 선택해 주세요.');
-                    }
-
-                    bannerPayload = {
-                        ...bannerPayload,
-                        title: selectedProduct.name,
-                        subtitle: selectedProduct.short_description || '',
-                        image_url: selectedProduct.image_url || '',
-                        link: `/p/${getProductRoutingKey(selectedProduct)}`,
-                        button_text: bannerPayload.button_text || '상품 보기',
-                    };
-                }
+                const bannerPayload = {
+                    ...formData,
+                    banner_type: 'hero' as const,
+                    tab_id: null,
+                    target_product_code: '',
+                };
 
                 if (editingItem) {
                     await updateBanner(editingItem.id, bannerPayload);
@@ -421,7 +475,7 @@ export const CMSManager: React.FC = () => {
     const tabs = [
         { id: 'quickmenu' as TabType, label: '아이콘 메뉴', icon: Grid3X3, count: quickMenuItems.length },
         { id: 'tabmenu' as TabType, label: '탭 메뉴', icon: Menu, count: tabMenuItems.length },
-        { id: 'banners' as TabType, label: '배너', icon: ImageIcon, count: banners.length },
+        { id: 'banners' as TabType, label: '배너', icon: ImageIcon, count: heroBanners.length },
         { id: 'popups' as TabType, label: '팝업', icon: MessageSquare, count: popups.length },
         { id: 'alliance' as TabType, label: 'MICE 회원사', icon: Grid3X3, count: allianceMembers.length },
     ];
@@ -434,7 +488,7 @@ export const CMSManager: React.FC = () => {
 
     const currentItems = activeTab === 'quickmenu' ? quickMenuItems
         : activeTab === 'tabmenu' ? tabMenuItems
-            : activeTab === 'banners' ? banners
+            : activeTab === 'banners' ? heroBanners
                 : activeTab === 'popups' ? popups
                     : filteredAllianceMembers;
     const allianceCategoryOptions = getAllianceCategoryOptions();
@@ -513,6 +567,13 @@ export const CMSManager: React.FC = () => {
                 </div>
             )}
 
+            {activeTab === 'banners' && (
+                <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    메인 중간 프로모 영역은 더 이상 수동 배너를 사용하지 않습니다.
+                    탭 메뉴에 연결된 카테고리 기준으로 최신 상품이 자동 노출되며, 이 화면에서는 상단 메인 슬라이드 배너만 관리합니다.
+                </div>
+            )}
+
             {/* Items List */}
             <div className="bg-white rounded-lg shadow-sm border border-slate-200">
                 {currentItems.length === 0 ? (
@@ -540,11 +601,8 @@ export const CMSManager: React.FC = () => {
                                             {item.name || item.title}
                                         </span>
                                         {activeTab === 'banners' && (
-                                            <span className={`text-xs px-2 py-0.5 rounded border ${item.banner_type === 'hero'
-                                                ? 'bg-purple-50 text-purple-700 border-purple-200'
-                                                : 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                                                }`}>
-                                                {item.banner_type === 'hero' ? '메인 슬라이드' : '프로모션'}
+                                            <span className="text-xs px-2 py-0.5 rounded border bg-purple-50 text-purple-700 border-purple-200">
+                                                메인 슬라이드
                                             </span>
                                         )}
                                         {!item.is_active && (
@@ -575,20 +633,6 @@ export const CMSManager: React.FC = () => {
                                     <div className="text-sm text-slate-400">
                                         {activeTab === 'alliance' ? item.phone : item.link}
                                     </div>
-                                    {activeTab === 'banners' && item.banner_type === 'promo' && (
-                                        <div className="mt-1 flex flex-wrap gap-2 text-xs">
-                                            {item.tab_id && (
-                                                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">
-                                                    탭: {tabMenuItems.find((tab) => tab.id === item.tab_id)?.name || '-'}
-                                                </span>
-                                            )}
-                                            {item.target_product_code && (
-                                                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700">
-                                                    상품: {findProductByKey(item.target_product_code)?.name || item.target_product_code}
-                                                </span>
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
 
                                 <span className="text-xs text-slate-400">순서: {item.display_order}</span>
@@ -720,13 +764,33 @@ export const CMSManager: React.FC = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">링크</label>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">연결할 메뉴 카테고리</label>
+                                        <select
+                                            value={formData.selected_menu_key || ''}
+                                            onChange={(e) => applySelectedCategoryToTabMenu(e.target.value)}
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
+                                            required
+                                        >
+                                            <option value="">메뉴 카테고리를 선택하세요</option>
+                                            {tabMenuCategoryOptions.map((option) => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <p className="text-xs text-slate-500 mt-1">선택한 메뉴 카테고리를 기준으로 탭 이름과 링크가 자동으로 맞춰집니다.</p>
+                                        {editingItem && formData.link && !formData.selected_menu_key && (
+                                            <p className="text-xs text-amber-600 mt-2">기존 항목은 수동 링크로 저장되어 있어 자동 매핑되지 않았습니다. 메뉴 카테고리를 다시 선택하면 정리됩니다.</p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">생성된 링크</label>
                                         <input
                                             type="text"
                                             value={formData.link || ''}
-                                            onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
-                                            placeholder="/products?category=notebook"
+                                            readOnly
+                                            className="w-full px-3 py-2 border rounded-lg bg-slate-50 text-slate-500 focus:ring-2 focus:ring-[#39B54A]"
+                                            placeholder="메뉴 카테고리를 선택하면 자동 생성됩니다."
                                         />
                                     </div>
                                 </>
@@ -735,61 +799,20 @@ export const CMSManager: React.FC = () => {
                             {/* Banner Form */}
                             {activeTab === 'banners' && (
                                 <>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">배너 위치</label>
-                                        <select
-                                            value={formData.banner_type || 'hero'}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                banner_type: e.target.value,
-                                                tab_id: e.target.value === 'hero' ? null : formData.tab_id,
-                                                target_product_code: e.target.value === 'hero' ? '' : formData.target_product_code
-                                            })}
-                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
-                                        >
-                                            <option value="hero">메인 슬라이드 (상단 전체 배너)</option>
-                                            <option value="promo">프로모션 (탭 메뉴 하단)</option>
-                                        </select>
+                                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                                        이 영역은 상단 메인 슬라이드 배너 전용입니다. 메인 중간 프로모 영역은 탭 메뉴 기준 최신 상품이 자동으로 노출됩니다.
                                     </div>
-
-                                    {/* Tab selector - only show when banner_type is promo */}
-                                    {formData.banner_type === 'promo' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">연결할 탭 메뉴</label>
-                                            <select
-                                                value={formData.tab_id || ''}
-                                                onChange={(e) => setFormData({ ...formData, tab_id: e.target.value || null })}
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
-                                                required
-                                            >
-                                                <option value="">탭을 선택하세요</option>
-                                                {tabMenuItems.map((tab) => (
-                                                    <option key={tab.id} value={tab.id}>{tab.name}</option>
-                                                ))}
-                                            </select>
-                                            <p className="text-xs text-slate-500 mt-1">선택한 탭을 클릭하면 이 배너가 표시됩니다.</p>
-                                        </div>
-                                    )}
-
-                                    {formData.banner_type === 'promo' && (
-                                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-                                            프로모션은 선택한 상품을 탭 카드로 노출하는 방식이며 수동 배너 입력보다 상품 선택이 우선 적용됩니다.
-                                        </div>
-                                    )}
-                                    {/* Brand text - only show when banner_type is hero */}
-                                    {formData.banner_type === 'hero' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">브랜드 텍스트</label>
-                                            <input
-                                                type="text"
-                                                value={formData.brand_text || ''}
-                                                onChange={(e) => setFormData({ ...formData, brand_text: e.target.value })}
-                                                placeholder="행사어때"
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
-                                            />
-                                            <p className="text-xs text-slate-500 mt-1">제목 위에 표시되는 작은 텍스트 (비우면 기본값 사용)</p>
-                                        </div>
-                                    )}
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">브랜드 텍스트</label>
+                                        <input
+                                            type="text"
+                                            value={formData.brand_text || ''}
+                                            onChange={(e) => setFormData({ ...formData, brand_text: e.target.value })}
+                                            placeholder="행사어때"
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
+                                        />
+                                        <p className="text-xs text-slate-500 mt-1">제목 위에 표시되는 작은 텍스트 (비우면 기본값 사용)</p>
+                                    </div>
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">제목</label>
                                         <input
@@ -864,55 +887,6 @@ export const CMSManager: React.FC = () => {
                                             onChange={(e) => setFormData({ ...formData, link: e.target.value })}
                                             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">연결할 상품 (선택)</label>
-                                        <div className="space-y-2">
-                                            <select
-                                                value={formData.target_product_code || ''}
-                                                onChange={(e) => applyLinkedProductToBanner(e.target.value)}
-                                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#39B54A]"
-                                            >
-                                                <option value="">상품 선택 없음</option>
-                                                {promoProducts.map((product) => (
-                                                    <option key={product.id} value={getProductRoutingKey(product)}>
-                                                        {product.name} ({product.product_code || 'No Code'})
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <p className="text-xs text-slate-500 mt-1">
-                                            선택 시 해당 상품의 상세 페이지로 자동 연결됩니다.
-                                        </p>
-                                        {formData.banner_type === 'promo' && selectedPromoProduct && (
-                                            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-16 w-16 overflow-hidden rounded-lg bg-slate-200 flex-shrink-0">
-                                                        {selectedPromoProduct.image_url ? (
-                                                            <img
-                                                                src={selectedPromoProduct.image_url}
-                                                                alt={selectedPromoProduct.name}
-                                                                className="h-full w-full object-cover"
-                                                                loading="lazy"
-                                                                decoding="async"
-                                                            />
-                                                        ) : (
-                                                            <div className="flex h-full w-full items-center justify-center text-[11px] text-slate-500">
-                                                                No Image
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <div className="font-semibold text-slate-900 truncate">
-                                                            {selectedPromoProduct.name}
-                                                        </div>
-                                                        <div className="mt-1 text-xs text-slate-500 line-clamp-2">
-                                                            {selectedPromoProduct.short_description || '등록된 요약 설명이 없습니다.'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
                                 </>
                             )}

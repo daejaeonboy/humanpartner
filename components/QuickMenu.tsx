@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Container } from './ui/Container';
 import { NavMenuItem, QuickMenuItem } from '../src/api/cmsApi';
 import { usePublicContent } from '../src/context/PublicContentContext';
+import { getResponsiveImageProps } from '../src/utils/responsiveImage';
 import {
   Hotel,
   Zap,
@@ -290,6 +291,12 @@ export const QuickMenu: React.FC = () => {
           <div className="grid grid-cols-5 gap-y-6 gap-x-1 sm:gap-x-2 md:flex md:justify-between items-start pb-4 md:pb-0">
             {items.map((item, index) => {
               const linkUrl = resolveQuickMenuLink(item, navItems);
+              const imageProps = getResponsiveImageProps(item.image_url, {
+                widths: [96, 160],
+                sizes: '(max-width: 768px) 48px, 80px',
+                quality: 80,
+                resize: 'contain',
+              });
 
               return (
                 <Link
@@ -301,9 +308,10 @@ export const QuickMenu: React.FC = () => {
                     <div className="scale-90 md:scale-110 lg:scale-125">
                       {item.image_url ? (
                         <img
-                          src={item.image_url}
+                          {...imageProps}
                           alt={item.name}
                           className="w-full h-full object-contain p-0 md:p-4"
+                          loading={index < 5 ? 'eager' : 'lazy'}
                           decoding="async"
                         />
                       ) : (

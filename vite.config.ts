@@ -11,9 +11,26 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       build: {
+        modulePreload: {
+          resolveDependencies: (_filename, deps, context) => {
+            if (context.hostType === 'html') {
+              return deps.filter((dep) => !dep.includes('pdf-vendor'));
+            }
+
+            return deps;
+          },
+        },
         rollupOptions: {
           output: {
             manualChunks(id) {
+              if (
+                id === '\0vite/preload-helper.js' ||
+                id === '\0vite/modulepreload-polyfill.js' ||
+                id === '\0commonjsHelpers.js'
+              ) {
+                return 'vendor';
+              }
+
               if (!id.includes('node_modules')) {
                 return undefined;
               }

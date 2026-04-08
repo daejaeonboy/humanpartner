@@ -7,7 +7,8 @@ import sharp from 'sharp';
 const ROOT_DIR = process.cwd();
 const REPORT_DIR = path.join(ROOT_DIR, '.agent', 'reports');
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zwxvjlnzhjmsuwjnwvqv.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
 const BUCKET_NAME = process.env.SUPABASE_BUCKET || 'Humanpartner';
 const APPLY_CHANGES = process.argv.includes('--apply');
 const LIMIT_FLAG_INDEX = process.argv.indexOf('--limit');
@@ -15,9 +16,11 @@ const LIMIT = LIMIT_FLAG_INDEX >= 0 ? Number.parseInt(process.argv[LIMIT_FLAG_IN
 const PAGE_SIZE = 200;
 const PUBLIC_URL_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/`;
 
+const WEBP_DIMENSION_LIMIT = 16383;
+
 const IMAGE_CONFIG_BY_FOLDER = {
   products: { maxDimension: 1600, quality: 82 },
-  'description-images': { maxDimension: 1600, quality: 82 },
+  'description-images': { maxWidth: 2000, quality: 92, skipOptimizationWhenHeightExceeds: WEBP_DIMENSION_LIMIT },
   banners: { maxDimension: 1920, quality: 82 },
   popups: { maxDimension: 1920, quality: 82 },
   'quick-menu': { maxDimension: 800, quality: 90 },
@@ -81,8 +84,8 @@ const TABLE_TASKS = [
 ];
 
 if (!SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('SUPABASE_SERVICE_ROLE_KEY 환경 변수가 필요합니다.');
-  console.error('예시: $env:SUPABASE_SERVICE_ROLE_KEY="..." ; npm run optimize:images -- --apply');
+  console.error('SUPABASE_SERVICE_ROLE_KEY 또는 SUPABASE_SECRET_KEY 환경 변수가 필요합니다.');
+  console.error('예시: $env:SUPABASE_SECRET_KEY="..." ; npm run optimize:images -- --apply');
   process.exit(1);
 }
 
@@ -109,6 +112,24 @@ function getFolderConfig(storagePath) {
   return {
     folder,
     ...(IMAGE_CONFIG_BY_FOLDER[folder] || IMAGE_CONFIG_BY_FOLDER.products),
+  };
+}
+
+function buildResizeOptions(config) {
+  if (config.maxWidth || config.maxHeight) {
+    return {
+      width: config.maxWidth,
+      height: config.maxHeight,
+      fit: 'inside',
+      withoutEnlargement: true,
+    };
+  }
+
+  return {
+    width: config.maxDimension,
+    height: config.maxDimension,
+    fit: 'inside',
+    withoutEnlargement: true,
   };
 }
 
@@ -193,16 +214,28 @@ async function optimizeImageFromUrl(url) {
   }
 
   const originalBuffer = Buffer.from(await response.arrayBuffer());
-  const { maxDimension, quality } = getFolderConfig(storagePath);
+  const { maxDimension, quality, maxWidth, maxHeight, skipOptimizationWhenHeightExceeds } = getFolderConfig(storagePath);
+  const metadata = await sharp(originalBuffer).metadata();
+  const projectedScale = Math.min(
+    1,
+    maxDimension ? maxDimension / Math.max(metadata.width || 1, metadata.height || 1) : 1,
+    maxWidth ? maxWidth / (metadata.width || 1) : 1,
+    maxHeight ? maxHeight / (metadata.height || 1) : 1,
+  );
+  const projectedHeight = Math.max(1, Math.round((metadata.height || 1) * projectedScale));
+
+  if (skipOptimizationWhenHeightExceeds && projectedHeight > skipOptimizationWhenHeightExceeds) {
+    return {
+      status: 'skipped',
+      reason: 'height-limit',
+      originalUrl: url,
+      originalBytes: originalBuffer.length,
+    };
+  }
 
   const optimizedBuffer = await sharp(originalBuffer)
     .rotate()
-    .resize({
-      width: maxDimension,
-      height: maxDimension,
-      fit: 'inside',
-      withoutEnlargement: true,
-    })
+    .resize(buildResizeOptions(getFolderConfig(storagePath)))
     .webp({ quality })
     .toBuffer();
 

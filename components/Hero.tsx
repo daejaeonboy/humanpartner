@@ -3,6 +3,16 @@ import { ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Container } from './ui/Container';
 import { usePublicContent } from '../src/context/PublicContentContext';
+import { getResponsiveImageProps } from '../src/utils/responsiveImage';
+
+const getCircularDistance = (from: number, to: number, total: number) => {
+  if (total <= 1) {
+    return 0;
+  }
+
+  const directDistance = Math.abs(from - to);
+  return Math.min(directDistance, total - directDistance);
+};
 
 export const Hero: React.FC = () => {
   const { heroBanners: slides, loading } = usePublicContent();
@@ -10,6 +20,8 @@ export const Hero: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const isDesktopLoopBoundary =
+    !isMobile && slides.length > 1 && (currentSlide === slides.length || currentSlide === -1);
 
   // Handle window resize for responsive rendering
   useEffect(() => {
@@ -35,12 +47,12 @@ export const Hero: React.FC = () => {
   }, [slides.length, isPaused]);
 
   const nextSlide = () => {
-    if (slides.length <= 1 || !isTransitioning) return;
+    if (slides.length <= 1 || !isTransitioning || isDesktopLoopBoundary) return;
     setCurrentSlide((prev) => prev + 1);
   };
 
   const prevSlide = () => {
-    if (slides.length <= 1 || !isTransitioning) return;
+    if (slides.length <= 1 || !isTransitioning || isDesktopLoopBoundary) return;
     setCurrentSlide((prev) => prev - 1);
   };
 
@@ -67,6 +79,21 @@ export const Hero: React.FC = () => {
     return () => {
       if (timer) clearTimeout(timer);
     };
+  }, [currentSlide, slides.length, isMobile]);
+
+  useEffect(() => {
+    if (slides.length <= 1 || isMobile) return;
+
+    if (currentSlide > slides.length) {
+      setIsTransitioning(false);
+      setCurrentSlide(0);
+      return;
+    }
+
+    if (currentSlide < -1) {
+      setIsTransitioning(false);
+      setCurrentSlide(slides.length - 1);
+    }
   }, [currentSlide, slides.length, isMobile]);
 
   // Re-enable transition after jump
@@ -112,7 +139,11 @@ export const Hero: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="relative w-full h-[500px] md:h-[600px] bg-slate-900 flex items-center justify-center">
+      <section
+        className={`relative w-full bg-slate-900 flex items-center justify-center ${
+          isMobile ? 'aspect-[4/3] min-h-[320px]' : 'h-[500px] md:h-[600px]'
+        }`}
+      >
         <Loader2 className="animate-spin text-white" size={40} />
       </section>
     );
@@ -120,7 +151,11 @@ export const Hero: React.FC = () => {
 
   if (slides.length === 0) {
     return (
-      <section className="relative w-full h-[500px] md:h-[600px] bg-slate-900 flex items-center justify-center">
+      <section
+        className={`relative w-full bg-slate-900 flex items-center justify-center ${
+          isMobile ? 'aspect-[4/3] min-h-[320px]' : 'h-[500px] md:h-[600px]'
+        }`}
+      >
         <p className="text-white/50">배너가 없습니다. Admin에서 배너를 추가해주세요.</p>
       </section>
     );
@@ -132,7 +167,7 @@ export const Hero: React.FC = () => {
     
     return (
       <section
-        className="relative w-full h-[500px] bg-slate-900 overflow-hidden group"
+        className="relative w-full aspect-[4/3] bg-slate-900 overflow-hidden group"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -143,32 +178,48 @@ export const Hero: React.FC = () => {
           const linkHref = slide.target_product_code ? `/p/${slide.target_product_code}` : slide.link || '/';
           const isExternal = linkHref.startsWith('http');
           const isActive = index === normalizedIndex;
+          const shouldLoadImage =
+            slides.length <= 2 || getCircularDistance(index, normalizedIndex, slides.length) <= 1;
+          const imageProps = getResponsiveImageProps(slide.image_url, {
+            widths: [640, 828, 1080, 1280],
+            sizes: '100vw',
+            quality: 84,
+            resize: 'cover',
+          });
 
           const SlideContent = (
             <>
-              <div
-                className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-[7000ms]"
-                style={{ backgroundImage: `url(${slide.image_url})` }}
-              >
+              <div className="absolute inset-0 w-full h-full overflow-hidden">
+                {shouldLoadImage ? (
+                  <img
+                    {...imageProps}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-[7000ms]"
+                    decoding="async"
+                    loading={isActive ? 'eager' : 'lazy'}
+                    fetchPriority={isActive ? 'high' : 'auto'}
+                    aria-hidden="true"
+                  />
+                ) : null}
                 <div className="absolute inset-0 bg-black/30 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
               </div>
 
-              <Container className="relative h-full flex flex-col justify-center text-white z-20">
+              <Container className="relative h-full flex flex-col justify-end pt-20 pb-10 text-white z-20">
                 <div className="max-w-4xl">
-                  <h1 className={`text-[28px] font-semibold leading-[1.2] tracking-tight text-white mb-3 transition-all duration-1000 delay-300 transform drop-shadow-2xl
+                  <h1 className={`text-[22px] sm:text-[24px] font-semibold leading-[1.2] tracking-tight text-white mb-2 transition-all duration-1000 delay-300 transform drop-shadow-2xl
                     ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
                   `}>
                     {slide.title}
                   </h1>
-                  <p className={`text-[1.1rem] font-normal text-white/80 leading-relaxed break-keep max-w-xl transition-all duration-1000 delay-500 transform drop-shadow-lg
+                  <p className={`text-[0.95rem] sm:text-base font-normal text-white/80 leading-relaxed break-keep max-w-xl transition-all duration-1000 delay-500 transform drop-shadow-lg
                     ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
                   `}>
                     {slide.subtitle}
                   </p>
-                  <div className={`mt-8 transition-all duration-1000 delay-700 transform
+                  <div className={`mt-5 transition-all duration-1000 delay-700 transform
                     ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
                   `}>
-                    <div className="inline-flex items-center gap-2 px-6 h-[40px] rounded-lg bg-[#39B54A] text-white font-semibold text-sm transition-all shadow-md shadow-[#39B54A]/20">
+                    <div className="inline-flex items-center gap-2 px-5 h-[38px] rounded-lg bg-[#39B54A] text-white font-semibold text-sm transition-all shadow-md shadow-[#39B54A]/20">
                       자세히 보기 <ArrowRight size={16} />
                     </div>
                   </div>
@@ -198,7 +249,7 @@ export const Hero: React.FC = () => {
         })}
 
         {/* Indicators for Mobile - Left Aligned Dots at the Top */}
-        <div className="absolute top-8 left-0 w-full z-30">
+        <div className="absolute top-6 left-0 w-full z-30">
           <Container>
             <div className="flex gap-2.5">
               {slides.map((_, index) => (
@@ -240,6 +291,16 @@ export const Hero: React.FC = () => {
             const linkHref = slide.target_product_code ? `/p/${slide.target_product_code}` : slide.link || '/';
             const isExternal = linkHref.startsWith('http');
             const isActive = slides.length > 1 ? (index === currentSlide + 1) : (index === currentSlide);
+            const logicalIndex = slides.length > 1 ? (index - 1 + slides.length) % slides.length : index;
+            const normalizedIndex = ((currentSlide % slides.length) + slides.length) % slides.length;
+            const shouldLoadImage =
+              slides.length <= 2 || getCircularDistance(logicalIndex, normalizedIndex, slides.length) <= 1;
+            const imageProps = getResponsiveImageProps(slide.image_url, {
+              widths: [960, 1280, 1600, 1920],
+              sizes: '(max-width: 1024px) 85vw, 1200px',
+              quality: 86,
+              resize: 'cover',
+            });
 
             const SlideWrapper = ({ children }: { children: React.ReactNode }) => (
               isExternal ? (
@@ -261,29 +322,33 @@ export const Hero: React.FC = () => {
                 }}
               >
                 <SlideWrapper>
-                  <div
-                    className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-[7000ms] hover:scale-105"
-                    style={{ backgroundImage: `url(${slide.image_url})` }}
-                  >
+                  <div className="absolute inset-0 w-full h-full overflow-hidden">
+                    {shouldLoadImage ? (
+                      <img
+                        {...imageProps}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-[7000ms] hover:scale-105"
+                        decoding="async"
+                        loading={isActive ? 'eager' : 'lazy'}
+                        fetchPriority={isActive ? 'high' : 'auto'}
+                        aria-hidden="true"
+                      />
+                    ) : null}
                     {(slide.title || slide.subtitle) && (
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                     )}
                   </div>
 
-                  {(slide.title || slide.subtitle) && (
+                  {isActive && (slide.title || slide.subtitle) && (
                     <div className="absolute inset-0 p-16 flex flex-col justify-end text-white z-20">
                       <div className="max-w-4xl">
                         {slide.title && (
-                          <h2 className={`text-3xl lg:text-4xl font-bold mb-4 transition-all duration-700 transform
-                            ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-                          `}>
+                          <h2 className="text-3xl lg:text-4xl mb-4 font-bold transition-all duration-700 transform opacity-100 translate-y-0">
                             {slide.title}
                           </h2>
                         )}
                         {slide.subtitle && (
-                          <p className={`text-lg opacity-90 mb-8 max-w-2xl transition-all duration-700 delay-100 transform
-                            ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-                          `}>
+                          <p className="text-lg opacity-90 mb-8 max-w-2xl transition-all duration-700 delay-100 transform opacity-100 translate-y-0">
                             {slide.subtitle}
                           </p>
                         )}
@@ -299,6 +364,7 @@ export const Hero: React.FC = () => {
         {/* Navigation Arrows (Desktop Only) */}
         <button
           onClick={prevSlide}
+          disabled={isDesktopLoopBoundary}
           className="absolute left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-slate-800 hover:bg-white transition-all shadow-lg opacity-0 group-hover:opacity-100"
           aria-label="Previous slide"
         >
@@ -306,6 +372,7 @@ export const Hero: React.FC = () => {
         </button>
         <button
           onClick={nextSlide}
+          disabled={isDesktopLoopBoundary}
           className="absolute right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-slate-800 hover:bg-white transition-all shadow-lg opacity-0 group-hover:opacity-100"
           aria-label="Next slide"
         >

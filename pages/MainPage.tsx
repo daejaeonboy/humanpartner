@@ -17,6 +17,30 @@ interface SectionWithProducts {
     products: any[];
 }
 
+const scheduleNonCriticalTask = (callback: () => void) => {
+    if (typeof window === 'undefined') {
+        callback();
+        return () => undefined;
+    }
+
+    const idleWindow = window as Window & {
+        requestIdleCallback?: (callback: (deadline?: unknown) => void, options?: { timeout: number }) => number;
+        cancelIdleCallback?: (handle: number) => void;
+    };
+
+    if (typeof idleWindow.requestIdleCallback === 'function') {
+        const idleId = idleWindow.requestIdleCallback(() => callback(), { timeout: 1200 });
+        return () => {
+            if (typeof idleWindow.cancelIdleCallback === 'function') {
+                idleWindow.cancelIdleCallback(idleId);
+            }
+        };
+    }
+
+    const timeoutId = window.setTimeout(callback, 250);
+    return () => window.clearTimeout(timeoutId);
+};
+
 export const MainPage: React.FC = () => {
     const { activeSections, loading: publicContentLoading } = usePublicContent();
     const [sectionsWithProducts, setSectionsWithProducts] = useState<SectionWithProducts[]>([]);
@@ -24,11 +48,14 @@ export const MainPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchData = async () => {
-            if (publicContentLoading) {
-                return;
-            }
+        if (publicContentLoading) {
+            return;
+        }
 
+        let cancelled = false;
+        setLoading(true);
+
+        const fetchData = async () => {
             try {
                 if (activeSections.length > 0) {
                     const sectionProductsMap = await getProductsForSections(
@@ -40,20 +67,34 @@ export const MainPage: React.FC = () => {
                         products: sectionProductsMap[section.id!] || [],
                     }));
 
-                    setSectionsWithProducts(sectionsData);
-                    setAllProducts([]);
+                    if (!cancelled) {
+                        setSectionsWithProducts(sectionsData);
+                        setAllProducts([]);
+                    }
                 } else {
                     const products = await getBasicProducts();
-                    setAllProducts(products);
-                    setSectionsWithProducts([]);
+                    if (!cancelled) {
+                        setAllProducts(products);
+                        setSectionsWithProducts([]);
+                    }
                 }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             } finally {
-                setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
         };
-        fetchData();
+
+        const cancelScheduledTask = scheduleNonCriticalTask(() => {
+            void fetchData();
+        });
+
+        return () => {
+            cancelled = true;
+            cancelScheduledTask();
+        };
     }, [activeSections, publicContentLoading]);
 
     // Helper to format products for ProductSection
@@ -158,6 +199,7 @@ export const MainPage: React.FC = () => {
                                 categories={getSectionCategories(section, products)}
                                 products={formattedProducts}
                                 layoutMode="grid-2"
+                                sectionId={section.id}
                             />
                         );
                     })}

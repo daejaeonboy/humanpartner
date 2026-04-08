@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { auth } from '../firebase';
-import { getUserProfileByFirebaseUid, UserProfile } from '../api/userApi';
+import type { User } from 'firebase/auth';
+import type { UserProfile } from '../api/userApi';
 
 interface AuthContextType {
     user: User | null;
@@ -30,6 +29,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const fetchProfile = async (firebaseUser: User) => {
         try {
+            const [{ getUserProfileByFirebaseUid }, { auth }, { signOut }] = await Promise.all([
+                import('../api/userApi'),
+                import('../firebase'),
+                import('firebase/auth'),
+            ]);
             const profile = await getUserProfileByFirebaseUid(firebaseUser.uid);
             
             // 승인되지 않은 일반 사용자만 자동 로그아웃 처리
@@ -49,20 +53,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            setUser(currentUser);
-            if (currentUser) {
-                await fetchProfile(currentUser);
-            } else {
-                setUserProfile(null);
-            }
-            setLoading(false);
-        });
+        let unsubscribe: (() => void) | undefined;
+        let isMounted = true;
 
-        return () => unsubscribe();
+        const initializeAuth = async () => {
+            try {
+                const [{ onAuthStateChanged }, { auth }] = await Promise.all([
+                    import('firebase/auth'),
+                    import('../firebase'),
+                ]);
+
+                if (!isMounted) {
+                    return;
+                }
+
+                unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+                    if (!isMounted) {
+                        return;
+                    }
+
+                    setUser(currentUser);
+
+                    if (currentUser) {
+                        await fetchProfile(currentUser);
+                    } else {
+                        setUserProfile(null);
+                    }
+
+                    if (isMounted) {
+                        setLoading(false);
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to initialize auth:', error);
+                if (isMounted) {
+                    setUser(null);
+                    setUserProfile(null);
+                    setLoading(false);
+                }
+            }
+        };
+
+        void initializeAuth();
+
+        return () => {
+            isMounted = false;
+            unsubscribe?.();
+        };
     }, []);
 
     const logout = async () => {
+        const [{ signOut }, { auth }] = await Promise.all([
+            import('firebase/auth'),
+            import('../firebase'),
+        ]);
         await signOut(auth);
         setUserProfile(null);
     };
@@ -77,7 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return (
         <AuthContext.Provider value={{ user, userProfile, loading, isAdmin, logout, refreshProfile }}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };

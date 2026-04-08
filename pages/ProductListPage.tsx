@@ -6,6 +6,7 @@ import { Seo } from '../components/seo/Seo';
 import { getBasicProducts, getBasicProductsByCategories, Product } from '../src/api/productApi';
 import { getProductsBySection } from '../src/api/sectionApi';
 import { usePublicContent } from '../src/context/PublicContentContext';
+import { getResponsiveImageProps } from '../src/utils/responsiveImage';
 
 export const ProductListPage: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -200,44 +201,58 @@ export const ProductListPage: React.FC = () => {
                         등록된 상품이 없습니다. <Link to="/admin/products" className="text-[#39B54A] underline">Admin에서 상품 추가</Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 gap-y-8 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-y-8 md:grid-cols-2 md:gap-8 2xl:grid-cols-3">
                         {filteredProducts.map((product) => (
-                            <Link to={`/products/${product.id}`} key={product.id} className="group cursor-pointer">
-                                <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 mb-4 rounded-xl shadow-sm">
-                                    <img
-                                        src={product.image_url || 'https://picsum.photos/seed/product/400/500'}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
+                            (() => {
+                                const imageProps = getResponsiveImageProps(
+                                    product.image_url || 'https://picsum.photos/seed/product/400/500',
+                                    {
+                                        widths: [480, 640, 960, 1280],
+                                        sizes: '(max-width: 768px) 100vw, (max-width: 1536px) 50vw, 33vw',
+                                        quality: 82,
+                                        resize: 'cover',
+                                    },
+                                );
+
+                                return (
+                                <Link to={`/products/${product.id}`} key={product.id} className="group cursor-pointer">
+                                    <div className="relative aspect-video overflow-hidden bg-gray-100 mb-4 rounded-xl shadow-sm">
+                                        <img
+                                            {...imageProps}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                                     {product.stock === 0 && (
                                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                                             <span className="text-white font-bold">품절</span>
                                         </div>
                                     )}
-                                </div>
-
-                                <div className="space-y-1.5 px-1">
-                                    <h3 className="text-[16px] font-bold text-slate-800 line-clamp-2 leading-tight group-hover:text-[#39B54A] transition-colors">{product.name}</h3>
-
-                                    <div className="flex items-center gap-2">
-                                        {product.discount_rate && product.discount_rate > 0 && (
-                                            <span className="text-[#39B54A] font-bold text-[18px]">
-                                                {product.discount_rate}%
-                                            </span>
-                                        )}
-                                        <span className="font-medium text-[18px] text-slate-900">
-                                            {product.price?.toLocaleString()}원
-                                        </span>
                                     </div>
 
-                                    {product.stock !== undefined && product.stock > 0 && product.stock <= 3 && (
-                                        <span className="text-xs text-orange-500">재고 {product.stock}개 남음</span>
-                                    )}
-                                </div>
-                            </Link>
+                                    <div className="space-y-1.5 px-1">
+                                        <h3 className="text-[16px] font-bold text-slate-800 line-clamp-2 leading-tight group-hover:text-[#39B54A] transition-colors">{product.name}</h3>
+
+                                        <div className="flex items-center gap-2">
+                                            {product.discount_rate && product.discount_rate > 0 && (
+                                                <span className="text-[#39B54A] font-bold text-[18px]">
+                                                    {product.discount_rate}%
+                                                </span>
+                                            )}
+                                            <span className="font-medium text-[18px] text-slate-900">
+                                                {product.price?.toLocaleString()}원
+                                            </span>
+                                        </div>
+
+                                        {product.stock !== undefined && product.stock > 0 && product.stock <= 3 && (
+                                            <span className="text-xs text-orange-500">재고 {product.stock}개 남음</span>
+                                        )}
+                                    </div>
+                                </Link>
+                                );
+                            })()
                         ))}
                     </div>
                 )}
