@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Seo } from '../components/seo/Seo';
 import { Container } from '../components/ui/Container';
 import { MapPin, Phone, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
@@ -193,7 +194,12 @@ export const AlliancePage: React.FC = () => {
           ) : members.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-16">
               {members.map((member) => (
-                <div key={member.id} className="flex border border-gray-100 hover:border-[#39B54A]/30 transition-all bg-white rounded-xl overflow-hidden min-h-[130px] md:h-[180px] shadow-sm hover:shadow-md group">
+                <Link
+                  key={member.id}
+                  to={`/alliance/${member.id}`}
+                  className="flex border border-gray-200 hover:border-2 hover:border-[#39B54A]/35 transition-all bg-white rounded-xl overflow-hidden min-h-[130px] md:h-[180px] group"
+                  aria-label={`${member.name} 상세 보기`}
+                >
                   {/* Left: Logo Area */}
                   <div className="w-[130px] md:w-[200px] bg-slate-50 flex items-center justify-center p-4 md:p-6 flex-shrink-0 group-hover:bg-white transition-colors border-r border-gray-50">
                     {member.logo_url && (
@@ -227,7 +233,7 @@ export const AlliancePage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

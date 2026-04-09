@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Container } from './ui/Container';
@@ -20,6 +20,10 @@ export const Hero: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [dragOffset, setDragOffset] = useState(0);
+  const dragStartXRef = useRef<number | null>(null);
+  const dragCurrentXRef = useRef<number | null>(null);
+  const suppressClickRef = useRef(false);
   const isDesktopLoopBoundary =
     !isMobile && slides.length > 1 && (currentSlide === slides.length || currentSlide === -1);
 
@@ -110,20 +114,43 @@ export const Hero: React.FC = () => {
     setCurrentSlide(index);
   };
 
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
+  const resetDragState = () => {
+    dragStartXRef.current = null;
+    dragCurrentXRef.current = null;
+    setDragOffset(0);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+  const handleDragStart = (clientX: number) => {
+    if (slides.length <= 1) return;
+    dragStartXRef.current = clientX;
+    dragCurrentXRef.current = clientX;
+    suppressClickRef.current = false;
+    setIsPaused(true);
   };
 
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
+  const handleDragMove = (clientX: number) => {
+    if (dragStartXRef.current === null) return;
+
+    dragCurrentXRef.current = clientX;
+    const deltaX = clientX - dragStartXRef.current;
+
+    if (Math.abs(deltaX) > 8) {
+      suppressClickRef.current = true;
+    }
+
+    if (!isMobile) {
+      const clampedDelta = Math.max(Math.min(deltaX, 180), -180);
+      setDragOffset(clampedDelta);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (dragStartXRef.current === null || dragCurrentXRef.current === null) {
+      resetDragState();
+      return;
+    }
+
+    const distance = dragStartXRef.current - dragCurrentXRef.current;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
@@ -133,8 +160,51 @@ export const Hero: React.FC = () => {
       prevSlide();
     }
 
-    setTouchStart(null);
-    setTouchEnd(null);
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+
+    resetDragState();
+    setIsPaused(false);
+  };
+
+  const handleHeroClickCapture = (event: React.MouseEvent<HTMLElement>) => {
+    if (!suppressClickRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    handleDragStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    handleDragMove(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    handleDragEnd();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLElement>) => {
+    handleDragStart(e.clientX);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    handleDragMove(e.clientX);
+  };
+
+  const handleMouseUp = () => {
+    handleDragEnd();
+  };
+
+  const handleMouseLeave = () => {
+    if (dragStartXRef.current !== null) {
+      handleDragEnd();
+      return;
+    }
+
+    setIsPaused(false);
   };
 
   if (loading) {
@@ -167,12 +237,16 @@ export const Hero: React.FC = () => {
     
     return (
       <section
-        className="relative w-full aspect-[4/3] bg-slate-900 overflow-hidden group"
+        className="relative w-full aspect-[4/3] bg-slate-900 overflow-hidden group touch-pan-y"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
         onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
+        onMouseLeave={handleMouseLeave}
+        onClickCapture={handleHeroClickCapture}
       >
         {slides.map((slide, index) => {
           const linkHref = slide.target_product_code ? `/p/${slide.target_product_code}` : slide.link || '/';
@@ -194,11 +268,12 @@ export const Hero: React.FC = () => {
                   <img
                     {...imageProps}
                     alt=""
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-[7000ms]"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-[7000ms] select-none"
                     decoding="async"
                     loading={isActive ? 'eager' : 'lazy'}
                     fetchPriority={isActive ? 'high' : 'auto'}
                     aria-hidden="true"
+                    draggable={false}
                   />
                 ) : null}
                 <div className="absolute inset-0 bg-black/30 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
@@ -216,13 +291,6 @@ export const Hero: React.FC = () => {
                   `}>
                     {slide.subtitle}
                   </p>
-                  <div className={`mt-5 transition-all duration-1000 delay-700 transform
-                    ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
-                  `}>
-                    <div className="inline-flex items-center gap-2 px-5 h-[38px] rounded-lg bg-[#39B54A] text-white font-semibold text-sm transition-all shadow-md shadow-[#39B54A]/20">
-                      자세히 보기 <ArrowRight size={16} />
-                    </div>
-                  </div>
                 </div>
               </Container>
             </>
@@ -274,15 +342,19 @@ export const Hero: React.FC = () => {
   // --- Desktop View: New Centered Slide Slider ---
   return (
     <section
-      className="relative w-full bg-white overflow-hidden group"
+      className="relative w-full bg-white overflow-hidden group select-none"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onClickCapture={handleHeroClickCapture}
       onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="relative w-full h-[450px] lg:h-[550px]">
         <div 
           className={`flex h-full ${isTransitioning ? 'transition-transform duration-700 ease-out' : 'transition-none'}`}
           style={{
-            transform: `translateX(calc(50% - (var(--slide-width) / 2) - (${currentSlide + (slides.length > 1 ? 1 : 0)} * (var(--slide-width) + var(--slide-gap)))))`,
+            transform: `translateX(calc(50% - (var(--slide-width) / 2) - (${currentSlide + (slides.length > 1 ? 1 : 0)} * (var(--slide-width) + var(--slide-gap))) + ${dragOffset}px))`,
             '--slide-width': 'min(1200px, 85vw)',
             '--slide-gap': '20px',
           } as any}
@@ -327,11 +399,12 @@ export const Hero: React.FC = () => {
                       <img
                         {...imageProps}
                         alt=""
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-[7000ms] hover:scale-105"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-[7000ms] hover:scale-105 select-none"
                         decoding="async"
                         loading={isActive ? 'eager' : 'lazy'}
                         fetchPriority={isActive ? 'high' : 'auto'}
                         aria-hidden="true"
+                        draggable={false}
                       />
                     ) : null}
                     {(slide.title || slide.subtitle) && (

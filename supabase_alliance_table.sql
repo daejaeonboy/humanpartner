@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS public.alliance_members (
     address TEXT,
     phone TEXT,
     logo_url TEXT,
+    content TEXT DEFAULT '',
     display_order INTEGER DEFAULT 0,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())

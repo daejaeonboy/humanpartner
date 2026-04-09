@@ -8,6 +8,7 @@ interface RichHtmlEditorProps {
   placeholder?: string;
   imageFolder?: string;
   className?: string;
+  minHeightClassName?: string;
 }
 
 export const RichHtmlEditor: React.FC<RichHtmlEditorProps> = ({
@@ -16,6 +17,7 @@ export const RichHtmlEditor: React.FC<RichHtmlEditorProps> = ({
   placeholder = '내용을 입력하세요.',
   imageFolder = 'description-images',
   className = '',
+  minHeightClassName = 'min-h-[220px]',
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -55,7 +57,7 @@ export const RichHtmlEditor: React.FC<RichHtmlEditorProps> = ({
         const url = await uploadImage(file, imageFolder);
         execCmd(
           'insertHTML',
-          `<p><img src="${url}" alt="" style="max-width:100%;height:auto;border-radius:12px;" /></p>`,
+          `<p><img src="${url}" alt="" style="max-width:100%;height:auto;" /></p>`,
         );
       } catch (error) {
         console.error('Failed to upload editor image:', error);
@@ -113,7 +115,7 @@ export const RichHtmlEditor: React.FC<RichHtmlEditorProps> = ({
         </button>
       </div>
 
-      <div className="relative min-h-[220px] bg-white">
+      <div className={`relative bg-white ${minHeightClassName}`}>
         {isEmpty && (
           <div className="pointer-events-none absolute left-4 top-4 text-sm text-slate-400">
             {placeholder}
@@ -121,7 +123,7 @@ export const RichHtmlEditor: React.FC<RichHtmlEditorProps> = ({
         )}
         <div
           ref={contentRef}
-          className="prose prose-sm min-h-[220px] max-w-none p-4 outline-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl"
+          className={`prose prose-sm max-w-none p-4 outline-none [&_img]:max-w-full [&_img]:h-auto ${minHeightClassName}`}
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}

@@ -18,16 +18,16 @@ export function Footer() {
             {/* TOP LAYER: Links (Full width border) */}
             <div className="w-full border-b border-gray-200 py-6 mb-8">
                 <Container>
-                    <div className="flex flex-wrap items-center gap-x-4 md:gap-x-6 text-[15px] md:text-sm font-semibold text-gray-600">
-                        <Link to="/" className="hover:text-black transition-colors whitespace-nowrap flex items-center h-full">홈</Link>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5 md:gap-x-6 md:gap-y-0 text-[15px] md:text-sm font-semibold text-gray-600">
+                        <Link to="/" className="hover:text-black transition-colors whitespace-nowrap flex items-center h-full py-0.5">홈</Link>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
-                        <Link to="/cs" className="hover:text-[#39B54A] font-bold text-[#39B54A] transition-colors whitespace-nowrap flex items-center h-full">고객센터</Link>
+                        <Link to="/cs" className="hover:text-[#39B54A] font-bold text-[#39B54A] transition-colors whitespace-nowrap flex items-center h-full py-0.5">고객센터</Link>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
-                        <Link to="/company" className="cursor-pointer hover:text-black transition-colors whitespace-nowrap flex items-center h-full">회사소개</Link>
+                        <Link to="/company" className="cursor-pointer hover:text-black transition-colors whitespace-nowrap flex items-center h-full py-0.5">회사소개</Link>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
-                        <Link to="/terms" className="cursor-pointer hover:text-black transition-colors whitespace-nowrap flex items-center h-full">이용약관</Link>
+                        <Link to="/terms" className="cursor-pointer hover:text-black transition-colors whitespace-nowrap flex items-center h-full py-0.5">이용약관</Link>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
-                        <Link to="/privacy" className="cursor-pointer hover:text-black font-bold text-gray-800 transition-colors whitespace-nowrap flex items-center h-full">개인정보처리방침</Link>
+                        <Link to="/privacy" className="cursor-pointer hover:text-black font-bold text-gray-800 transition-colors whitespace-nowrap flex items-center h-full py-0.5">개인정보처리방침</Link>
                     </div>
                 </Container>
             </div>

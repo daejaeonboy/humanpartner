@@ -213,10 +213,10 @@ export const NoticesPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <h3 className="text-[18px] font-bold text-gray-900 break-keep mb-3 transition-colors group-hover:text-[#1f8f36]">
+                    <h3 className="text-[18px] font-bold text-gray-900 break-keep mb-1 transition-colors group-hover:text-[#1f8f36]">
                       {item.title}
                     </h3>
-                    <p className="text-[12px] text-gray-400">
+                    <p className="text-[13px] text-gray-400 md:text-[14px]">
                       {item.published_at ? new Date(item.published_at).toLocaleDateString('ko-KR') : '-'}
                     </p>
                   </Link>

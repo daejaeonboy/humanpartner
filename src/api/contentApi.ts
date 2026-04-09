@@ -167,6 +167,11 @@ const sanitizeCategoryPayload = <T extends { category?: string | null }>(payload
   category: normalizeContentCategoryName(payload.category) || null,
 });
 
+const applyInstallationCaseOrdering = <T>(query: T) =>
+  (query as any)
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: true });
+
 export const getInstallationCasesPage = async ({
   page,
   pageSize,
@@ -183,13 +188,13 @@ export const getInstallationCasesPage = async ({
   const normalizedCategory = normalizeContentCategoryName(category);
 
   const buildRequest = (selectColumns: string, allowCategoryFilter: boolean) => {
-    let request = supabase
+    let request = applyInstallationCaseOrdering(
+      supabase
       .from(INSTALLATION_CASE_TABLE)
       .select(selectColumns, { count: 'exact' })
       .eq('is_active', true)
-      .order('display_order', { ascending: true })
-      .order('published_at', { ascending: false })
-      .range(from, to);
+      .range(from, to)
+    );
 
     if (allowCategoryFilter && normalizedCategory && normalizedCategory !== '전체') {
       request = request.eq('category', normalizedCategory);
@@ -219,19 +224,19 @@ export const getInstallationCasesPage = async ({
 
 export const getAllInstallationCases = async (): Promise<InstallationCase[]> => {
   const request = () =>
-    supabase
+    applyInstallationCaseOrdering(
+      supabase
       .from(INSTALLATION_CASE_TABLE)
       .select(INSTALLATION_CASE_SELECT)
-      .order('display_order', { ascending: true })
-      .order('published_at', { ascending: false });
+    );
 
   const { data, error } = await request();
   if (error && isMissingColumnError(error, 'category')) {
-    const fallbackResponse = await supabase
-      .from(INSTALLATION_CASE_TABLE)
-      .select(INSTALLATION_CASE_LEGACY_SELECT)
-      .order('display_order', { ascending: true })
-      .order('published_at', { ascending: false });
+    const fallbackResponse = await applyInstallationCaseOrdering(
+      supabase
+        .from(INSTALLATION_CASE_TABLE)
+        .select(INSTALLATION_CASE_LEGACY_SELECT)
+    );
 
     if (fallbackResponse.error) throw fallbackResponse.error;
     return (fallbackResponse.data || []).map((item) => ({ ...item, category: undefined }));

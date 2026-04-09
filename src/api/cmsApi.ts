@@ -7,7 +7,32 @@ const NAV_MENU_SELECT = 'id,name,link,category,display_order,is_active,created_a
 const BANNER_SELECT = 'id,title,subtitle,image_url,link,button_text,brand_text,banner_type,tab_id,display_order,is_active,created_at,target_product_code';
 const POPUP_SELECT = 'id,title,image_url,link,start_date,end_date,display_order,is_active,created_at,target_product_code';
 const ALLIANCE_CATEGORY_SELECT = 'id,name,display_order,is_active,created_at';
-const ALLIANCE_MEMBER_SELECT = 'id,name,category1,category2,address,phone,logo_url,display_order,is_active,created_at';
+const ALLIANCE_MEMBER_SELECT = 'id,name,category1,category2,address,phone,logo_url,content,display_order,is_active,created_at';
+const ALLIANCE_MEMBER_LEGACY_SELECT = 'id,name,category1,category2,address,phone,logo_url,display_order,is_active,created_at';
+
+interface SupabaseErrorShape {
+    code?: string;
+    message?: string;
+    details?: string;
+    hint?: string;
+}
+
+const isMissingColumnError = (error: unknown, columnName: string) => {
+    const candidate = error as SupabaseErrorShape | null;
+    const message = [candidate?.message, candidate?.details, candidate?.hint].filter(Boolean).join(' ').toLowerCase();
+    return (
+        candidate?.code === '42703' ||
+        (message.includes(columnName.toLowerCase()) && (message.includes('column') || message.includes('schema cache')))
+    );
+};
+
+const removeAllianceContentField = <T extends { content?: string | null }>(payload: T) => {
+    const legacyPayload = { ...payload };
+    delete (legacyPayload as { content?: string | null }).content;
+    return legacyPayload;
+};
+
+const hasAllianceContent = (payload: { content?: string | null }) => Boolean(payload.content?.trim());
 
 // ==================== Quick Menu Items ====================
 export interface QuickMenuItem {
@@ -450,6 +475,7 @@ export interface AllianceMember {
     address: string;
     phone: string;
     logo_url: string;
+    content?: string;
     display_order: number;
     is_active: boolean;
     created_at?: string;
@@ -509,11 +535,20 @@ export const getAllianceCategoryNames = (
 };
 
 export const getAllianceMembers = async (): Promise<AllianceMember[]> => {
-    const { data, error } = await supabase
-        .from('alliance_members')
-        .select(ALLIANCE_MEMBER_SELECT)
-        .eq('is_active', true)
-        .order('display_order', { ascending: true });
+    const buildRequest = (selectColumns: string) =>
+        supabase
+            .from('alliance_members')
+            .select(selectColumns)
+            .eq('is_active', true)
+            .order('display_order', { ascending: true });
+
+    const { data, error } = await buildRequest(ALLIANCE_MEMBER_SELECT);
+    if (error && isMissingColumnError(error, 'content')) {
+        const fallbackResponse = await buildRequest(ALLIANCE_MEMBER_LEGACY_SELECT);
+        if (fallbackResponse.error) throw fallbackResponse.error;
+        return (fallbackResponse.data || []).map((item) => ({ ...item, content: undefined }));
+    }
+
     if (error) throw error;
     return data || [];
 };
@@ -542,12 +577,15 @@ export const getAllianceMembersPage = async ({
     const to = from + pageSize - 1;
     const categoryValues = getAllianceCategoryFilterValues(category);
 
-    let request = supabase
-        .from('alliance_members')
-        .select(ALLIANCE_MEMBER_SELECT, { count: 'exact' })
-        .eq('is_active', true)
-        .order('display_order', { ascending: true })
-        .range(from, to);
+    const buildRequest = (selectColumns: string) =>
+        supabase
+            .from('alliance_members')
+            .select(selectColumns, { count: 'exact' })
+            .eq('is_active', true)
+            .order('display_order', { ascending: true })
+            .range(from, to);
+
+    let request = buildRequest(ALLIANCE_MEMBER_SELECT);
 
     if (categoryValues.length === 1) {
         request = request.eq('category1', categoryValues[0]);
@@ -561,6 +599,28 @@ export const getAllianceMembersPage = async ({
     }
 
     const { data, error, count } = await request;
+    if (error && isMissingColumnError(error, 'content')) {
+        let fallbackRequest = buildRequest(ALLIANCE_MEMBER_LEGACY_SELECT);
+
+        if (categoryValues.length === 1) {
+            fallbackRequest = fallbackRequest.eq('category1', categoryValues[0]);
+        } else if (categoryValues.length > 1) {
+            fallbackRequest = fallbackRequest.in('category1', categoryValues);
+        }
+
+        if (normalizedSearch) {
+            fallbackRequest = fallbackRequest.ilike('name', `%${normalizedSearch}%`);
+        }
+
+        const fallbackResponse = await fallbackRequest;
+        if (fallbackResponse.error) throw fallbackResponse.error;
+
+        return {
+            data: (fallbackResponse.data || []).map((item) => ({ ...item, content: undefined })),
+            count: fallbackResponse.count || 0,
+        };
+    }
+
     if (error) throw error;
     return {
         data: data || [],
@@ -569,12 +629,41 @@ export const getAllianceMembersPage = async ({
 };
 
 export const getAllAllianceMembers = async (): Promise<AllianceMember[]> => {
-    const { data, error } = await supabase
-        .from('alliance_members')
-        .select(ALLIANCE_MEMBER_SELECT)
-        .order('display_order', { ascending: true });
+    const buildRequest = (selectColumns: string) =>
+        supabase
+            .from('alliance_members')
+            .select(selectColumns)
+            .order('display_order', { ascending: true });
+
+    const { data, error } = await buildRequest(ALLIANCE_MEMBER_SELECT);
+    if (error && isMissingColumnError(error, 'content')) {
+        const fallbackResponse = await buildRequest(ALLIANCE_MEMBER_LEGACY_SELECT);
+        if (fallbackResponse.error) throw fallbackResponse.error;
+        return (fallbackResponse.data || []).map((item) => ({ ...item, content: undefined }));
+    }
+
     if (error) throw error;
     return data || [];
+};
+
+export const getAllianceMemberById = async (id: string): Promise<AllianceMember | null> => {
+    const buildRequest = (selectColumns: string) =>
+        supabase
+            .from('alliance_members')
+            .select(selectColumns)
+            .eq('id', id)
+            .eq('is_active', true)
+            .maybeSingle();
+
+    const { data, error } = await buildRequest(ALLIANCE_MEMBER_SELECT);
+    if (error && isMissingColumnError(error, 'content')) {
+        const fallbackResponse = await buildRequest(ALLIANCE_MEMBER_LEGACY_SELECT);
+        if (fallbackResponse.error) throw fallbackResponse.error;
+        return fallbackResponse.data ? { ...fallbackResponse.data, content: undefined } : null;
+    }
+
+    if (error) throw error;
+    return data;
 };
 
 export const addAllianceMember = async (member: Omit<AllianceMember, 'id' | 'created_at'>): Promise<AllianceMember> => {
@@ -583,6 +672,21 @@ export const addAllianceMember = async (member: Omit<AllianceMember, 'id' | 'cre
         .insert([member])
         .select()
         .single();
+    if (error && isMissingColumnError(error, 'content')) {
+        if (hasAllianceContent(member)) {
+            throw new Error('회원사 본문을 저장하려면 `add_alliance_member_content.sql`을 먼저 실행해주세요.');
+        }
+
+        const fallbackResponse = await supabase
+            .from('alliance_members')
+            .insert([removeAllianceContentField(member)])
+            .select()
+            .single();
+
+        if (fallbackResponse.error) throw fallbackResponse.error;
+        return { ...fallbackResponse.data, content: undefined };
+    }
+
     if (error) throw error;
     return data;
 };
@@ -594,6 +698,22 @@ export const updateAllianceMember = async (id: string, updates: Partial<Alliance
         .eq('id', id)
         .select()
         .single();
+    if (error && isMissingColumnError(error, 'content')) {
+        if (hasAllianceContent(updates)) {
+            throw new Error('회원사 본문을 저장하려면 `add_alliance_member_content.sql`을 먼저 실행해주세요.');
+        }
+
+        const fallbackResponse = await supabase
+            .from('alliance_members')
+            .update(removeAllianceContentField(updates))
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (fallbackResponse.error) throw fallbackResponse.error;
+        return { ...fallbackResponse.data, content: undefined };
+    }
+
     if (error) throw error;
     return data;
 };

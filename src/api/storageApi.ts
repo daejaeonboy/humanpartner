@@ -29,8 +29,9 @@ const IMAGE_CONFIG_BY_FOLDER: Record<string, ImageConfig> = {
     },
     banners: { maxDimension: 1920, quality: 0.82, outputMimeType: 'image/webp' },
     popups: { maxDimension: 1920, quality: 0.82, outputMimeType: 'image/webp' },
-    notices: { maxDimension: 1920, quality: 0.82, outputMimeType: 'image/webp' },
-    'installation-cases': { maxDimension: 1920, quality: 0.82, outputMimeType: 'image/webp' },
+    // 상세 상단 사진은 데스크톱 + 고해상도 화면에서 선명도를 유지하도록 여유 있게 보존한다.
+    notices: { maxDimension: 2560, quality: 0.9, outputMimeType: 'image/webp' },
+    'installation-cases': { maxDimension: 2560, quality: 0.9, outputMimeType: 'image/webp' },
     'quick-menu': { maxDimension: 800, quality: 0.9, outputMimeType: 'image/webp' },
     'alliance-logos': { maxDimension: 1000, quality: 0.9, outputMimeType: 'image/webp' },
     'business-licenses': { maxDimension: 2200, quality: 0.92, outputMimeType: 'image/webp' },

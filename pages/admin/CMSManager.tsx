@@ -15,6 +15,7 @@ import {
 } from '../../src/api/cmsApi';
 import { getBasicProducts, Product } from '../../src/api/productApi';
 import { uploadImage } from '../../src/api/storageApi';
+import { RichHtmlEditor } from '../../components/ui/RichHtmlEditor';
 
 type TabType = 'quickmenu' | 'tabmenu' | 'banners' | 'popups' | 'alliance';
 
@@ -214,7 +215,17 @@ export const CMSManager: React.FC = () => {
             setFormData({ title: '', image_url: '', link: '/', start_date: '', end_date: '', display_order: popups.length + 1, is_active: true });
         } else if (activeTab === 'alliance') {
             const categoryOptions = getAllianceCategoryOptions();
-            setFormData({ name: '', category1: categoryOptions[0] || 'MICE 시설분과', category2: '호텔', address: '', phone: '', logo_url: '', display_order: allianceMembers.length + 1, is_active: true });
+            setFormData({
+                name: '',
+                category1: categoryOptions[0] || 'MICE 시설분과',
+                category2: '호텔',
+                address: '',
+                phone: '',
+                logo_url: '',
+                content: '',
+                display_order: allianceMembers.length + 1,
+                is_active: true,
+            });
         }
         setShowModal(true);
     };
@@ -1099,6 +1110,15 @@ export const CMSManager: React.FC = () => {
                                             </button>
                                         )}
                                         <p className="text-xs text-slate-500 mt-1">배경이 투명하거나 흰색인 로고 이미지를 권장합니다.</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-2">본문 내용</label>
+                                        <RichHtmlEditor
+                                            initialValue={formData.content || ''}
+                                            onChange={(value) => setFormData((prev: any) => ({ ...prev, content: value }))}
+                                            placeholder="회원사 상세페이지에 노출할 본문 내용을 입력하세요."
+                                            imageFolder="description-images"
+                                        />
                                     </div>
                                 </>
                             )}

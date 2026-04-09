@@ -40,6 +40,9 @@ const formatDateTimeInput = (value?: string | null) => {
   return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 };
 
+const getNextDisplayOrder = (items: InstallationCase[]) =>
+  items.reduce((maxOrder, item) => Math.max(maxOrder, item.display_order || 0), 0) + 1;
+
 export const InstallationCaseManager: React.FC = () => {
   const [items, setItems] = useState<InstallationCase[]>([]);
   const [categories, setCategories] = useState<InstallationCaseCategory[]>([]);
@@ -66,7 +69,7 @@ export const InstallationCaseManager: React.FC = () => {
     summary: '',
     content: '',
     image_url: '',
-    display_order: 1,
+    display_order: getNextDisplayOrder([]),
     is_active: true,
     published_at: formatDateTimeInput(new Date().toISOString()),
   });
@@ -106,7 +109,7 @@ export const InstallationCaseManager: React.FC = () => {
       summary: '',
       content: '',
       image_url: '',
-      display_order: items.length + 1,
+      display_order: getNextDisplayOrder(items),
       is_active: true,
       published_at: formatDateTimeInput(new Date().toISOString()),
     });

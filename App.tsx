@@ -52,6 +52,9 @@ const PrivacyPolicy = lazy(() =>
 const AlliancePage = lazy(() =>
   import('./pages/AlliancePage').then((module) => ({ default: module.AlliancePage }))
 );
+const AllianceDetailPage = lazy(() =>
+  import('./pages/AllianceDetailPage').then((module) => ({ default: module.AllianceDetailPage }))
+);
 const InstallationCasePage = lazy(() =>
   import('./pages/InstallationCasePage').then((module) => ({ default: module.InstallationCasePage }))
 );
@@ -188,6 +191,7 @@ function App() {
                     <Route path="/search" element={<LazyRoute component={ProductSearchResult} />} />
                     <Route path="/company" element={<LazyRoute component={CompanyIntro} />} />
                     <Route path="/alliance" element={<LazyRoute component={AlliancePage} />} />
+                    <Route path="/alliance/:id" element={<LazyRoute component={AllianceDetailPage} />} />
                     <Route path="/cases" element={<LazyRoute component={InstallationCasePage} />} />
                     <Route path="/cases/:id" element={<LazyRoute component={InstallationCaseDetailPage} />} />
                     <Route path="/notices" element={<LazyRoute component={NoticesPage} />} />
