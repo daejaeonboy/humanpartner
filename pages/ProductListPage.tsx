@@ -7,6 +7,7 @@ import { getBasicProducts, getBasicProductsByCategories, Product } from '../src/
 import { getProductsBySection } from '../src/api/sectionApi';
 import { usePublicContent } from '../src/context/PublicContentContext';
 import { getResponsiveImageProps } from '../src/utils/responsiveImage';
+import { NOINDEX_ROBOTS } from '../src/seo';
 
 export const ProductListPage: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -150,8 +151,9 @@ export const ProductListPage: React.FC = () => {
     });
 
     const pageTitle = currentGroup || urlTitle || (activeCategory !== '전체' ? activeCategory : '전체 상품');
+    const isSectionLandingPage = Boolean(sectionId);
     const canonicalParams = new URLSearchParams();
-    if (urlCategory) canonicalParams.set('category', urlCategory);
+    if (!isSectionLandingPage && urlCategory) canonicalParams.set('category', urlCategory);
     const canonicalPath = canonicalParams.toString() ? `/products?${canonicalParams.toString()}` : '/products';
     const pageDescription = currentGroup || activeCategory !== '전체'
         ? `행사어때에서 ${pageTitle} 관련 행사 상품과 서비스를 확인해보세요. 대전 MICE 행사 운영에 필요한 장비와 구성을 한 곳에서 비교할 수 있습니다.`
@@ -163,6 +165,7 @@ export const ProductListPage: React.FC = () => {
                 title={`${pageTitle} | 행사어때`}
                 description={pageDescription}
                 canonical={canonicalPath}
+                robots={isSectionLandingPage ? NOINDEX_ROBOTS : undefined}
             />
             <Container>
                 <div className="mb-6 md:mb-8">

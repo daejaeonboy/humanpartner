@@ -10,6 +10,7 @@ const SITE_TITLE = '행사어때 | 대전 MICE 행사 통합운영 플랫폼';
 const SITE_DESCRIPTION =
   '행사어때는 대전·충청권 MICE 행사에 필요한 기획, 장비 렌탈, 공간 연출, 운영 지원을 한 번에 제공하는 행사 통합운영 플랫폼입니다.';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/logo_card.jpg`;
+const ORGANIZATION_LOGO = `${SITE_URL}/Miceday_Logo.png`;
 const INDEX_ROBOTS =
   'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
 const NOINDEX_ROBOTS = 'noindex,follow';
@@ -56,7 +57,7 @@ const staticRoutes = [
         legalName: ORGANIZATION.legalName,
         alternateName: [SITE_NAME],
         url: SITE_URL,
-        logo: DEFAULT_OG_IMAGE,
+        logo: ORGANIZATION_LOGO,
         email: ORGANIZATION.email,
         telephone: ORGANIZATION.officePhone,
         founder: ORGANIZATION.representative,
@@ -89,9 +90,9 @@ const staticRoutes = [
     route: '/company',
     title: '회사소개 | 행사어때',
     description:
-      '행사어때는 대전·충청권 MICE 행사 운영 경험을 바탕으로 기획, 장비 렌탈, 공간 연출, 운영 지원을 통합 제공하는 플랫폼입니다.',
-    canonical: '/company',
-    robots: INDEX_ROBOTS,
+      '행사어때 회사소개는 공식 홈페이지에서 확인할 수 있습니다.',
+    canonical: 'https://micepartner.co.kr/',
+    robots: NOINDEX_ROBOTS,
   },
   {
     route: '/cs',
@@ -361,36 +362,110 @@ async function readSupabaseConfig() {
   }
 }
 
-async function fetchProductPages() {
-  const config = await readSupabaseConfig();
+function getSupabaseHeaders(config) {
+  return {
+    apikey: config.anonKey,
+    Authorization: `Bearer ${config.anonKey}`,
+  };
+}
 
+async function fetchSupabaseRows(config, endpoint) {
+  const response = await fetch(`${config.url}/rest/v1/${endpoint}`, {
+    headers: getSupabaseHeaders(config),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Supabase responded with ${response.status}`);
+  }
+
+  const rows = await response.json();
+  return Array.isArray(rows) ? rows : [];
+}
+
+function toDateOnly(value) {
+  if (!value) return null;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
+function buildBreadcrumbSchema(items) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.item,
+    })),
+  };
+}
+
+async function fetchProductPages(config) {
   if (!config) {
     return [];
   }
 
   try {
-    const endpoint =
-      `${config.url}/rest/v1/products` +
-      '?select=id,product_code,name,category,price,stock,description,short_description,image_url,created_at' +
-      '&product_type=eq.basic' +
-      '&order=created_at.desc';
-
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: config.anonKey,
-        Authorization: `Bearer ${config.anonKey}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Supabase responded with ${response.status}`);
-    }
-
-    const products = await response.json();
-
-    return Array.isArray(products) ? products : [];
+    return await fetchSupabaseRows(
+      config,
+      'products?select=id,product_code,name,category,price,stock,description,short_description,image_url,created_at&product_type=eq.basic&order=created_at.desc'
+    );
   } catch (error) {
     console.warn('[prerender] Product fetch failed, continuing without product detail prerender:', error);
+    return [];
+  }
+}
+
+async function fetchNoticePages(config) {
+  if (!config) {
+    return [];
+  }
+
+  try {
+    return await fetchSupabaseRows(
+      config,
+      'notices?select=id,title,summary,image_url,published_at,updated_at,created_at&is_active=eq.true&order=published_at.desc'
+    );
+  } catch (error) {
+    console.warn('[prerender] Notice fetch failed, continuing without notice detail prerender:', error);
+    return [];
+  }
+}
+
+async function fetchInstallationCasePages(config) {
+  if (!config) {
+    return [];
+  }
+
+  try {
+    return await fetchSupabaseRows(
+      config,
+      'installation_cases?select=id,title,summary,image_url,published_at,updated_at,created_at&is_active=eq.true&order=published_at.desc'
+    );
+  } catch (error) {
+    console.warn('[prerender] Installation case fetch failed, continuing without case detail prerender:', error);
+    return [];
+  }
+}
+
+async function fetchAllianceMemberPages(config) {
+  if (!config) {
+    return [];
+  }
+
+  try {
+    return await fetchSupabaseRows(
+      config,
+      'alliance_members?select=id,name,category1,address,phone,logo_url,created_at&is_active=eq.true&order=display_order.asc'
+    );
+  } catch (error) {
+    console.warn('[prerender] Alliance member fetch failed, continuing without alliance detail prerender:', error);
     return [];
   }
 }
@@ -406,30 +481,11 @@ function buildProductDescription(product) {
 
 function buildProductSchemas(product, canonicalUrl, imageUrl, description) {
   return [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        {
-          '@type': 'ListItem',
-          position: 1,
-          name: '홈',
-          item: SITE_URL,
-        },
-        {
-          '@type': 'ListItem',
-          position: 2,
-          name: '상품',
-          item: `${SITE_URL}/products`,
-        },
-        {
-          '@type': 'ListItem',
-          position: 3,
-          name: product.name,
-          item: canonicalUrl,
-        },
-      ],
-    },
+    buildBreadcrumbSchema([
+      { name: '홈', item: SITE_URL },
+      { name: '상품', item: `${SITE_URL}/products` },
+      { name: product.name, item: canonicalUrl },
+    ]),
     {
       '@context': 'https://schema.org',
       '@type': 'Product',
@@ -455,8 +511,103 @@ function buildProductSchemas(product, canonicalUrl, imageUrl, description) {
   ];
 }
 
+function buildNoticeDescription(notice) {
+  return truncate(
+    notice.summary || `${notice.title} 공지사항 상세 페이지입니다.`,
+    160
+  );
+}
+
+function buildInstallationCaseDescription(item) {
+  return truncate(
+    item.summary || `${item.title} 설치사례 상세 페이지입니다.`,
+    160
+  );
+}
+
+function buildAllianceDescription(member) {
+  const contextParts = [member.category1, member.address, member.phone].filter(Boolean);
+  const rawDescription = contextParts.length > 0
+    ? `${member.name} | ${contextParts.join(' · ')}`
+    : `${member.name} 회원사 상세 페이지입니다.`;
+
+  return truncate(rawDescription, 160);
+}
+
+function buildArticleSchemas({ listName, listUrl, title, canonicalUrl, imageUrl, description, publishedAt, modifiedAt }) {
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description,
+    ...(imageUrl ? { image: [imageUrl] } : {}),
+    ...(publishedAt ? { datePublished: publishedAt } : {}),
+    ...(modifiedAt ? { dateModified: modifiedAt } : {}),
+    author: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      logo: {
+        '@type': 'ImageObject',
+        url: ORGANIZATION_LOGO,
+      },
+    },
+    mainEntityOfPage: canonicalUrl,
+  };
+
+  return [
+    buildBreadcrumbSchema([
+      { name: '홈', item: SITE_URL },
+      { name: listName, item: listUrl },
+      { name: title, item: canonicalUrl },
+    ]),
+    articleSchema,
+  ];
+}
+
+function buildAllianceSchemas(member, canonicalUrl, imageUrl, description) {
+  return [
+    buildBreadcrumbSchema([
+      { name: '홈', item: SITE_URL },
+      { name: '회원사', item: `${SITE_URL}/alliance` },
+      { name: member.name, item: canonicalUrl },
+    ]),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: member.name,
+      url: canonicalUrl,
+      description,
+      ...(imageUrl ? { logo: imageUrl, image: [imageUrl] } : {}),
+      ...(member.phone ? { telephone: member.phone } : {}),
+      ...(member.address
+        ? {
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: member.address,
+              addressCountry: 'KR',
+            },
+          }
+        : {}),
+      ...(member.category1
+        ? {
+            knowsAbout: [member.category1],
+            memberOf: {
+              '@type': 'Organization',
+              name: '대전·충청 MICE 얼라이언스',
+            },
+          }
+        : {}),
+    },
+  ];
+}
+
 async function main() {
   const baseHtml = await readFile(path.join(DIST_DIR, 'index.html'), 'utf8');
+  const supabaseConfig = await readSupabaseConfig();
 
   // Let Firebase Hosting serve /sitemap.xml via the Cloud Function rewrite.
   await rm(path.join(DIST_DIR, 'sitemap.xml'), { force: true });
@@ -466,7 +617,12 @@ async function main() {
     await writeRouteHtml(route.route, html);
   }
 
-  const products = await fetchProductPages();
+  const [products, notices, installationCases, allianceMembers] = await Promise.all([
+    fetchProductPages(supabaseConfig),
+    fetchNoticePages(supabaseConfig),
+    fetchInstallationCasePages(supabaseConfig),
+    fetchAllianceMemberPages(supabaseConfig),
+  ]);
 
   for (const product of products) {
     if (!product?.id || !product?.name) {
@@ -491,8 +647,95 @@ async function main() {
     await writeRouteHtml(canonicalPath, html);
   }
 
+  for (const notice of notices) {
+    if (!notice?.id || !notice?.title) {
+      continue;
+    }
+
+    const canonicalPath = `/notices/${notice.id}`;
+    const canonicalUrl = absoluteUrl(canonicalPath);
+    const imageUrl = notice.image_url ? absoluteUrl(notice.image_url) : undefined;
+    const description = buildNoticeDescription(notice);
+
+    const html = renderHtml(baseHtml, {
+      title: `${notice.title} | 행사어때`,
+      description,
+      canonical: canonicalPath,
+      robots: INDEX_ROBOTS,
+      image: imageUrl || DEFAULT_OG_IMAGE,
+      type: 'article',
+      jsonLd: buildArticleSchemas({
+        listName: '공지사항',
+        listUrl: `${SITE_URL}/notices`,
+        title: notice.title,
+        canonicalUrl,
+        imageUrl,
+        description,
+        publishedAt: toDateOnly(notice.published_at || notice.created_at),
+        modifiedAt: toDateOnly(notice.updated_at || notice.published_at || notice.created_at),
+      }),
+    });
+
+    await writeRouteHtml(canonicalPath, html);
+  }
+
+  for (const item of installationCases) {
+    if (!item?.id || !item?.title) {
+      continue;
+    }
+
+    const canonicalPath = `/cases/${item.id}`;
+    const canonicalUrl = absoluteUrl(canonicalPath);
+    const imageUrl = item.image_url ? absoluteUrl(item.image_url) : undefined;
+    const description = buildInstallationCaseDescription(item);
+
+    const html = renderHtml(baseHtml, {
+      title: `${item.title} | 행사어때`,
+      description,
+      canonical: canonicalPath,
+      robots: INDEX_ROBOTS,
+      image: imageUrl || DEFAULT_OG_IMAGE,
+      type: 'article',
+      jsonLd: buildArticleSchemas({
+        listName: '설치사례',
+        listUrl: `${SITE_URL}/cases`,
+        title: item.title,
+        canonicalUrl,
+        imageUrl,
+        description,
+        publishedAt: toDateOnly(item.published_at || item.created_at),
+        modifiedAt: toDateOnly(item.updated_at || item.published_at || item.created_at),
+      }),
+    });
+
+    await writeRouteHtml(canonicalPath, html);
+  }
+
+  for (const member of allianceMembers) {
+    if (!member?.id || !member?.name) {
+      continue;
+    }
+
+    const canonicalPath = `/alliance/${member.id}`;
+    const canonicalUrl = absoluteUrl(canonicalPath);
+    const imageUrl = member.logo_url ? absoluteUrl(member.logo_url) : undefined;
+    const description = buildAllianceDescription(member);
+
+    const html = renderHtml(baseHtml, {
+      title: `${member.name} | 행사어때`,
+      description,
+      canonical: canonicalPath,
+      robots: INDEX_ROBOTS,
+      image: imageUrl || DEFAULT_OG_IMAGE,
+      type: 'website',
+      jsonLd: buildAllianceSchemas(member, canonicalUrl, imageUrl, description),
+    });
+
+    await writeRouteHtml(canonicalPath, html);
+  }
+
   console.log(
-    `[prerender] Generated ${staticRoutes.length} static route HTML files and ${products.length} product detail HTML files.`
+    `[prerender] Generated ${staticRoutes.length} static route HTML files, ${products.length} product detail HTML files, ${notices.length} notice detail HTML files, ${installationCases.length} installation case detail HTML files, and ${allianceMembers.length} alliance detail HTML files.`
   );
 }
 

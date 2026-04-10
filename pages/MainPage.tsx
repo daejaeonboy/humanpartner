@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PopupManager } from '../components/Layout/PopupManager';
 import { usePublicContent } from '../src/context/PublicContentContext';
-import { DEFAULT_OG_IMAGE, ORGANIZATION, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '../src/seo';
+import { DEFAULT_OG_IMAGE, ORGANIZATION, ORGANIZATION_LOGO, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '../src/seo';
 
 interface SectionWithProducts {
     section: Section;
@@ -149,7 +149,7 @@ export const MainPage: React.FC = () => {
         legalName: ORGANIZATION.legalName,
         alternateName: [SITE_NAME],
         url: SITE_URL,
-        logo: DEFAULT_OG_IMAGE,
+        logo: ORGANIZATION_LOGO,
         email: ORGANIZATION.email,
         telephone: ORGANIZATION.officePhone,
         founder: ORGANIZATION.representative,

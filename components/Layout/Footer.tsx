@@ -23,7 +23,7 @@ export function Footer() {
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
                         <Link to="/cs" className="hover:text-[#39B54A] font-bold text-[#39B54A] transition-colors whitespace-nowrap flex items-center h-full py-0.5">고객센터</Link>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
-                        <Link to="/company" className="cursor-pointer hover:text-black transition-colors whitespace-nowrap flex items-center h-full py-0.5">회사소개</Link>
+                        <a href="https://micepartner.co.kr/" className="cursor-pointer hover:text-black transition-colors whitespace-nowrap flex items-center h-full py-0.5">회사소개</a>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>
                         <Link to="/terms" className="cursor-pointer hover:text-black transition-colors whitespace-nowrap flex items-center h-full py-0.5">이용약관</Link>
                         <span className="w-px h-3.5 bg-gray-200 hidden md:block"></span>

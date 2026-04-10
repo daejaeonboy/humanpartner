@@ -1,3 +1,4 @@
+import { getProductsByIds, getProductsByNames } from './productApi';
 import { supabase } from '../lib/supabase';
 
 export interface Booking {
@@ -49,6 +50,61 @@ const BOOKING_SELECT = `
     )
 `;
 
+type BookingItemWithImage = {
+    name: string;
+    product_id?: string;
+    image_url?: string;
+};
+
+const toUniqueArray = (values: (string | null | undefined)[]) =>
+    Array.from(new Set(values.filter((value): value is string => Boolean(value))));
+
+const enrichBookingItemImages = async (bookings: Booking[]): Promise<Booking[]> => {
+    const bookingItems = bookings.flatMap((booking) => [
+        ...(booking.basic_components || []),
+        ...(booking.selected_options || []),
+    ]);
+    const itemsMissingImages = bookingItems.filter((item) => !item.image_url);
+
+    if (itemsMissingImages.length === 0) {
+        return bookings;
+    }
+
+    const productIds = toUniqueArray(itemsMissingImages.map((item) => item.product_id));
+    const productNames = toUniqueArray(itemsMissingImages.map((item) => item.name));
+
+    if (productIds.length === 0 && productNames.length === 0) {
+        return bookings;
+    }
+
+    const [productsById, productsByName] = await Promise.all([
+        productIds.length > 0 ? getProductsByIds(productIds) : Promise.resolve([]),
+        productNames.length > 0 ? getProductsByNames(productNames) : Promise.resolve([]),
+    ]);
+
+    const productImageById = new Map(
+        productsById.map((product) => [product.id, product.image_url]),
+    );
+    const productImageByName = new Map(
+        [...productsById, ...productsByName].map((product) => [product.name, product.image_url]),
+    );
+
+    const mergeImageUrl = <T extends BookingItemWithImage>(items?: T[]) =>
+        items?.map((item) => ({
+            ...item,
+            image_url:
+                item.image_url ||
+                (item.product_id ? productImageById.get(item.product_id) : undefined) ||
+                productImageByName.get(item.name),
+        }));
+
+    return bookings.map((booking) => ({
+        ...booking,
+        basic_components: mergeImageUrl(booking.basic_components),
+        selected_options: mergeImageUrl(booking.selected_options),
+    }));
+};
+
 // 모든 예약 조회 (Admin용) - 사용자 정보 포함
 export const getBookings = async (): Promise<Booking[]> => {
     // First get bookings with products
@@ -71,13 +127,15 @@ export const getBookings = async (): Promise<Booking[]> => {
 
         const profileMap = new Map(profiles?.map(p => [p.firebase_uid, p]) || []);
 
-        return bookings.map(b => ({
+        const bookingsWithProfiles = bookings.map(b => ({
             ...b,
             user_profiles: profileMap.get(b.user_id) || null
         }));
+
+        return enrichBookingItemImages(bookingsWithProfiles);
     }
 
-    return bookings;
+    return enrichBookingItemImages(bookings);
 };
 
 export const getBookingsPage = async (
@@ -99,7 +157,10 @@ export const getBookingsPage = async (
     const userIds = [...new Set(bookings.map((booking) => booking.user_id).filter(Boolean))];
 
     if (userIds.length === 0) {
-        return { data: bookings, count: count || 0 };
+        return {
+            data: await enrichBookingItemImages(bookings),
+            count: count || 0,
+        };
     }
 
     const { data: profiles, error: profilesError } = await supabase
@@ -111,11 +172,13 @@ export const getBookingsPage = async (
 
     const profileMap = new Map(profiles?.map((profile) => [profile.firebase_uid, profile]) || []);
 
-    return {
-        data: bookings.map((booking) => ({
+    const bookingsWithProfiles = bookings.map((booking) => ({
             ...booking,
             user_profiles: profileMap.get(booking.user_id) || null,
-        })),
+        }));
+
+    return {
+        data: await enrichBookingItemImages(bookingsWithProfiles),
         count: count || 0,
     };
 };
@@ -138,7 +201,7 @@ export const getUserBookings = async (userId: string): Promise<Booking[]> => {
         .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return enrichBookingItemImages(data || []);
 };
 
 // 예약 생성

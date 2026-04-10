@@ -27,6 +27,18 @@ const xmlEscape = (value) => value
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
 const getErrorMessage = (error) => error instanceof Error ? error.message : "Unknown error";
+const toSitemapDate = (...values) => {
+    for (const value of values) {
+        if (!value) {
+            continue;
+        }
+        const date = new Date(value);
+        if (!Number.isNaN(date.getTime())) {
+            return date.toISOString().slice(0, 10);
+        }
+    }
+    return null;
+};
 const getOptionalText = (value) => typeof value === "string" && value.trim().length > 0 ? value.trim() : "";
 const getNumericValue = (value) => {
     if (typeof value === "number" && Number.isFinite(value)) {
@@ -291,11 +303,15 @@ exports.sitemapXml = functions.https.onRequest(async (req, res) => {
     }
     try {
         const today = new Date().toISOString().slice(0, 10);
-        const products = await requestJson(`${SUPABASE_REST_URL}/products?select=id,created_at&product_type=eq.basic&order=created_at.desc`, { headers: getSupabaseHeaders() });
+        const [products, notices, installationCases, allianceMembers] = await Promise.all([
+            requestJson(`${SUPABASE_REST_URL}/products?select=id,created_at&product_type=eq.basic&order=created_at.desc`, { headers: getSupabaseHeaders() }),
+            requestJson(`${SUPABASE_REST_URL}/notices?select=id,published_at,updated_at,created_at&is_active=eq.true&order=published_at.desc.nullslast,created_at.desc`, { headers: getSupabaseHeaders() }),
+            requestJson(`${SUPABASE_REST_URL}/installation_cases?select=id,published_at,updated_at,created_at&is_active=eq.true&order=published_at.desc.nullslast,created_at.desc`, { headers: getSupabaseHeaders() }),
+            requestJson(`${SUPABASE_REST_URL}/alliance_members?select=id,created_at&is_active=eq.true&order=display_order.asc`, { headers: getSupabaseHeaders() }),
+        ]);
         const staticEntries = [
             sitemapEntry(`${SITE_URL}/`, "daily", "1.0", today),
             sitemapEntry(`${SITE_URL}/products`, "daily", "0.8", today),
-            sitemapEntry(`${SITE_URL}/company`, "monthly", "0.7", today),
             sitemapEntry(`${SITE_URL}/alliance`, "monthly", "0.7", today),
             sitemapEntry(`${SITE_URL}/cases`, "monthly", "0.6", today),
             sitemapEntry(`${SITE_URL}/notices`, "monthly", "0.6", today),
@@ -305,10 +321,25 @@ exports.sitemapXml = functions.https.onRequest(async (req, res) => {
         ];
         const productEntries = products
             .filter((product) => Boolean(product.id))
-            .map((product) => sitemapEntry(`${SITE_URL}/products/${product.id}`, "weekly", "0.7", product.created_at ? new Date(product.created_at).toISOString().slice(0, 10) : null));
+            .map((product) => sitemapEntry(`${SITE_URL}/products/${product.id}`, "weekly", "0.7", toSitemapDate(product.created_at)));
+        const noticeEntries = notices
+            .filter((notice) => Boolean(notice.id))
+            .map((notice) => sitemapEntry(`${SITE_URL}/notices/${notice.id}`, "weekly", "0.7", toSitemapDate(notice.updated_at, notice.published_at, notice.created_at)));
+        const installationCaseEntries = installationCases
+            .filter((item) => Boolean(item.id))
+            .map((item) => sitemapEntry(`${SITE_URL}/cases/${item.id}`, "weekly", "0.7", toSitemapDate(item.updated_at, item.published_at, item.created_at)));
+        const allianceEntries = allianceMembers
+            .filter((member) => Boolean(member.id))
+            .map((member) => sitemapEntry(`${SITE_URL}/alliance/${member.id}`, "monthly", "0.6", toSitemapDate(member.created_at)));
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticEntries, ...productEntries].join("\n")}
+${[
+            ...staticEntries,
+            ...productEntries,
+            ...noticeEntries,
+            ...installationCaseEntries,
+            ...allianceEntries,
+        ].join("\n")}
 </urlset>
 `;
         res.set("Content-Type", "application/xml; charset=utf-8");

@@ -986,12 +986,21 @@ export const ProductDetailPage: React.FC = () => {
 
       // Basic Components
       const basicComponents =
-        product.basic_components?.map((comp) => ({
-          name: comp.name,
-          quantity: comp.quantity,
-          model_name: comp.model_name,
-          product_id: comp.product_id,
-        })) || [];
+        product.basic_components?.map((comp) => {
+          const matchedProduct = componentProducts.find(
+            (productItem) =>
+              (comp.product_id && productItem.id === comp.product_id) ||
+              productItem.name === comp.name,
+          );
+
+          return {
+            name: comp.name,
+            quantity: comp.quantity,
+            model_name: comp.model_name,
+            product_id: comp.product_id,
+            image_url: comp.image_url || matchedProduct?.image_url,
+          };
+        }) || [];
 
       const createdBooking = await createBooking({
         product_id: id,

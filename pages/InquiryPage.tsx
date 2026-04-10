@@ -95,8 +95,13 @@ export const InquiryPage: React.FC = () => {
                     {/* Sidebar */}
                     <div className="md:w-1/4">
                         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
-                            <div className="w-20 h-20 bg-[#B3C1D4] rounded-full mx-auto mb-4 flex items-center justify-center">
-                                <User size={32} className="text-[#39B54A]" />
+                            <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center bg-white border border-gray-100 shadow-sm">
+                                <img
+                                    src="/Symbol.png"
+                                    alt="행사어때 심볼"
+                                    className="w-16 h-16 object-contain"
+                                    decoding="async"
+                                />
                             </div>
                             <h2 className="text-lg font-bold text-gray-900">{userProfile?.name || '고객'} 님</h2>
                             <p className="text-sm text-gray-500 mb-6">{userProfile?.email || user.email}</p>

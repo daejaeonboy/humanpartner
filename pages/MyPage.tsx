@@ -99,8 +99,13 @@ export const MyPage: React.FC = () => {
                     {/* Sidebar / User Profile Summary */}
                     <div className="md:w-1/4">
                         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
-                            <div className="w-20 h-20 bg-[#B3C1D4] rounded-full mx-auto mb-4 flex items-center justify-center">
-                                <User size={32} className="text-[#39B54A]" />
+                            <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center bg-white border border-gray-100 shadow-sm">
+                                <img
+                                    src="/Symbol.png"
+                                    alt="행사어때 심볼"
+                                    className="w-16 h-16 object-contain"
+                                    decoding="async"
+                                />
                             </div>
                             <h2 className="text-lg font-bold text-gray-900">{userProfile?.name || '고객'} 님</h2>
                             <p className="text-sm text-gray-500 mb-6">{userProfile?.email || user.email}</p>
@@ -242,14 +247,13 @@ export const MyPage: React.FC = () => {
                                                 {booking.basic_components && booking.basic_components.length > 0 && (
                                                     <div>
                                                         <div className="flex items-center justify-between mb-4">
-                                                            <h4 className="text-xl font-bold text-gray-900 flex items-center gap-3">
-                                                                <span className="w-1.5 h-6 bg-slate-800 inline-block rounded-sm"></span>
+                                                            <h4 className="text-xl font-bold text-gray-900 flex items-center">
                                                                 기본 패키지 구성
                                                             </h4>
                                                             <span className="text-sm text-gray-500 font-medium">총 {booking.basic_components.length}개 품목</span>
                                                         </div>
                                                         
-                                                                <div className="border-t-2 border-slate-900 pt-6">
+                                                                <div className="border-t-2 border-gray-200 pt-6">
                                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
                                                                 {booking.basic_components.map((comp, i) => {
                                                                      const imageUrl = resolveComponentImageUrl(comp.name, comp.image_url);
@@ -286,14 +290,13 @@ export const MyPage: React.FC = () => {
                                                 {booking.selected_options && booking.selected_options.length > 0 && (
                                                     <div>
                                                         <div className="flex items-center justify-between mb-4">
-                                                            <h4 className="text-xl font-bold text-gray-900 flex items-center gap-3">
-                                                                <span className="w-1.5 h-6 bg-[#39B54A] inline-block rounded-sm"></span>
+                                                            <h4 className="text-xl font-bold text-gray-900 flex items-center">
                                                                 내가 추가한 유료 옵션
                                                             </h4>
                                                             <span className="text-sm text-[#39B54A] font-bold">{booking.selected_options.length}개 선택</span>
                                                         </div>
 
-                                                        <div className="border-t-2 border-[#39B54A] pt-6">
+                                                        <div className="border-t-2 border-gray-200 pt-6">
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
                                                                 {booking.selected_options.map((opt, i) => {
                                                                      const imageUrl = resolveComponentImageUrl(opt.name, opt.image_url);
