@@ -186,17 +186,13 @@ export const getUsersPage = async (
     };
 };
 
-const isLocalhost = () =>
-    typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
 const resolveUserApiBaseUrl = () => {
     const configuredUrl = import.meta.env.VITE_API_URL?.trim();
     if (configuredUrl) {
         return configuredUrl.replace(/\/$/, '');
     }
 
-    return isLocalhost() ? 'http://localhost:4000' : '';
+    return '';
 };
 
 const API_BASE_URL = resolveUserApiBaseUrl();
