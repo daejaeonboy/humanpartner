@@ -6,9 +6,12 @@ import { auth } from '../src/firebase';
 import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getAuthErrorMessage } from '../src/utils/authErrors';
 import { NOINDEX_ROBOTS } from '../src/seo';
+import { useAuth } from '../src/context/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 export const Login: React.FC = () => {
     const navigate = useNavigate();
+    const { user, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
@@ -24,6 +27,12 @@ export const Login: React.FC = () => {
             setRememberId(true);
         }
     }, []);
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            navigate('/', { replace: true });
+        }
+    }, [authLoading, navigate, user]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -56,6 +65,14 @@ export const Login: React.FC = () => {
             setLoading(false);
         }
     };
+
+    if (authLoading) {
+        return (
+            <div className="py-20 bg-gray-50 min-h-screen flex items-center justify-center px-4">
+                <Loader2 className="animate-spin text-[#39B54A]" size={40} />
+            </div>
+        );
+    }
 
     return (
         <div className="py-20 bg-gray-50 min-h-screen flex items-center justify-center px-4">

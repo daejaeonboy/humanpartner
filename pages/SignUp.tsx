@@ -11,6 +11,7 @@ import { createUserProfile } from '../src/api/userApi';
 import { uploadImage } from '../src/api/storageApi';
 import { getAuthErrorMessage } from '../src/utils/authErrors';
 import { NOINDEX_ROBOTS } from '../src/seo';
+import { useAuth } from '../src/context/AuthContext';
 
 // 약관 내용
 const TERMS_CONTENT = `제1조 (목적)
@@ -168,6 +169,7 @@ const AgreementSection = ({
 
 export const SignUp: React.FC = () => {
     const navigate = useNavigate();
+    const { user, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(false);
     
     // 회원 유형: 'business' (일반기업) 또는 'public' (공공기관)
@@ -202,6 +204,12 @@ export const SignUp: React.FC = () => {
         privacy: false,
         marketing: false
     });
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            navigate('/', { replace: true });
+        }
+    }, [authLoading, navigate, user]);
 
     const [uploadingLicense, setUploadingLicense] = useState(false);
 
