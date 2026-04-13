@@ -62,6 +62,28 @@ router.put('/update-password', async (req: Request, res: Response) => {
     }
 });
 
+// 사용자 삭제 (Firebase Auth)
+router.delete('/:firebaseUid', async (req: Request, res: Response) => {
+    try {
+        const firebaseUid = req.params.firebaseUid as string;
+
+        if (!firebaseUid) {
+            res.status(400).json({ error: 'firebaseUid가 필요합니다.' });
+            return;
+        }
+
+        await auth.deleteUser(firebaseUid);
+
+        res.json({
+            success: true,
+            message: 'Firebase 계정이 삭제되었습니다.'
+        });
+    } catch (error: any) {
+        console.error('Firebase 계정 삭제 실패:', error);
+        res.status(500).json({ error: error.message || 'Firebase 계정 삭제에 실패했습니다.' });
+    }
+});
+
 // 사용자 정보 조회 (Firebase UID로)
 router.get('/:firebaseUid', async (req: Request, res: Response) => {
     try {

@@ -6,7 +6,7 @@ import { Seo } from '../components/seo/Seo';
 import { ChevronDown, ChevronUp, Check, Loader2, Upload, X } from 'lucide-react';
 
 import { auth } from '../src/firebase';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, deleteUser, updateProfile } from 'firebase/auth';
 import { createUserProfile } from '../src/api/userApi';
 import { uploadImage } from '../src/api/storageApi';
 import { getAuthErrorMessage } from '../src/utils/authErrors';
@@ -28,7 +28,7 @@ const TERMS_CONTENT = `제1조 (목적)
 3. 이용자에게 불리한 변경은 사전에 공지하며, 계속 이용 시 변경 약관에 동의한 것으로 봅니다.
 
 제4조 (회원가입 및 계정관리)
-1. 회원가입은 이용자가 약관에 동의하고 가입 절차를 완료한 후 승인됨으로써 성립합니다.
+1. 회원가입은 이용자가 약관에 동의하고 가입 절차를 완료함으로써 성립합니다.
 2. 이용자는 정확한 정보를 제공해야 하며, 계정 관리 책임은 회원 본인에게 있습니다.
 3. 계정 도용 등 이상 징후 발견 시 즉시 운영 주체에 통지해야 합니다.
 
@@ -374,27 +374,37 @@ export const SignUp: React.FC = () => {
                 displayName: formData.name
             });
 
-            // 2. Supabase에 프로필 저장
-            await createUserProfile({
-                firebase_uid: userCredential.user.uid,
-                email: formData.email,
-                name: formData.name,
-                phone: formData.phone,
-                company_name: memberType === 'business' ? formData.companyName : formData.institutionName,
-                department: memberType === 'business' ? (formData.department || undefined) : undefined,
-                position: memberType === 'business' ? (formData.position || undefined) : undefined,
-                address: memberType === 'business' ? (formData.address || undefined) : undefined,
-                business_number: memberType === 'business' ? (formData.businessNumber || undefined) : undefined,
-                business_license_url: memberType === 'business' ? (formData.businessLicenseUrl || undefined) : undefined,
-                member_type: memberType,
-                manager_name: memberType === 'public' ? formData.managerName : undefined,
-                is_approved: false,
-                agreed_terms: agreements.terms,
-                agreed_privacy: agreements.privacy,
-                agreed_marketing: agreements.marketing
-            });
+            try {
+                // 2. Supabase에 프로필 저장
+                await createUserProfile({
+                    firebase_uid: userCredential.user.uid,
+                    email: formData.email,
+                    name: formData.name,
+                    phone: formData.phone,
+                    company_name: memberType === 'business' ? formData.companyName : formData.institutionName,
+                    department: memberType === 'business' ? (formData.department || undefined) : undefined,
+                    position: memberType === 'business' ? (formData.position || undefined) : undefined,
+                    address: memberType === 'business' ? (formData.address || undefined) : undefined,
+                    business_number: memberType === 'business' ? (formData.businessNumber || undefined) : undefined,
+                    business_license_url: memberType === 'business' ? (formData.businessLicenseUrl || undefined) : undefined,
+                    member_type: memberType,
+                    manager_name: memberType === 'public' ? formData.managerName : undefined,
+                    is_approved: true,
+                    agreed_terms: agreements.terms,
+                    agreed_privacy: agreements.privacy,
+                    agreed_marketing: agreements.marketing
+                });
+            } catch (profileError) {
+                // 프로필 저장 실패 시 Auth 계정이 유령처럼 남지 않도록 바로 롤백합니다.
+                try {
+                    await deleteUser(userCredential.user);
+                } catch (rollbackError) {
+                    console.error('Failed to rollback Firebase Auth user after profile creation failure:', rollbackError);
+                }
+                throw profileError;
+            }
 
-            alert('가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.');
+            alert('회원가입이 완료되었습니다. 바로 로그인하여 이용하실 수 있습니다.');
             navigate('/login');
         } catch (error: any) {
             console.error('Sign up failed', error);

@@ -35,6 +35,10 @@
         ],
         "rewrites": [
             {
+                "source": "/api/users/**",
+                "function": "userManagementApi"
+            },
+            {
                 "source": "/api/email/booking-request",
                 "function": "sendBookingRequestNotification"
             },

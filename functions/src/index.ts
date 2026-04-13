@@ -93,6 +93,11 @@ type BookingEmailLogPayload = {
     errorMessage?: string;
 };
 
+type UserProfileAdminRow = {
+    firebase_uid?: string | null;
+    is_admin?: boolean | null;
+};
+
 const xmlEscape = (value: string) =>
     value
         .replace(/&/g, "&amp;")
@@ -235,6 +240,36 @@ const getBearerToken = (authorizationHeader?: string) => {
 
     const match = authorizationHeader.match(/^Bearer\s+(.+)$/i);
     return match ? match[1] : "";
+};
+
+const normalizeUserManagementPath = (pathValue: string) => {
+    const withoutQuery = pathValue.split("?")[0] || "/";
+    const normalized = withoutQuery.replace(/^\/?api\/users/, "");
+    return normalized || "/";
+};
+
+const getUserProfileAdminRow = async (firebaseUid: string): Promise<UserProfileAdminRow | null> => {
+    const rows = await requestJson<UserProfileAdminRow[]>(
+        `${SUPABASE_REST_URL}/user_profiles?select=firebase_uid,is_admin&firebase_uid=eq.${encodeURIComponent(firebaseUid)}&limit=1`,
+        { headers: getSupabaseHeaders() }
+    );
+
+    return rows?.[0] || null;
+};
+
+const verifyUserManagementRequest = async (req: functions.https.Request) => {
+    const bearerToken = getBearerToken(req.headers.authorization);
+    if (!bearerToken) {
+        throw new Error("Missing authorization token");
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(bearerToken);
+    const profile = await getUserProfileAdminRow(decodedToken.uid);
+
+    return {
+        decodedToken,
+        isAdmin: profile?.is_admin === true,
+    };
 };
 
 const sanitizeBookingItems = (value: unknown): BookingEmailItem[] => {
@@ -556,6 +591,130 @@ ${[
         console.error("Failed to generate sitemap.xml", error);
         res.status(500).send("Failed to generate sitemap.xml");
     }
+});
+
+export const userManagementApi = functions.https.onRequest((req, res) => {
+    corsHandler(req, res, async () => {
+        if (req.method === "OPTIONS") {
+            res.status(204).send("");
+            return;
+        }
+
+        const path = normalizeUserManagementPath(req.path || req.url || "/");
+
+        try {
+            if (req.method === "PUT" && path === "/update-email") {
+                const payload = req.body as Record<string, unknown>;
+                const firebaseUid = getOptionalText(payload.firebaseUid);
+                const newEmail = getOptionalText(payload.newEmail);
+
+                if (!firebaseUid || !newEmail) {
+                    res.status(400).json({ error: "firebaseUid와 newEmail이 필요합니다." });
+                    return;
+                }
+
+                const { decodedToken, isAdmin } = await verifyUserManagementRequest(req);
+                if (!isAdmin && decodedToken.uid !== firebaseUid) {
+                    res.status(403).json({ error: "본인 또는 관리자만 이메일을 변경할 수 있습니다." });
+                    return;
+                }
+
+                await admin.auth().updateUser(firebaseUid, { email: newEmail });
+                res.status(200).json({
+                    success: true,
+                    message: "이메일이 변경되었습니다.",
+                });
+                return;
+            }
+
+            if (req.method === "PUT" && path === "/update-password") {
+                const payload = req.body as Record<string, unknown>;
+                const firebaseUid = getOptionalText(payload.firebaseUid);
+                const newPassword = getOptionalText(payload.newPassword);
+
+                if (!firebaseUid || !newPassword) {
+                    res.status(400).json({ error: "firebaseUid와 newPassword가 필요합니다." });
+                    return;
+                }
+
+                if (newPassword.length < 6) {
+                    res.status(400).json({ error: "비밀번호는 최소 6자 이상이어야 합니다." });
+                    return;
+                }
+
+                const { decodedToken, isAdmin } = await verifyUserManagementRequest(req);
+                if (!isAdmin && decodedToken.uid !== firebaseUid) {
+                    res.status(403).json({ error: "본인 또는 관리자만 비밀번호를 변경할 수 있습니다." });
+                    return;
+                }
+
+                await admin.auth().updateUser(firebaseUid, { password: newPassword });
+                res.status(200).json({
+                    success: true,
+                    message: "비밀번호가 변경되었습니다.",
+                });
+                return;
+            }
+
+            const uidMatch = path.match(/^\/([^/]+)$/);
+            if (uidMatch) {
+                const firebaseUid = uidMatch[1];
+                const { decodedToken, isAdmin } = await verifyUserManagementRequest(req);
+                const isSelf = decodedToken.uid === firebaseUid;
+
+                if (req.method === "GET") {
+                    if (!isAdmin && !isSelf) {
+                        res.status(403).json({ error: "본인 또는 관리자만 조회할 수 있습니다." });
+                        return;
+                    }
+
+                    const userRecord = await admin.auth().getUser(firebaseUid);
+                    res.status(200).json({
+                        uid: userRecord.uid,
+                        email: userRecord.email || "",
+                        displayName: userRecord.displayName || "",
+                        disabled: userRecord.disabled,
+                        emailVerified: userRecord.emailVerified,
+                        providers: userRecord.providerData.map((provider) => provider.providerId).filter(Boolean),
+                    });
+                    return;
+                }
+
+                if (req.method === "DELETE") {
+                    if (!isAdmin) {
+                        res.status(403).json({ error: "관리자만 삭제할 수 있습니다." });
+                        return;
+                    }
+
+                    await admin.auth().deleteUser(firebaseUid);
+                    console.log("Firebase user deleted by uid:", { requesterUid: decodedToken.uid, firebaseUid });
+                    res.status(200).json({
+                        success: true,
+                        message: "Firebase 계정이 삭제되었습니다.",
+                    });
+                    return;
+                }
+            }
+
+            res.status(404).json({ error: "지원하지 않는 사용자 관리 경로입니다." });
+        } catch (error) {
+            console.error("User management API failed:", error);
+
+            if (error instanceof Error) {
+                if (error.message === "Missing authorization token") {
+                    res.status(401).json({ error: "인증 토큰이 필요합니다." });
+                    return;
+                }
+
+                if ((error as { code?: string }).code === "auth/user-not-found") {
+                    res.status(404).json({ error: "해당 Firebase 계정을 찾을 수 없습니다." });
+                    return;
+                }
+            }
+
+            res.status(500).json({ error: getErrorMessage(error) });
+        }
+    });
 });
 
 export const sendEmailVerification = functions.https.onRequest((req, res) => {

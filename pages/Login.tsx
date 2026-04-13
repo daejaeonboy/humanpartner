@@ -46,18 +46,7 @@ export const Login: React.FC = () => {
             // 로그인 상태 유지 설정
             await setPersistence(auth, keepLoggedIn ? browserLocalPersistence : browserSessionPersistence);
 
-            const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-            
-            // 승인 여부 확인
-            const { getUserProfileByFirebaseUid } = await import('../src/api/userApi');
-            const profile = await getUserProfileByFirebaseUid(userCredential.user.uid);
-
-            if (profile && !profile.is_approved) {
-                await auth.signOut();
-                alert('관리자 승인이 필요한 계정입니다. 승인 완료 후 이용해주세요.');
-                setLoading(false);
-                return;
-            }
+            await signInWithEmailAndPassword(auth, formData.email, formData.password);
 
             navigate('/');
         } catch (error: any) {

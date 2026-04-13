@@ -1,3 +1,4 @@
+import { auth } from '../firebase';
 import { supabase } from '../lib/supabase';
 
 export interface UserProfile {
@@ -185,14 +186,48 @@ export const getUsersPage = async (
     };
 };
 
-// 서버 API 기본 URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const isLocalhost = () =>
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const resolveUserApiBaseUrl = () => {
+    const configuredUrl = import.meta.env.VITE_API_URL?.trim();
+    if (configuredUrl) {
+        return configuredUrl.replace(/\/$/, '');
+    }
+
+    return isLocalhost() ? 'http://localhost:4000' : '';
+};
+
+const API_BASE_URL = resolveUserApiBaseUrl();
+
+const buildUserApiUrl = (path: string) => (API_BASE_URL ? `${API_BASE_URL}${path}` : path);
+
+const getAuthorizedHeaders = async (includeContentType = true): Promise<Record<string, string>> => {
+    const headers: Record<string, string> = {};
+
+    if (includeContentType) {
+        headers['Content-Type'] = 'application/json';
+    }
+
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+        try {
+            const idToken = await currentUser.getIdToken();
+            headers.Authorization = `Bearer ${idToken}`;
+        } catch (error) {
+            console.warn('Failed to get Firebase ID token for user API request:', error);
+        }
+    }
+
+    return headers;
+};
 
 // Firebase 이메일 변경 (서버 API 호출)
 export const updateFirebaseEmail = async (firebaseUid: string, newEmail: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/api/users/update-email`, {
+    const response = await fetch(buildUserApiUrl('/api/users/update-email'), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthorizedHeaders(),
         body: JSON.stringify({ firebaseUid, newEmail })
     });
 
@@ -204,14 +239,27 @@ export const updateFirebaseEmail = async (firebaseUid: string, newEmail: string)
 
 // Firebase 비밀번호 변경 (서버 API 호출)
 export const updateFirebasePassword = async (firebaseUid: string, newPassword: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/api/users/update-password`, {
+    const response = await fetch(buildUserApiUrl('/api/users/update-password'), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthorizedHeaders(),
         body: JSON.stringify({ firebaseUid, newPassword })
     });
 
     const result = await response.json();
     if (!response.ok) {
         throw new Error(result.error || '비밀번호 변경에 실패했습니다.');
+    }
+};
+
+// Firebase 사용자 삭제 (서버 API 호출)
+export const deleteFirebaseUser = async (firebaseUid: string): Promise<void> => {
+    const response = await fetch(buildUserApiUrl(`/api/users/${firebaseUid}`), {
+        method: 'DELETE',
+        headers: await getAuthorizedHeaders(false),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+        throw new Error(result.error || 'Firebase 계정 삭제에 실패했습니다.');
     }
 };

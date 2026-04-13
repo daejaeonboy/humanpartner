@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Search, Eye, Trash2, Loader2, X, Building2, Phone, Mail, Calendar, CheckCircle, XCircle, UserCheck, UserX, FileText, Edit2, Save, KeyRound, MapPin } from 'lucide-react';
-import { deleteUserProfile, getUsersPage, updateUserProfile, UserProfile, updateFirebaseEmail, updateFirebasePassword } from '../../src/api/userApi';
+import { deleteFirebaseUser, deleteUserProfile, getUsersPage, updateUserProfile, UserProfile, updateFirebaseEmail, updateFirebasePassword } from '../../src/api/userApi';
+
+const getMemberTypeMeta = (memberType?: UserProfile['member_type']) => {
+    if (memberType === 'public') {
+        return {
+            label: '공공기관',
+            className: 'border-indigo-200 bg-indigo-50 text-indigo-700',
+            organizationLabel: '기관명',
+        };
+    }
+
+    return {
+        label: '일반기업',
+        className: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+        organizationLabel: '회사/단체명',
+    };
+};
 
 export const UserManager = () => {
     const [users, setUsers] = useState<UserProfile[]>([]);
@@ -78,11 +94,17 @@ export const UserManager = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (targetUser: UserProfile) => {
+        const id = targetUser.id;
         if (!confirm('정말 이 회원을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+        if (!id) return;
 
         setDeleting(id);
         try {
+            // 프로필만 삭제되면 Firebase Auth 계정이 남아 같은 이메일로 재가입이 막힐 수 있습니다.
+            if (targetUser.firebase_uid) {
+                await deleteFirebaseUser(targetUser.firebase_uid);
+            }
             await deleteUserProfile(id);
             const nextPage = users.length === 1 && page > 1 ? page - 1 : page;
             if (nextPage !== page) {
@@ -93,7 +115,7 @@ export const UserManager = () => {
             if (selectedUser?.id === id) setSelectedUser(null);
         } catch (error) {
             console.error('Failed to delete user:', error);
-            alert('회원 삭제에 실패했습니다.');
+            alert('회원 삭제에 실패했습니다. Firebase 계정 삭제 상태도 함께 확인해주세요.');
         } finally {
             setDeleting(null);
         }
@@ -106,6 +128,8 @@ export const UserManager = () => {
                 name: selectedUser.name,
                 phone: selectedUser.phone,
                 company_name: selectedUser.company_name,
+                member_type: selectedUser.member_type,
+                manager_name: selectedUser.manager_name || '',
                 department: selectedUser.department || '',
                 position: selectedUser.position || '',
                 business_number: selectedUser.business_number || '',
@@ -222,7 +246,7 @@ export const UserManager = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                         <input
                             type="text"
-                            placeholder="이름, 이메일, 회사명으로 검색"
+                            placeholder="이름, 이메일, 회사명/기관명으로 검색"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -246,7 +270,7 @@ export const UserManager = () => {
                     <thead className="bg-slate-50 border-b">
                         <tr>
                             <th className="text-left px-4 py-3 text-sm font-semibold text-slate-600">회원정보</th>
-                            <th className="text-left px-4 py-3 text-sm font-semibold text-slate-600">회사/단체</th>
+                            <th className="text-left px-4 py-3 text-sm font-semibold text-slate-600">회원 유형 / 회사·기관</th>
                             <th className="text-left px-4 py-3 text-sm font-semibold text-slate-600">연락처</th>
                             <th className="text-center px-4 py-3 text-sm font-semibold text-slate-600">승인상태</th>
                             <th className="text-center px-4 py-3 text-sm font-semibold text-slate-600">작업</th>
@@ -279,10 +303,35 @@ export const UserManager = () => {
                                         </div>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <div className="text-slate-800">{user.company_name}</div>
-                                        {user.business_number && (
-                                            <div className="text-sm text-slate-500">사업자: {user.business_number}</div>
-                                        )}
+                                        {(() => {
+                                            const memberTypeMeta = getMemberTypeMeta(user.member_type);
+                                            const isPublicMember = user.member_type === 'public';
+
+                                            return (
+                                                <div className="space-y-1">
+                                                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${memberTypeMeta.className}`}>
+                                                        {memberTypeMeta.label}
+                                                    </span>
+                                                    <div className="text-slate-800 font-medium">{user.company_name}</div>
+                                                    {isPublicMember ? (
+                                                        user.manager_name ? (
+                                                            <div className="text-sm text-slate-500">담당자: {user.manager_name}</div>
+                                                        ) : null
+                                                    ) : (
+                                                        <>
+                                                            {user.business_number && (
+                                                                <div className="text-sm text-slate-500">사업자: {user.business_number}</div>
+                                                            )}
+                                                            {(user.department || user.position) && (
+                                                                <div className="text-sm text-slate-500">
+                                                                    {[user.department, user.position].filter(Boolean).join(' / ')}
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-4 py-3 text-slate-600">{user.phone}</td>
                                     <td className="px-4 py-3">
@@ -323,7 +372,7 @@ export const UserManager = () => {
                                                 <Eye size={18} />
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(user.id!)}
+                                                onClick={() => handleDelete(user)}
                                                 disabled={deleting === user.id}
                                                 className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                                                 title="삭제"
@@ -411,6 +460,14 @@ export const UserManager = () => {
                                 /* Edit Form */
                                 <div className="space-y-4">
                                     <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">회원 유형</label>
+                                        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                                            <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getMemberTypeMeta(selectedUser.member_type).className}`}>
+                                                {getMemberTypeMeta(selectedUser.member_type).label}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">이름</label>
                                         <input
                                             type="text"
@@ -461,7 +518,7 @@ export const UserManager = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">회사/단체명</label>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">{getMemberTypeMeta(selectedUser.member_type).organizationLabel}</label>
                                         <input
                                             type="text"
                                             value={editData.company_name || ''}
@@ -469,44 +526,58 @@ export const UserManager = () => {
                                             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                         />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    {selectedUser.member_type === 'public' ? (
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">부서</label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">담당자 성함</label>
                                             <input
                                                 type="text"
-                                                value={editData.department || ''}
-                                                onChange={(e) => setEditData({ ...editData, department: e.target.value })}
+                                                value={editData.manager_name || ''}
+                                                onChange={(e) => setEditData({ ...editData, manager_name: e.target.value })}
                                                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
                                             />
                                         </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">직책</label>
-                                            <input
-                                                type="text"
-                                                value={editData.position || ''}
-                                                onChange={(e) => setEditData({ ...editData, position: e.target.value })}
-                                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">사업자등록번호</label>
-                                        <input
-                                            type="text"
-                                            value={editData.business_number || ''}
-                                            onChange={(e) => setEditData({ ...editData, business_number: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">주소</label>
-                                        <input
-                                            type="text"
-                                            value={editData.address || ''}
-                                            onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
-                                        />
-                                    </div>
+                                    ) : (
+                                        <>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-slate-700 mb-1">부서</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editData.department || ''}
+                                                        onChange={(e) => setEditData({ ...editData, department: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-slate-700 mb-1">직책</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editData.position || ''}
+                                                        onChange={(e) => setEditData({ ...editData, position: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 mb-1">사업자등록번호</label>
+                                                <input
+                                                    type="text"
+                                                    value={editData.business_number || ''}
+                                                    onChange={(e) => setEditData({ ...editData, business_number: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 mb-1">주소</label>
+                                                <input
+                                                    type="text"
+                                                    value={editData.address || ''}
+                                                    onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#39B54A] focus:border-transparent outline-none"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ) : (
                                 /* View Mode */
@@ -522,7 +593,12 @@ export const UserManager = () => {
                                                     <span className="px-2 py-0.5 bg-purple-100 text-purple-600 text-xs rounded font-medium">관리자</span>
                                                 )}
                                             </div>
-                                            <div className="text-slate-500">{selectedUser.company_name}</div>
+                                            <div className="mt-1 flex items-center gap-2">
+                                                <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getMemberTypeMeta(selectedUser.member_type).className}`}>
+                                                    {getMemberTypeMeta(selectedUser.member_type).label}
+                                                </span>
+                                                <span className="text-slate-500">{selectedUser.company_name}</span>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -539,17 +615,29 @@ export const UserManager = () => {
                                             <Building2 size={18} className="text-slate-400" />
                                             <span>
                                                 {selectedUser.company_name}
-                                                {(selectedUser.department || selectedUser.position) && (
+                                                {selectedUser.member_type !== 'public' && (selectedUser.department || selectedUser.position) && (
                                                     <span className="text-slate-400 ml-2">
                                                         ({[selectedUser.department, selectedUser.position].filter(Boolean).join(' / ')})
                                                     </span>
                                                 )}
                                             </span>
                                         </div>
+                                        {selectedUser.member_type === 'public' && selectedUser.manager_name && (
+                                            <div className="flex items-center gap-3 text-slate-600">
+                                                <FileText size={18} className="text-slate-400" />
+                                                <span>담당자: {selectedUser.manager_name}</span>
+                                            </div>
+                                        )}
                                         {selectedUser.business_number && (
                                             <div className="flex items-center gap-3 text-slate-600">
                                                 <FileText size={18} className="text-slate-400" />
                                                 <span>사업자등록번호: {selectedUser.business_number}</span>
+                                            </div>
+                                        )}
+                                        {selectedUser.address && (
+                                            <div className="flex items-center gap-3 text-slate-600">
+                                                <MapPin size={18} className="text-slate-400" />
+                                                <span>{selectedUser.address}</span>
                                             </div>
                                         )}
                                         {selectedUser.business_license_url && (
@@ -630,7 +718,7 @@ export const UserManager = () => {
                                     <button onClick={() => setSelectedUser(null)} className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors">
                                         닫기
                                     </button>
-                                    <button onClick={() => handleDelete(selectedUser.id!)} className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                                    <button onClick={() => handleDelete(selectedUser)} className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
                                         회원 삭제
                                     </button>
                                 </>
