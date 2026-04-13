@@ -75,15 +75,18 @@ export const Login: React.FC = () => {
     }
 
     return (
-        <div className="py-20 bg-gray-50 min-h-screen flex items-center justify-center px-4">
+        <div className="py-20 bg-gray-50 min-h-screen px-4">
             <Seo
                 title="로그인 | 행사어때"
                 description="행사어때 회원 로그인 페이지입니다."
                 canonical="/login"
                 robots={NOINDEX_ROBOTS}
             />
-            <Container>
-                <div className="w-full max-w-2xl sm:max-w-3xl md:max-w-4xl lg:max-w-5xl mx-auto bg-white px-6 py-8 sm:px-10 sm:py-10 md:px-14 md:py-14 rounded-lg shadow-lg border border-gray-100 mb-20">
+            <Container className="max-w-none">
+                <div
+                    className="mx-auto mb-20 w-full rounded-2xl border border-gray-100 bg-white px-8 py-10 shadow-lg sm:px-10 sm:py-12 md:px-14 md:py-14"
+                    style={{ maxWidth: '820px' }}
+                >
                     <div className="text-center mb-6 md:mb-10">
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">로그인</h1>
                         <p className="text-gray-500 text-sm md:text-base mt-2 md:mt-3">행사어때 서비스 이용을 위해 로그인해주세요.</p>
