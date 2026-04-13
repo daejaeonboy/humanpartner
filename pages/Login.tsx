@@ -83,7 +83,7 @@ export const Login: React.FC = () => {
                 robots={NOINDEX_ROBOTS}
             />
             <Container>
-                <div className="w-full max-w-xl md:max-w-3xl mx-auto bg-white p-6 md:p-16 rounded-lg shadow-lg border border-gray-100 mb-20">
+                <div className="w-full max-w-xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto bg-white px-6 py-8 sm:px-10 sm:py-10 md:px-14 md:py-14 rounded-lg shadow-lg border border-gray-100 mb-20">
                     <div className="text-center mb-6 md:mb-10">
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">로그인</h1>
                         <p className="text-gray-500 text-sm md:text-base mt-2 md:mt-3">행사어때 서비스 이용을 위해 로그인해주세요.</p>
