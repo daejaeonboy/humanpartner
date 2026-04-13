@@ -85,7 +85,7 @@ export const Login: React.FC = () => {
             <Container className="max-w-none">
                 <div
                     className="mx-auto mb-20 w-full rounded-2xl border border-gray-100 bg-white px-8 py-10 shadow-lg sm:px-10 sm:py-12 md:px-14 md:py-14"
-                    style={{ maxWidth: '820px' }}
+                    style={{ maxWidth: '720px' }}
                 >
                     <div className="text-center mb-6 md:mb-10">
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">로그인</h1>
