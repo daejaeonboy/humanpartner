@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Eye, Trash2, Loader2, X, Building2, Phone, Mail, Calendar, CheckCircle, XCircle, UserCheck, UserX, FileText, Edit2, Save, KeyRound, MapPin } from 'lucide-react';
-import { deleteFirebaseUser, deleteUserProfile, getUsersPage, updateUserProfile, UserProfile, updateFirebaseEmail, updateFirebasePassword } from '../../src/api/userApi';
+import { deleteManagedUser, getUsersPage, updateUserProfile, UserProfile, updateFirebaseEmail, updateFirebasePassword } from '../../src/api/userApi';
 
 const getMemberTypeMeta = (memberType?: UserProfile['member_type']) => {
     if (memberType === 'public') {
@@ -101,11 +101,10 @@ export const UserManager = () => {
 
         setDeleting(id);
         try {
-            // 프로필만 삭제되면 Firebase Auth 계정이 남아 같은 이메일로 재가입이 막힐 수 있습니다.
-            if (targetUser.firebase_uid) {
-                await deleteFirebaseUser(targetUser.firebase_uid);
+            if (!targetUser.firebase_uid) {
+                throw new Error('Firebase UID가 없어 회원을 삭제할 수 없습니다.');
             }
-            await deleteUserProfile(id);
+            await deleteManagedUser(targetUser.firebase_uid);
             const nextPage = users.length === 1 && page > 1 ? page - 1 : page;
             if (nextPage !== page) {
                 setPage(nextPage);
@@ -113,9 +112,9 @@ export const UserManager = () => {
                 await loadUsers(nextPage, appliedQuery);
             }
             if (selectedUser?.id === id) setSelectedUser(null);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to delete user:', error);
-            alert('회원 삭제에 실패했습니다. Firebase 계정 삭제 상태도 함께 확인해주세요.');
+            alert(error?.message || '회원 삭제에 실패했습니다.');
         } finally {
             setDeleting(null);
         }

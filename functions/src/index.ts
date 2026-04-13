@@ -23,6 +23,10 @@ const normalizeEnvValue = (value?: string) => {
     return value.trim().replace(/^['"]|['"]$/g, "");
 };
 
+const SUPABASE_SERVICE_ROLE_KEY = normalizeEnvValue(
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY
+);
+
 type ResendEnvironment = {
     apiKey: string;
     fromEmail: string;
@@ -150,6 +154,19 @@ const getSupabaseHeaders = (extraHeaders: Record<string, string> = {}) => ({
     ...extraHeaders,
 });
 
+const getSupabaseServiceHeaders = (extraHeaders: Record<string, string> = {}) => {
+    if (!SUPABASE_SERVICE_ROLE_KEY) {
+        throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
+    }
+
+    return {
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+        ...extraHeaders,
+    };
+};
+
 const getResendEnvironment = (): ResendEnvironment => {
     const apiKey = normalizeEnvValue(process.env.RESEND_API_KEY);
     const fromEmail = normalizeEnvValue(process.env.RESEND_FROM_EMAIL);
@@ -255,6 +272,18 @@ const getUserProfileAdminRow = async (firebaseUid: string): Promise<UserProfileA
     );
 
     return rows?.[0] || null;
+};
+
+const deleteUserProfileByFirebaseUid = async (firebaseUid: string) => {
+    await requestJson(
+        `${SUPABASE_REST_URL}/user_profiles?firebase_uid=eq.${encodeURIComponent(firebaseUid)}`,
+        {
+            method: "DELETE",
+            headers: getSupabaseServiceHeaders({
+                Prefer: "return=minimal",
+            }),
+        }
+    );
 };
 
 const verifyUserManagementRequest = async (req: functions.https.Request) => {
@@ -686,11 +715,24 @@ export const userManagementApi = functions.https.onRequest((req, res) => {
                         return;
                     }
 
-                    await admin.auth().deleteUser(firebaseUid);
+                    let authDeleted = false;
+                    try {
+                        await admin.auth().deleteUser(firebaseUid);
+                        authDeleted = true;
+                    } catch (error) {
+                        const authErrorCode = (error as { code?: string })?.code;
+                        if (authErrorCode !== "auth/user-not-found") {
+                            throw error;
+                        }
+                    }
+
+                    await deleteUserProfileByFirebaseUid(firebaseUid);
                     console.log("Firebase user deleted by uid:", { requesterUid: decodedToken.uid, firebaseUid });
                     res.status(200).json({
                         success: true,
-                        message: "Firebase 계정이 삭제되었습니다.",
+                        message: "회원 계정이 삭제되었습니다.",
+                        authDeleted,
+                        profileDeleted: true,
                     });
                     return;
                 }

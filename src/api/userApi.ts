@@ -251,8 +251,8 @@ export const updateFirebasePassword = async (firebaseUid: string, newPassword: s
     }
 };
 
-// Firebase 사용자 삭제 (서버 API 호출)
-export const deleteFirebaseUser = async (firebaseUid: string): Promise<void> => {
+// 관리자 회원 삭제 (Firebase Auth + user_profiles)
+export const deleteManagedUser = async (firebaseUid: string): Promise<void> => {
     const response = await fetch(buildUserApiUrl(`/api/users/${firebaseUid}`), {
         method: 'DELETE',
         headers: await getAuthorizedHeaders(false),
@@ -260,6 +260,6 @@ export const deleteFirebaseUser = async (firebaseUid: string): Promise<void> => 
 
     const result = await response.json();
     if (!response.ok) {
-        throw new Error(result.error || 'Firebase 계정 삭제에 실패했습니다.');
+        throw new Error(result.error || '회원 삭제에 실패했습니다.');
     }
 };
