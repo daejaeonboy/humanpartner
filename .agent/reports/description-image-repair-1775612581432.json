@@ -1,0 +1,327 @@
+{
+  "summary": {
+    "mode": "apply",
+    "reportPath": "C:\\Users\\USER\\Desktop\\Miceday\\.agent\\reports\\image-migration-1775608834338.json",
+    "mappedUrls": 6,
+    "affectedRows": 32,
+    "affectedUrls": 6,
+    "repairedAssets": 0,
+    "restoredOriginalAssets": 6,
+    "failedAssets": 0,
+    "updatedRows": 32,
+    "unresolvedUrls": [],
+    "generatedAt": "2026-04-08T01:43:01.431Z"
+  },
+  "rowUpdates": [
+    {
+      "table": "products",
+      "id": "00ecb410-3395-4158-ba7b-4577d7409664",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "01d7a894-674f-4710-a051-0baae31535ec",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "03fd9820-b83a-4562-826f-8e96c11840e8",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "09c03631-69c3-4aaa-b9d7-6cf9e71d4787",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "14a1de64-b25d-4235-a097-5a8948d8b2be",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912807475_3t2b.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "17fad107-0f92-4333-8768-1f1bd8053a32",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912807475_3t2b.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "18c1586d-0cfd-4461-9078-8f7cda65f16e",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "2ac55df4-bab5-4b10-8479-83659c09ca9a",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "2cef44d4-ea73-45be-a3a9-b5ce0c15a2a2",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "2fc40dbf-439f-4a6f-9940-ba3fa1cfa81a",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "3356dd84-fb13-410d-b3e2-48884accb9b4",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "358f33c9-b12c-4cc2-a098-9d1c7de30abb",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "3e01ed4a-4aa5-4647-93bb-ce3bd7e85fd5",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912899876_vktwm.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "460f8b33-953b-4ae7-9b0f-23f759b3a44f",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "46eb2a7c-3e8a-4ede-bad0-15ee36a14f93",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "639f5514-f20b-48cb-9ab6-bb5810fd2c26",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "66564297-c09c-4a1d-932f-d0aebe1d7665",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912842318_vl85xv.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "68d78ad2-732f-41b9-b7c8-2a3b5903a747",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912807475_3t2b.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "6ca805d5-f465-49f3-b09a-d481174da916",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "8ad9771f-5fe5-41e6-85ac-feba106ea5f6",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "937bbb6a-70ff-4b51-94f2-f24008b0b803",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "98bd55bb-13d8-4ba9-bdaa-a60246817dfe",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "a8711bf6-d410-4d00-85c4-1230f0631dc9",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912807475_3t2b.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "bcb7296d-0d64-457c-9c25-0263331675e7",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912883012_j0qc5.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "bde0334e-4813-4f03-8a95-166cbcccec87",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912867670_kqy71a.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "c1b1ea8a-b581-4558-a90d-143718fe18fa",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "ca76d41f-f451-49a5-8792-fea1d6158cef",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "d5f4874b-7ede-43d0-a533-6fedffef6396",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "f2082292-5700-4a83-b7d8-74c516c229ce",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "f40d50ea-1828-4661-8bd2-d8b03732d14e",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "f434be21-9fee-4988-a1c9-f207fb3ae9ed",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "f6a1bff6-973e-493c-84fa-42aa66097b4e",
+      "updates": {
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg\">"
+      }
+    }
+  ],
+  "repairResults": [
+    {
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/cd74203b29230873.webp",
+      "status": "restored-original",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg",
+      "repairedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg",
+      "originalBytes": 8392601,
+      "repairedBytes": 8392601,
+      "originalWidth": 1200,
+      "originalHeight": 18908,
+      "repairedWidth": 1200,
+      "repairedHeight": 18908,
+      "savedBytes": 0,
+      "reason": "height-limit"
+    },
+    {
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/9f0fcad6bcc27ccf.webp",
+      "status": "restored-original",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912807475_3t2b.jpg",
+      "repairedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912807475_3t2b.jpg",
+      "originalBytes": 8675839,
+      "repairedBytes": 8675839,
+      "originalWidth": 1200,
+      "originalHeight": 18908,
+      "repairedWidth": 1200,
+      "repairedHeight": 18908,
+      "savedBytes": 0,
+      "reason": "height-limit"
+    },
+    {
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/a591338448f830f6.webp",
+      "status": "restored-original",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912899876_vktwm.jpg",
+      "repairedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912899876_vktwm.jpg",
+      "originalBytes": 8435617,
+      "repairedBytes": 8435617,
+      "originalWidth": 1200,
+      "originalHeight": 18908,
+      "repairedWidth": 1200,
+      "repairedHeight": 18908,
+      "savedBytes": 0,
+      "reason": "height-limit"
+    },
+    {
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/5b4c1135d13d895e.webp",
+      "status": "restored-original",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912842318_vl85xv.jpg",
+      "repairedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912842318_vl85xv.jpg",
+      "originalBytes": 8355954,
+      "repairedBytes": 8355954,
+      "originalWidth": 1200,
+      "originalHeight": 18908,
+      "repairedWidth": 1200,
+      "repairedHeight": 18908,
+      "savedBytes": 0,
+      "reason": "height-limit"
+    },
+    {
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/bca6b0c0c97e7077.webp",
+      "status": "restored-original",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912883012_j0qc5.jpg",
+      "repairedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912883012_j0qc5.jpg",
+      "originalBytes": 8235113,
+      "repairedBytes": 8235113,
+      "originalWidth": 1200,
+      "originalHeight": 18908,
+      "repairedWidth": 1200,
+      "repairedHeight": 18908,
+      "savedBytes": 0,
+      "reason": "height-limit"
+    },
+    {
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/8c702b9f91b42ba6.webp",
+      "status": "restored-original",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912867670_kqy71a.jpg",
+      "repairedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912867670_kqy71a.jpg",
+      "originalBytes": 8458168,
+      "repairedBytes": 8458168,
+      "originalWidth": 1200,
+      "originalHeight": 18908,
+      "repairedWidth": 1200,
+      "repairedHeight": 18908,
+      "savedBytes": 0,
+      "reason": "height-limit"
+    }
+  ]
+}

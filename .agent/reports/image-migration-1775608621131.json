@@ -1,0 +1,934 @@
+{
+  "summary": {
+    "mode": "dry-run",
+    "uniqueUrls": 63,
+    "optimizedAssets": 59,
+    "skippedAssets": 3,
+    "failedAssets": 1,
+    "updatedRows": 59,
+    "savedBytes": 107875843,
+    "generatedAt": "2026-04-08T00:37:01.130Z"
+  },
+  "rowUpdates": [
+    {
+      "table": "products",
+      "id": "00ecb410-3395-4158-ba7b-4577d7409664",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/a7e7844885385fad.webp",
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/cd74203b29230873.webp\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "01d7a894-674f-4710-a051-0baae31535ec",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/de382d69642d50e2.webp",
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/cd74203b29230873.webp\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "03103711-0a61-485f-bbc1-c8136794adb2",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/69fc3153dbe399b1.webp"
+      }
+    },
+    {
+      "table": "products",
+      "id": "03fd9820-b83a-4562-826f-8e96c11840e8",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d786569c4f04a2af.webp",
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/cd74203b29230873.webp\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "07198a8a-b4bb-4fe1-a4ba-6dbe3c8801bc",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/e5e4004e3aeeaa6b.webp"
+      }
+    },
+    {
+      "table": "products",
+      "id": "09c03631-69c3-4aaa-b9d7-6cf9e71d4787",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/baf3a6f09316e091.webp",
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/cd74203b29230873.webp\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "113b9c01-9cbf-4de2-81d8-b3eca0afcb5d",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/5ddddd4931f6d7c3.webp"
+      }
+    },
+    {
+      "table": "products",
+      "id": "14a1de64-b25d-4235-a097-5a8948d8b2be",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/41212fcd31cf25da.webp",
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/9f0fcad6bcc27ccf.webp\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "17c8e595-e17d-4447-9d25-cad2d3475582",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/5fd85932f5542905.webp"
+      }
+    },
+    {
+      "table": "products",
+      "id": "17fad107-0f92-4333-8768-1f1bd8053a32",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/c96bd84881b90695.webp",
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/9f0fcad6bcc27ccf.webp\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "18c1586d-0cfd-4461-9078-8f7cda65f16e",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/8236f691fd686338.webp",
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/cd74203b29230873.webp\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "1cefcc0a-f3b7-4f8d-b6b0-b9d62c504df2",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/2e327c3021796948.webp"
+      }
+    },
+    {
+      "table": "products",
+      "id": "22466e0c-e5eb-407c-901c-61237cac3fed",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/73a72c3caa947eb2.webp"
+      }
+    },
+    {
+      "table": "products",
+      "id": "2ac55df4-bab5-4b10-8479-83659c09ca9a",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/9fb55999aa4d8575.webp",
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/cd74203b29230873.webp\">"
+      }
+    },
+    {
+      "table": "products",
+      "id": "2cef44d4-ea73-45be-a3a9-b5ce0c15a2a2",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/da3c319eea40f52a.webp",
+        "description": "<img src=\"https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/cd74203b29230873.webp\">"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "12316ce8-bb08-40a7-8400-f8dd5b4ee824",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/edc33ca9c3e47566.webp"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "2084d76a-ae9a-4796-874f-ed2e512ef390",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d12016c4144b0f68.webp"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "382becc1-8c92-4b17-bba9-dab4dcf4396a",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/790c88db5cb5f46a.webp"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "5311e1e2-a4e7-4a9d-b199-78d5d1c8cd5e",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3ecf983da832b867.webp"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "636a0afb-ff19-4863-9377-b0d09b9d20dd",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d2c51d4263c81f5c.webp"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "b2a723f1-56f4-44af-b55b-57556293bb86",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/e250f3d9e44fede9.webp"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "c37b3109-ff5d-4871-a593-d5be11a655f4",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/8df08a3cb745d34b.webp"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "d9e85c0f-b4ee-4415-8664-41800da3d2d5",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/67672969d502aefd.webp"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "da2483ac-fc3c-47a6-b464-86b090f2a2ef",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/7e69a8bfad0edf01.webp"
+      }
+    },
+    {
+      "table": "quick_menu_items",
+      "id": "f46879e7-bb6e-4274-a343-49619597b1c8",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3481d962333687b8.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "0d4c6205-8960-45be-a17a-f9c0a4438776",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/a7e7844885385fad.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "1bea281d-8e0b-44f7-a636-6440696f37b4",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/6287bf387f34afbf.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "2129edb7-7b9d-4836-9369-aa2d1f9389cb",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/08f6650a319d2178.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "39f32e6c-c66d-456e-aa17-0007e278b01e",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/9cd67c1cd022ddc9.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "491ea7a7-6fff-4f6a-bc9f-1a4efd8818f4",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/022966aa55e0c935.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "4d0ee408-7364-45c3-8919-bd97def75c4a",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/581d48ba2e65c6bc.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "6516f8ae-eb46-4e4e-8062-4f1b3ace53e4",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/9a5bef2b50e8fad7.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "837b07c5-d107-4d38-86c4-ccc05908a4c6",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d786569c4f04a2af.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "83cdcd96-72f6-4103-a6ea-a46028d748a6",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/896ce908f509f869.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "9b7073c0-e507-43ba-aad3-f7297621cbf8",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3b6525935d292193.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "ac5e6432-d24b-41a1-8953-b26f2c8cbdd9",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/42b6728d3618407c.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "e6d433eb-cf1f-4541-b477-86aae21fcf9a",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/b82c53de95c4d69f.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "e88bea55-dfe2-411c-a97c-9575061880fe",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/e4ce0db7894f803f.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "f8983e3d-bfe8-4f99-b382-bf005490701c",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/da5337f27aee31c5.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "fa6d6ed0-4e04-499e-b235-4623deb77024",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/6944d8cdcd7cc35b.webp"
+      }
+    },
+    {
+      "table": "banners",
+      "id": "ff3e74bd-7361-4121-ae73-ee82f8dfd708",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/0c314697738682f4.webp"
+      }
+    },
+    {
+      "table": "popups",
+      "id": "4159576b-fc89-4649-ac10-e74a9edd9937",
+      "updates": {
+        "image_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d5d42da3eab74c41.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "052974f3-1eda-45a3-ac02-2394df0e7862",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/bf488f8e0d95865d.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "0a5b7db5-6b7a-431b-82f6-a8951b60b707",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/5fc5ebbc8e9df5a2.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "0b7ac29d-ee3f-4074-b363-121834090915",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/843d0c605717d47f.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "0d09676d-d000-49c6-9b89-28bd54697f3d",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/76d614adec795378.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "120b1bcc-2506-4e83-8171-3d74ecf405bc",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/f711fc6dfd8f6630.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "13a808af-20de-4d21-8ddb-8003b9454ba0",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d6e98ed4eb111201.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "13b27090-c1f8-4bed-a585-7abd234eace1",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/31403f7ee6841f7d.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "17547f4c-9d59-44f7-8c83-f859d6a95dc8",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/6e12a57cdb92cdfc.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "18bf058f-7d8a-41a8-b26c-6ae6f84e899c",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3d28ec95d3dfdca1.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "1e9dec9b-19fb-42cb-9a19-faa38a631bc0",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/2c31776755537cb9.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "24ea975d-af1c-415e-8d5d-eb5d8865590f",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/7ecc05e1ea23c04c.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "25cb4c48-43c5-4295-9020-f1d02703a0d8",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/075d2cc2fdb539f6.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "2a82996c-8e09-4aa4-85d3-3cd74af754c1",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/7c5651b24d66f44a.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "33c86d83-3f30-4091-b9a7-592a4ec58266",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/4143cc46984aea0a.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "3ac47577-c6a7-4882-bb5c-6a492cfab8aa",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/83a2402f3a8342fd.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "3d042276-6928-4daa-adc0-494c8468a96a",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3c6ec0653f37d8e6.webp"
+      }
+    },
+    {
+      "table": "alliance_members",
+      "id": "3e86427c-b13b-4691-848b-fe8c71a92209",
+      "updates": {
+        "logo_url": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/16b4680a1fde26bc.webp"
+      }
+    }
+  ],
+  "optimizationResults": [
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773639266718_dke5l.jpg",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/a7e7844885385fad.webp",
+      "originalBytes": 412613,
+      "optimizedBytes": 125218,
+      "savedBytes": 287395
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912783624_z8715.jpg",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/cd74203b29230873.webp",
+      "originalBytes": 8392601,
+      "optimizedBytes": 26736,
+      "savedBytes": 8365865
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773384614811_iowx4w.jpg",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/de382d69642d50e2.webp",
+      "originalBytes": 5367360,
+      "optimizedBytes": 226212,
+      "savedBytes": 5141148
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774515205870_qngrrp.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/69fc3153dbe399b1.webp",
+      "originalBytes": 43285,
+      "optimizedBytes": 22992,
+      "savedBytes": 20293
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773384513279_ntct8d.jpg",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d786569c4f04a2af.webp",
+      "originalBytes": 3614243,
+      "optimizedBytes": 206430,
+      "savedBytes": 3407813
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770789937369_i63krl.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/e5e4004e3aeeaa6b.webp",
+      "originalBytes": 141418,
+      "optimizedBytes": 11170,
+      "savedBytes": 130248
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773643347024_0bk11k.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/baf3a6f09316e091.webp",
+      "originalBytes": 701113,
+      "optimizedBytes": 73800,
+      "savedBytes": 627313
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770788726137_h7qjs5.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/5ddddd4931f6d7c3.webp",
+      "originalBytes": 135731,
+      "optimizedBytes": 8914,
+      "savedBytes": 126817
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1771897489405_bgurrp.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/41212fcd31cf25da.webp",
+      "originalBytes": 8883471,
+      "optimizedBytes": 191398,
+      "savedBytes": 8692073
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/1771912807475_3t2b.jpg",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/description-images/optimized/9f0fcad6bcc27ccf.webp",
+      "originalBytes": 8675839,
+      "optimizedBytes": 27886,
+      "savedBytes": 8647953
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770788748034_xfy8ds.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/5fd85932f5542905.webp",
+      "originalBytes": 145675,
+      "optimizedBytes": 12422,
+      "savedBytes": 133253
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773644871442_nk0ls.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/c96bd84881b90695.webp",
+      "originalBytes": 595535,
+      "optimizedBytes": 42230,
+      "savedBytes": 553305
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773644337213_6qqiai.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/8236f691fd686338.webp",
+      "originalBytes": 605378,
+      "optimizedBytes": 52882,
+      "savedBytes": 552496
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770790605502_k1i01u.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/2e327c3021796948.webp",
+      "originalBytes": 85784,
+      "optimizedBytes": 10218,
+      "savedBytes": 75566
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774514945163_lbac2l.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/73a72c3caa947eb2.webp",
+      "originalBytes": 32045,
+      "optimizedBytes": 20802,
+      "savedBytes": 11243
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773638920249_4e9slt.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/9fb55999aa4d8575.webp",
+      "originalBytes": 7258176,
+      "optimizedBytes": 180888,
+      "savedBytes": 7077288
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773647423456_0j7o8l.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/da3c319eea40f52a.webp",
+      "originalBytes": 5684414,
+      "optimizedBytes": 184692,
+      "savedBytes": 5499722
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770777158079_f36mef.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/edc33ca9c3e47566.webp",
+      "originalBytes": 209768,
+      "optimizedBytes": 12734,
+      "savedBytes": 197034
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770769039403_pa6hwn.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d12016c4144b0f68.webp",
+      "originalBytes": 416664,
+      "optimizedBytes": 24228,
+      "savedBytes": 392436
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770778330605_93rlul.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/790c88db5cb5f46a.webp",
+      "originalBytes": 231009,
+      "optimizedBytes": 14974,
+      "savedBytes": 216035
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770770250205_ijtp18.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3ecf983da832b867.webp",
+      "originalBytes": 79177,
+      "optimizedBytes": 6312,
+      "savedBytes": 72865
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770775497229_tmhae.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d2c51d4263c81f5c.webp",
+      "originalBytes": 303590,
+      "optimizedBytes": 14580,
+      "savedBytes": 289010
+    },
+    {
+      "status": "skipped",
+      "reason": "content-type:image/svg+xml",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770087420948_4cwjp.svg"
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770772552443_adak0b.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/e250f3d9e44fede9.webp",
+      "originalBytes": 327988,
+      "optimizedBytes": 27260,
+      "savedBytes": 300728
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770712465183_xtccd.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/8df08a3cb745d34b.webp",
+      "originalBytes": 317234,
+      "optimizedBytes": 26948,
+      "savedBytes": 290286
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770769395988_qnurqj.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/67672969d502aefd.webp",
+      "originalBytes": 354933,
+      "optimizedBytes": 30240,
+      "savedBytes": 324693
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770772298899_m7jmx.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/7e69a8bfad0edf01.webp",
+      "originalBytes": 297480,
+      "optimizedBytes": 17396,
+      "savedBytes": 280084
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770777881688_9u9wc.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3481d962333687b8.webp",
+      "originalBytes": 368571,
+      "optimizedBytes": 13962,
+      "savedBytes": 354609
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773385290106_phaxni.jpg",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/6287bf387f34afbf.webp",
+      "originalBytes": 3759437,
+      "optimizedBytes": 221172,
+      "savedBytes": 3538265
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773385610717_7awo.jpg",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/08f6650a319d2178.webp",
+      "originalBytes": 4432147,
+      "optimizedBytes": 258118,
+      "savedBytes": 4174029
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1771898356724_hl4n8d.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/9cd67c1cd022ddc9.webp",
+      "originalBytes": 7884615,
+      "optimizedBytes": 130796,
+      "savedBytes": 7753819
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773627622356_mqnbo.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/022966aa55e0c935.webp",
+      "originalBytes": 5296003,
+      "optimizedBytes": 126168,
+      "savedBytes": 5169835
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1771562138375_9f4jo.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/581d48ba2e65c6bc.webp",
+      "originalBytes": 7871973,
+      "optimizedBytes": 114392,
+      "savedBytes": 7757581
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773819068998_vjndqq.jpg",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/9a5bef2b50e8fad7.webp",
+      "originalBytes": 4505652,
+      "optimizedBytes": 112244,
+      "savedBytes": 4393408
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770877528407_49d919.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/896ce908f509f869.webp",
+      "originalBytes": 3122396,
+      "optimizedBytes": 114106,
+      "savedBytes": 3008290
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773625361760_db569.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3b6525935d292193.webp",
+      "originalBytes": 556526,
+      "optimizedBytes": 39662,
+      "savedBytes": 516864
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773385565047_7x7qhp.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/42b6728d3618407c.webp",
+      "originalBytes": 2167073,
+      "optimizedBytes": 101422,
+      "savedBytes": 2065651
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773639626005_ooxrq.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/b82c53de95c4d69f.webp",
+      "originalBytes": 6038374,
+      "optimizedBytes": 86756,
+      "savedBytes": 5951618
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1770181903597_srw4nf.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/e4ce0db7894f803f.webp",
+      "originalBytes": 3122396,
+      "optimizedBytes": 114106,
+      "savedBytes": 3008290
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773623406767_jcfur.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/da5337f27aee31c5.webp",
+      "originalBytes": 690569,
+      "optimizedBytes": 72642,
+      "savedBytes": 617927
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1771814378039_qs3sh4.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/6944d8cdcd7cc35b.webp",
+      "originalBytes": 2145169,
+      "optimizedBytes": 125052,
+      "savedBytes": 2020117
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1773646641582_591105.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/0c314697738682f4.webp",
+      "originalBytes": 5101065,
+      "optimizedBytes": 145904,
+      "savedBytes": 4955161
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1775177890598_t7823f.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d5d42da3eab74c41.webp",
+      "originalBytes": 381159,
+      "optimizedBytes": 23104,
+      "savedBytes": 358055
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774508686001_cii4jx.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/bf488f8e0d95865d.webp",
+      "originalBytes": 124562,
+      "optimizedBytes": 30824,
+      "savedBytes": 93738
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774508669539_4wjq38.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/5fc5ebbc8e9df5a2.webp",
+      "originalBytes": 34173,
+      "optimizedBytes": 19348,
+      "savedBytes": 14825
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1771918091509_stfpxu.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/843d0c605717d47f.webp",
+      "originalBytes": 25096,
+      "optimizedBytes": 12826,
+      "savedBytes": 12270
+    },
+    {
+      "status": "skipped",
+      "reason": "no-size-gain",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507727835_n0tm8.png",
+      "originalBytes": 27417,
+      "optimizedBytes": 38908
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507732114_84ku1j.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/76d614adec795378.webp",
+      "originalBytes": 101543,
+      "optimizedBytes": 12018,
+      "savedBytes": 89525
+    },
+    {
+      "status": "failed",
+      "reason": "download-502",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1771918277763_le5stc.png"
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507901774_u6cnj.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/f711fc6dfd8f6630.webp",
+      "originalBytes": 47088,
+      "optimizedBytes": 23890,
+      "savedBytes": 23198
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1771917933184_w26rxf.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/d6e98ed4eb111201.webp",
+      "originalBytes": 41204,
+      "optimizedBytes": 12212,
+      "savedBytes": 28992
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1771918159049_dmcw8l.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/31403f7ee6841f7d.webp",
+      "originalBytes": 55265,
+      "optimizedBytes": 26960,
+      "savedBytes": 28305
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507690239_omrpt.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/6e12a57cdb92cdfc.webp",
+      "originalBytes": 32043,
+      "optimizedBytes": 14222,
+      "savedBytes": 17821
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507884623_2acxx.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3d28ec95d3dfdca1.webp",
+      "originalBytes": 37447,
+      "optimizedBytes": 26706,
+      "savedBytes": 10741
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507609992_umh6x.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/2c31776755537cb9.webp",
+      "originalBytes": 36843,
+      "optimizedBytes": 20204,
+      "savedBytes": 16639
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507833230_xg5lz.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/7ecc05e1ea23c04c.webp",
+      "originalBytes": 50738,
+      "optimizedBytes": 43240,
+      "savedBytes": 7498
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1771918212970_n4pbhb.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/075d2cc2fdb539f6.webp",
+      "originalBytes": 46899,
+      "optimizedBytes": 21768,
+      "savedBytes": 25131
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507931543_0gqcqo.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/7c5651b24d66f44a.webp",
+      "originalBytes": 39224,
+      "optimizedBytes": 35970,
+      "savedBytes": 3254
+    },
+    {
+      "status": "skipped",
+      "reason": "no-size-gain",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774508615098_0wi497.png",
+      "originalBytes": 39869,
+      "optimizedBytes": 72364
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507850107_a0xtic.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/4143cc46984aea0a.webp",
+      "originalBytes": 54683,
+      "optimizedBytes": 30092,
+      "savedBytes": 24591
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507581261_4icd0h.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/83a2402f3a8342fd.webp",
+      "originalBytes": 37152,
+      "optimizedBytes": 25632,
+      "savedBytes": 11520
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774508640872_f7wsta.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/3c6ec0653f37d8e6.webp",
+      "originalBytes": 144656,
+      "optimizedBytes": 47280,
+      "savedBytes": 97376
+    },
+    {
+      "status": "optimized",
+      "originalUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/1774507681740_kij1vw.png",
+      "optimizedUrl": "https://zwxvjlnzhjmsuwjnwvqv.supabase.co/storage/v1/object/public/Humanpartner/products/optimized/16b4680a1fde26bc.webp",
+      "originalBytes": 39470,
+      "optimizedBytes": 25532,
+      "savedBytes": 13938
+    }
+  ]
+}
